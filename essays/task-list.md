@@ -1,0 +1,19 @@
+# Task List
+- Specify desired list of features for game engine
+- Specify programming language used to develop engine
+- Research options for potential game script interpreter
+- Investigate potential multimedia libraries
+- Investigate potential languages for game engine
+- Investigate potential scripting languages for game engine
+- Design UI engine
+- Design audio engine
+- Design rendering engine
+- Develop UI engine
+- Develop audio engine
+- Develop rendering engine
+- Design videogame(s) to test features
+- Develop videogame(s) to test features
+- Test engine features for correct behavior
+- Test games for correct behavior
+- Refactor game engine code
+- Refactor videogame code
