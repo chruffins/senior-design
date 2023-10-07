@@ -1,0 +1,8 @@
+# Constraints for Team Chrus
+In terms of constraints, there are only a few that affect my project, which is the design and development of a game engine and video game using said engine. However, I still need to consider the economic, professional, and social constraints that my project will have.
+
+Firstly, the economic constraints on my project will probably be the largest of the constraints. Since the senior design class has a very short timespan to design and develop a project that is as large as mine, I need to rely on libraries written by other people to handle the implementation of functions that would be outside the scope of my project. I plan on only using free and open source libraries, so there are a small selection of libraries that I can use to abstract the usage of computer graphics.
+
+Professional constraints are another concern I have with my project. Although I technically have professional experience with game development, I have no real experience with game engine development or even systems programming. This project would be a massive boost to my professional development. In terms of needed expertise, any game I work on will likely require me to ask for help from others for art assets.
+
+Lastly, I need to consider some social impacts with my project. I'm hoping that whatever I work on is usable enough to create a full-fledged videogame that I can release for multiple platforms and for money. As a result, I hope that if people play my videogame, they'll have fun and not be influenced to do bad things. Like cutting people off in traffic, or taking candy from babies.
