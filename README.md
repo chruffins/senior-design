@@ -1,14 +1,37 @@
-# Chrus Engine
-## Table of Contents
+# Chrus Engine Overview
+## Team and Project Abstract
+Team Name: Team Chrus
 
-1. [Abstract](#teamname)
-2. [Project Description]
-3. [User Stories and Design Diagrams]
-4. [Project Tasks and Timeline]
-5. [Concerns]
-6. [Slide Deck]
-7. [Self-Assessment Essay]
-8. [Professional Biography]
-9. [Budget]
-10. [Appendix]
+Team Members:
+- Chris Lee, Computer Science, lee4cr@mail.uc.edu
 
+Project Advisor:
+- Dr. Badri Vellambi
+
+## [Project Description](essays/project-description.md)
+
+## User Stories and Design Diagrams
+[User Stories](essays/user-stories.md)
+
+### D0 Diagram
+![D0 Diagram](essays/design-diagrams/d0.svg)
+
+### D1 Diagram
+![D1 Diagram](essays/design-diagrams/d1.svg)
+
+### D2 Diagram
+![D2 Diagram](essays/design-diagrams/d2.svg)
+
+## Project Tasks and Timeline
+The task list can be found [here](essays/task-list.md).
+
+### Timeline and Effort Matrix
+![Timeline and Effort Matrix](essays/timeline-and-effort-matrix.pdf)
+
+## [Constraint Essay](essays/constraint-essay.md)
+## [Professional Biography](essays/professional-biography.md)
+## Budget
+No expenses so far.
+
+## Appendix
+N/A
