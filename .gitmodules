@@ -1,6 +1,3 @@
 [submodule "luajit"]
 	path = luajit
 	url = https://luajit.org/git/luajit.git
-[submodule "code/luajit"]
-	path = code/luajit
-	url = https://luajit.org/git/luajit.git
