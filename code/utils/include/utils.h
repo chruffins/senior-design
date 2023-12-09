@@ -1,0 +1,3 @@
+enum ERROR_CODES {
+    ERROR_FAILED_TO_INIT_LIB=-1,
+};
