@@ -1,0 +1,1 @@
+gcc src/*.c -ogame -O2 -lallegro -lallegro_image -lallegro_primitives -lallegro_font && ./game
