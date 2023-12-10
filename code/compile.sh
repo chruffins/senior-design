@@ -1,0 +1,1 @@
+cmake . && make && ./chrus_engine
