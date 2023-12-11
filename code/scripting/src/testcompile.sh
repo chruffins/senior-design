@@ -1,1 +1,1 @@
-gcc *.c -o test.out -llua5.1 && ./test.out
+gcc *.c -o test.out -lluajit -lallegro && ./test.out
