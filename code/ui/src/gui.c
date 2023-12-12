@@ -17,11 +17,13 @@ void gui_element_move(gui_element* element, gui_dims dim) {
 }
 
 void gui_label_draw(gui_element* this) {
+    if (!this->visible) return;
+
     al_draw_text(this->label.font, this->label.font_color, this->x, this->y, 0, this->label.text);
 }
 
 void gui_bitmap_draw(gui_element* this) {
-    if (this->bitmap.bitmap) {
+    if (!this->visible && this->bitmap.bitmap) {
         al_draw_bitmap(this->bitmap.bitmap, this->x, this->y, 0);
     }
 }

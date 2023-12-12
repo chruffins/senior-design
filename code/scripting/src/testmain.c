@@ -16,9 +16,13 @@ int main(int argc, char **argv) {
 
     // init lua state
     lua_State *L = luaL_newstate();
+    ALLEGRO_DISPLAY *display = al_create_display(480, 320);
 
     // load lua libs
     luaL_openlibs(L);
+
+    lua_pushlightuserdata(L, display);
+    lua_setglobal(L, "display");
 
     if (luaL_loadfile(L, "allegrotest.lua") || lua_pcall(L, 0, 0, 0)) {
         printf("This thing failed to run: %s\n", lua_tostring(L, -1));

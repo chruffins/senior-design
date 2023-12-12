@@ -4,7 +4,9 @@
 #include<allegro5/allegro_font.h>
 #include<allegro5/allegro_image.h>
 
-#include "../../luajit/src/lua.h"
+#include<luajit-2.1/lua.h>
+#include<luajit-2.1/lualib.h>
+#include<luajit-2.1/lauxlib.h>
 
 #include "../../utils/include/utils.h"
 

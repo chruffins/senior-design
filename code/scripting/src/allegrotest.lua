@@ -8,10 +8,13 @@ local width = 800
 local height = 600
 
 -- Create a display window
-local display = allegro.al_create_display(width, height)
-if display == ffi.NULL then
-    error("Failed to create display")
-end
+--local display = allegro.al_create_display(width, height)
+--local display = _G.display
+--if display == ffi.NULL then
+--    error("Failed to create display")
+--end
+
+allegro.al_set_window_title(display, "Goo-gooby")
 
 for i = 1, 255 do
     -- Clear the display to a color (e.g., black)
@@ -23,7 +26,6 @@ for i = 1, 255 do
     -- Wait for a few seconds
     allegro.al_rest(0.01)
 end
-
 
 -- Destroy the display and clean up Allegro
 allegro.al_destroy_display(display)
