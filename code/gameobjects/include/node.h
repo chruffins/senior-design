@@ -20,6 +20,9 @@ typedef chrus_node* chrus_nodeptr;
 struct chrus_node_t {
     chrus_node* parent;
     chrus_node_vec children;
+
+    int type;
+    void *data;
 }; // chrus is pretty long but should be the prefix for all names... thanks C!
 
 struct chrus_node_vector_t {
@@ -31,5 +34,7 @@ struct chrus_node_vector_t {
 chrus_node chrus_node_create();
 chrus_node_vec chrus_node_vec_create();
 
+
 void chrus_node_reparent(chrus_node *parent, chrus_node *new_child);
+
 

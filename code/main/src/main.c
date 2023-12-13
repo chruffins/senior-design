@@ -10,6 +10,8 @@
 
 #include "../../utils/include/utils.h"
 
+#include "../../gameobjects/include/scenemanager.h"
+
 #include<stdbool.h>
 #include<stdio.h>
 
@@ -46,6 +48,9 @@ void run_game_loop() {
     ALLEGRO_EVENT_QUEUE *queue = al_create_event_queue();
     ALLEGRO_TIMER *timer = al_create_timer(1.0 / 60.0);
     ALLEGRO_EVENT event;
+
+    chrus_scene_manager scene_manager;
+    chrus_scene_manager_init(&scene_manager);
 
     bool finished = false;
     bool redraw = false;
