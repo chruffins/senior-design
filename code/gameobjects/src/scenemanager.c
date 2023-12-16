@@ -5,10 +5,6 @@ void chrus_scene_manager_init(chrus_scene_manager *ptr) {
     ptr->top = -1;
 }
 
-void chrus_scene_manager_destroy(chrus_scene_manager* scene_manager) {
-    free(scene_manager);
-}
-
 chrus_scene *chrus_scene_manager_top(chrus_scene_manager *this) {
     return this->scenes[this->top];
 }
@@ -48,16 +44,23 @@ void chrus_scene_manager_reset_modal(chrus_scene_manager *this) {
 
 void chrus_scene_manager_draw(chrus_scene_manager *this) {
     for (int i = 0; i < this->top; i++) {
-        chrus_scene_draw(&this->scenes[i]);
+        chrus_scene_draw(this->scenes[i]);
     }
 }
 
 void chrus_scene_manager_process_input(chrus_scene_manager *this, ALLEGRO_EVENT *event) {
-    if (this->current_modal != -1) {
+    if (this->current_modal < 0) {
         for (int i = 0; i < this->top; i++) {
-            chrus_scene_process_input(&this->scenes[i], event);
+            chrus_scene_process_input(this->scenes[i], event);
         }
     } else {
-        chrus_scene_process_input(&this->scenes[this->current_modal], event);
+        chrus_scene_process_input(this->scenes[this->current_modal], event);
+    }
+}
+
+void chrus_scene_manager_destroy(chrus_scene_manager* this) {
+    int result = chrus_scene_manager_pop_scene(this);
+    while (!result) {
+        result = chrus_scene_manager_pop_scene(this);
     }
 }
