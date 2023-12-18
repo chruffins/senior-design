@@ -41,8 +41,8 @@ chrus_sprite* chrus_sprite_create(const char *source) {
     return new_sprite;
 }
 
-void chrus_sprite_draw(chrus_sprite *this) {
-    al_draw_bitmap(this->image_data, this->x, this->y, this->flipping);
+void chrus_sprite_draw(chrus_sprite *this, float dx, float dy) {
+    al_draw_bitmap(this->image_data, this->x + dx, this->y + dy, this->flipping);
 }
 
 void chrus_sprite_translate(chrus_sprite *this, float dx, float dy) {

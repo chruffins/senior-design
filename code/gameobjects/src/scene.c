@@ -39,11 +39,14 @@ void chrus_scene_process_input(chrus_scene* this, ALLEGRO_EVENT *event) {
 
 void chrus_scene_draw(chrus_scene* restrict this) {
     chrus_camera* restrict current_camera = (chrus_camera*)this->current_camera->data;
+
+    al_use_transform(&current_camera->_scaler);
+
     for (int i = 0; i < this->sprites_cache.size; i++) {
         chrus_sprite* restrict s = (chrus_sprite*)this->sprites_cache.data[i];
-        if (s->x + s->width > current_camera->viewport_x || s->x < current_camera->viewport_x + current_camera->viewport_width || 
-                s->y + s->height > current_camera->viewport_y || s->y < current_camera->viewport_y + current_camera->viewport_height) {
-            chrus_sprite_draw(s);
+        if ((s->x + s->width > current_camera->viewport_x && s->x < current_camera->viewport_x + current_camera->viewport_width) && 
+                (s->y + s->height > current_camera->viewport_y && s->y < current_camera->viewport_y + current_camera->viewport_height)) {
+            chrus_sprite_draw(s, -current_camera->viewport_x, -current_camera->viewport_y);
         }
     }
 }

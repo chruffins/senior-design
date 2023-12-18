@@ -27,6 +27,6 @@ struct chrus_sprite_vec_t {
 
 //chrus_sprite* chrus_sprite_create_default();
 chrus_sprite* chrus_sprite_create(const char *source);
-void chrus_sprite_draw(chrus_sprite *this);
+void chrus_sprite_draw(chrus_sprite *this, float dx, float dy);
 
 void chrus_sprite_translate(chrus_sprite *this, float dx, float dy);
