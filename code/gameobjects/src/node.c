@@ -10,12 +10,22 @@ struct chrus_node_t {
 }; // chrus is pretty long but should be the prefix for all names... thanks C!
 */
 
-chrus_node chrus_node_create_uninit() {
-    return (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_UNINITIALIZED, NULL };
+chrus_node *chrus_node_create_uninit() {
+    chrus_node *new_node = malloc(sizeof(chrus_node));
+    *new_node = (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_UNINITIALIZED, NULL };
+    return new_node;
+}
+
+chrus_node *chrus_node_create_camera() {
+    printf("creating camera node\n");
+
+    chrus_node *new_node = malloc(sizeof(chrus_node));
+    *new_node = (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_CAMERA, chrus_camera_create() };
+    return new_node;
 }
 
 chrus_node_vec chrus_node_vec_create() {
-    return (chrus_node_vec){ malloc(sizeof(chrus_node)), 0, 1 };
+    return (chrus_node_vec){ malloc(sizeof(chrus_node*)), 0, 1 };
 }
 
 void chrus_node_destroy(chrus_node *this) {

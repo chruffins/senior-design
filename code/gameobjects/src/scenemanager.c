@@ -43,7 +43,7 @@ void chrus_scene_manager_reset_modal(chrus_scene_manager *this) {
 }
 
 void chrus_scene_manager_draw(chrus_scene_manager *this) {
-    for (int i = 0; i < this->top; i++) {
+    for (int i = 0; i <= this->top; i++) {
         chrus_scene_draw(this->scenes[i]);
     }
 }

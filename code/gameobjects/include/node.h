@@ -15,6 +15,10 @@ I steal ASCII art too!
 #include<memory.h>
 
 #include "node_types.h"
+#include "camera.h"
+#include "script.h"
+#include "sound.h"
+#include "sprite.h"
 
 typedef struct chrus_node_t chrus_node;
 typedef struct chrus_node_vector_t chrus_node_vec;
@@ -35,7 +39,8 @@ struct chrus_node_t {
     void *data;
 }; // chrus is pretty long but should be the prefix for all names... thanks C!
 
-chrus_node chrus_node_create_uninit();
+chrus_node* chrus_node_create_uninit();
+chrus_node* chrus_node_create_camera();
 chrus_node_vec chrus_node_vec_create();
 
 void chrus_node_destroy(chrus_node *this);

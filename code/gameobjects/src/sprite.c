@@ -1,6 +1,6 @@
 #include "../include/sprite.h"
 
-chrus_sprite* chrus_sprite_create_default() {
+static chrus_sprite* chrus_sprite_create_default() {
     static ALLEGRO_BITMAP* default_square;
     if (default_square == NULL) {
         default_square = al_create_bitmap(64, 64);
@@ -43,4 +43,9 @@ chrus_sprite* chrus_sprite_create(const char *source) {
 
 void chrus_sprite_draw(chrus_sprite *this) {
     al_draw_bitmap(this->image_data, this->x, this->y, this->flipping);
+}
+
+void chrus_sprite_translate(chrus_sprite *this, float dx, float dy) {
+    this->x += dx;
+    this->y += dy;
 }

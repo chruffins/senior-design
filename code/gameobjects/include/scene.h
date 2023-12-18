@@ -3,21 +3,32 @@
 #include<stdio.h>
 #include<memory.h>
 
+#include<luajit/lua.h>
+#include<luajit/lualib.h>
+#include<luajit/lauxlib.h>
+
 #include<allegro5/allegro.h>
 #include "node.h"
+#include "script.h"
+#include "sprite.h"
+#include "../../utils/include/vector.h"
 
 // basically a top level node lol
 struct chrus_scene_t {
     const char *name;
     chrus_node *current_camera;
+    lua_State *lua_vm; // we run the scripts in this environemnt
     chrus_node_vec children;
+    chrus_vector sprites_cache; // component we use for direct access to sprite pointers
 } typedef chrus_scene;
 
 chrus_scene *chrus_scene_create(const char *name);
 void chrus_scene_destroy(chrus_scene *scene);
-
 chrus_scene *chrus_scene_from_file(const char *filename);
 
 void chrus_scene_process_input(chrus_scene* restrict this, ALLEGRO_EVENT *event);
-
 void chrus_scene_draw(chrus_scene* restrict this);
+chrus_node* chrus_scene_add_node(chrus_scene* this, void* parent, chrus_node *child);
+
+void chrus_scene_add_spritecache(chrus_scene* restrict this, chrus_sprite *sprite);
+void chrus_scene_run_script(chrus_scene* restrict this, chrus_node *script);
