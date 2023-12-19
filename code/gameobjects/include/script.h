@@ -7,12 +7,14 @@
 #include<luajit/lauxlib.h>
 #include<luajit/lualib.h>
 
+typedef struct chrus_script_t chrus_script;
+
 // as a security consideration we probably shouldn't give script objects a pointer to their lua vm
 // scripts just store where their source is located
 struct chrus_script_t {
     const char *source_name;
     bool enabled;
-} typedef chrus_script;
+};
 
 chrus_script *chrus_script_create(const char *source);
 //void chrus_script_run(chrus_script *this);

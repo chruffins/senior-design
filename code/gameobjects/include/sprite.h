@@ -6,6 +6,8 @@
 
 #include<stdlib.h>
 
+typedef struct chrus_sprite_t chrus_sprite;
+
 struct chrus_sprite_t {
     float x;
     float y;
@@ -15,13 +17,7 @@ struct chrus_sprite_t {
     float rotation;
 
     ALLEGRO_BITMAP *image_data;
-} typedef chrus_sprite;
-
-struct chrus_sprite_vec_t {
-    chrus_sprite **data;
-    size_t size;
-    size_t capacity;
-} typedef chrus_sprite_vec;
+};
 
 //static ALLEGRO_BITMAP *default_image;
 

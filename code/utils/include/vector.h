@@ -3,11 +3,13 @@
 #include<memory.h>
 #include<stdlib.h>
 
+typedef struct chrus_vector_t chrus_vector;
+
 struct chrus_vector_t {
     void **data;
     size_t size;
     size_t capacity;
-} typedef chrus_vector;
+};
 
 chrus_vector chrus_vector_create();
 

@@ -1,5 +1,6 @@
 #include<allegro5/allegro.h>
 #include<allegro5/allegro_audio.h>
+#include<allegro5/allegro_acodec.h>
 #include<allegro5/allegro_primitives.h>
 #include<allegro5/allegro_font.h>
 #include<allegro5/allegro_image.h>
@@ -13,6 +14,7 @@
 #include "../../gameobjects/include/scenemanager.h"
 #include "../../gameobjects/include/node.h"
 #include "../../gameobjects/include/script.h"
+#include "../../gameobjects/include/chrus.h"
 
 #include<stdbool.h>
 #include<stdio.h>
@@ -33,8 +35,13 @@ void load_allegro_libraries() {
     must_init(al_init_image_addon(), "allegro image library");
 
     must_init(al_install_audio(), "allegro audio");
+    must_init(al_init_acodec_addon(), "allegro codec library");
     must_init(al_install_keyboard(), "allegro keyboard input");
     must_init(al_install_mouse(), "allegro mouse input");
+
+    must_init(al_reserve_samples(16), "reserve samples");
+
+    must_init(chrus_init(), "chrus lib");
 
     printf("Libraries loaded correctly!\n");
 }
@@ -70,8 +77,12 @@ void run_game_loop() {
     *datetime_script = (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/datetime.lua") };
     *test_image = (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_SPRITE, chrus_sprite_create("data/test.png")};
 
+    chrus_sound* sound = chrus_sound_create("data/fruitcake.flac");
+    chrus_sound_play(sound);
+    
     chrus_sprite_translate(test_image->data, 64, 64);
 
+    /*
     // a thousand test pngs descend on you!
     for (int i = 0; i < 1000; i++) {
         chrus_node *image = malloc(sizeof(chrus_node));
@@ -80,6 +91,7 @@ void run_game_loop() {
         ((chrus_sprite*)(image->data))->flipping = rand() % 2 * ALLEGRO_FLIP_HORIZONTAL;
         chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), image);
     }
+    */
 
     //chrus_node_vec_add_node(&scene_manager.scenes[scene_manager.top]->children, (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/helloworld.lua") });
     chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), test_node_script);
@@ -114,6 +126,7 @@ void run_game_loop() {
             redraw = false;
         }
     }
+    chrus_sound_free(sound);
 
     printf("freeing scene resources now\n");
     chrus_scene_manager_destroy(&scene_manager);
@@ -125,12 +138,19 @@ void run_game_loop() {
     al_destroy_display(display);
 }
 
+void finalize() {
+    printf("deinitializing\n");
+    chrus_deinit();
+}
+
 int main(int argc, char **argv) {
     load_allegro_libraries();
 
     set_some_flags();
 
     run_game_loop();
+
+    finalize();
 
     return 0;
 }

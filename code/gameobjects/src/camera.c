@@ -6,15 +6,15 @@ chrus_camera *chrus_camera_create() {
     if (new_camera == NULL) {
         printf("camera failed to create!\n");
     }
-    
+
     new_camera->screen_x = 0;
     new_camera->screen_y = 0;
 
-    new_camera->screen_width = 480;
-    new_camera->screen_height = 320;
+    new_camera->screen_width = 1080;
+    new_camera->screen_height = 810;
 
-    new_camera->viewport_height = 480;
-    new_camera->viewport_width = 320;
+    new_camera->viewport_width = 1080;
+    new_camera->viewport_height = 810;
 
     new_camera->viewport_x = 0;
     new_camera->viewport_y = 0;

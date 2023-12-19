@@ -13,6 +13,8 @@
 #include "sprite.h"
 #include "../../utils/include/vector.h"
 
+typedef struct chrus_scene_t chrus_scene;
+
 // basically a top level node lol
 struct chrus_scene_t {
     const char *name;
@@ -20,11 +22,13 @@ struct chrus_scene_t {
     lua_State *lua_vm; // we run the scripts in this environemnt
     chrus_node_vec children;
     chrus_vector sprites_cache; // component we use for direct access to sprite pointers
-} typedef chrus_scene;
+};
 
 chrus_scene *chrus_scene_create(const char *name);
 void chrus_scene_destroy(chrus_scene *scene);
 chrus_scene *chrus_scene_from_file(const char *filename);
+
+void chrus_scene_init_lua_vm(chrus_scene* restrict this);
 
 void chrus_scene_process_input(chrus_scene* restrict this, ALLEGRO_EVENT *event);
 void chrus_scene_draw(chrus_scene* restrict this);

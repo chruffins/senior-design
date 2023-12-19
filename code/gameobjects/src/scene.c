@@ -11,7 +11,7 @@ chrus_scene *chrus_scene_create(const char *name) {
     new_scene->current_camera = chrus_node_create_camera();
 
     chrus_scene_add_node(new_scene, new_scene, new_scene->current_camera);
-    luaL_openlibs(new_scene->lua_vm);
+    chrus_scene_init_lua_vm(new_scene);
 
     new_scene->sprites_cache = chrus_vector_create();
     return new_scene;
@@ -31,6 +31,18 @@ chrus_scene *chrus_scene_from_file(const char *filename) {
     // TODO: design the storage of scenes
 
     return new_scene;
+}
+
+void chrus_scene_init_lua_vm(chrus_scene* restrict this) {
+    lua_State *lua_vm = this->lua_vm;
+    const char *init = "ffi = require(\"ffi\")";
+    const char *scene_cast = "";
+
+    luaL_openlibs(lua_vm);
+    luaL_dostring(lua_vm, init);
+
+    lua_pushlightuserdata(lua_vm, this);
+    lua_setglobal(lua_vm, "scene");
 }
 
 void chrus_scene_process_input(chrus_scene* this, ALLEGRO_EVENT *event) {

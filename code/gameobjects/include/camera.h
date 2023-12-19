@@ -4,6 +4,8 @@
 
 #include<stdio.h>
 
+typedef struct chrus_camera_t chrus_camera;
+
 // game objects can be seen from cameras
 struct chrus_camera_t {
     // screen x and y represent "top left" of the viewport rectangle
@@ -21,7 +23,7 @@ struct chrus_camera_t {
 
     // private object that transforms the view to the camera when rendering
     ALLEGRO_TRANSFORM _scaler;
-} typedef chrus_camera;
+};
 
 chrus_camera *chrus_camera_create();
 void chrus_camera_calc_transform(chrus_camera* restrict this);

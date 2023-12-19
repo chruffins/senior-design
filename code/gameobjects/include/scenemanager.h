@@ -8,6 +8,8 @@
 
 #define MAX_SCENES 256
 
+typedef struct chrus_scene_manager_t chrus_scene_manager;
+
 // totally not intended to be a pointer... i think.
 // this will ALWAYS be on the stack, never the heap
 struct chrus_scene_manager_t {
@@ -16,7 +18,7 @@ struct chrus_scene_manager_t {
 
     int16_t top; // stack pointer basically
     int16_t current_modal;
-} typedef chrus_scene_manager;
+};
 
 // because scene managers are only allocated on the stack...
 void chrus_scene_manager_init(chrus_scene_manager *ptr);

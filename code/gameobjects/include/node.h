@@ -41,6 +41,8 @@ struct chrus_node_t {
 
 chrus_node* chrus_node_create_uninit();
 chrus_node* chrus_node_create_camera();
+chrus_node* chrus_node_create_sprite();
+chrus_node* chrus_node_create_sound();
 chrus_node_vec chrus_node_vec_create();
 
 void chrus_node_destroy(chrus_node *this);
