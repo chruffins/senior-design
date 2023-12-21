@@ -35,11 +35,12 @@ chrus_scene *chrus_scene_from_file(const char *filename) {
 
 void chrus_scene_init_lua_vm(chrus_scene* restrict this) {
     lua_State *lua_vm = this->lua_vm;
-    const char *init = "ffi = require(\"ffi\")";
-    const char *scene_cast = "";
+    //const char *init = "ffi = require(\"ffi\")";
+    //const char *scene_cast = "";
 
     luaL_openlibs(lua_vm);
-    luaL_dostring(lua_vm, init);
+    //luaL_dostring(lua_vm, init);
+    luaL_dofile(lua_vm, "data/chrus_ffi.lua");
 
     lua_pushlightuserdata(lua_vm, this);
     lua_setglobal(lua_vm, "scene");

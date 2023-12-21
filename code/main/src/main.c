@@ -77,8 +77,8 @@ void run_game_loop() {
     *datetime_script = (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/datetime.lua") };
     *test_image = (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_SPRITE, chrus_sprite_create("data/test.png")};
 
-    chrus_sound* sound = chrus_sound_create("data/fruitcake.flac");
-    chrus_sound_play(sound);
+    //chrus_sound* sound = chrus_sound_create("data/fruitcake.flac");
+    //chrus_sound_play(sound);
     
     chrus_sprite_translate(test_image->data, 64, 64);
 
@@ -126,7 +126,7 @@ void run_game_loop() {
             redraw = false;
         }
     }
-    chrus_sound_free(sound);
+    //chrus_sound_free(sound);
 
     printf("freeing scene resources now\n");
     chrus_scene_manager_destroy(&scene_manager);

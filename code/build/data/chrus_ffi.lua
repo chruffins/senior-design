@@ -1,8 +1,8 @@
-local ffi = require("ffi")
+ffi = require("ffi")
 
 local al_ffi = require("data/allegro_ffi")
 
-local chrus = {}
+chrus = {}
 
 local function get_line_count(str)
     local lines = 1
@@ -16,7 +16,7 @@ end
 
 --print(get_line_count(al_ffi.cdef))
 
-chrus.cdef = al_ffi.cdef .. [[
+ffi.cdef(al_ffi.cdef .. [[
 enum CHRUS_NODE_TYPES { CHRUS_NODE_UNINITIALIZED, CHRUS_NODE_CAMERA, CHRUS_NODE_SCRIPT, CHRUS_NODE_SPRITE };
 
 typedef struct chrus_scene_t chrus_scene;
@@ -42,9 +42,43 @@ chrus_node* chrus_node_create_sprite();
 
 chrus_sound *chrus_sound_create(const char *source);
 
+void chrus_sound_load(chrus_sound* restrict this, const char *source);
 void chrus_sound_play(chrus_sound* restrict this);
 void chrus_sound_stop(chrus_sound* restrict this);
+void chrus_sound_free(chrus_sound* restrict this);
 
-]]
+]])
 
-return chrus
+--ffi.load("allegro")
+local lchrus = ffi.load("chrus_lib")
+local node = ffi.typeof("chrus_node")
+--chrus.sound = ffi.typeof("chrus_node")
+
+local sprite_metatable = {
+    __index = {
+        new = function()
+            local new = node()
+            return new
+        end,
+    }
+}
+
+local sound_metatable = {
+    __index = {
+        new = function()
+            local new = node()
+            new.data = lchrus.chrus_sound_create(nil)
+            return new
+        end,
+        load = function(this, source)
+            lchrus.chrus_sound_load(this.data, source)
+        end,
+        play = function(this)
+            lchrus.chrus_sound_play(this.data)
+        end
+    }
+    
+}
+
+chrus.sound = ffi.metatype("chrus_node", sound_metatable)
+print("this should set the metatable?")
