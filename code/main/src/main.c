@@ -49,7 +49,37 @@ void load_allegro_libraries() {
 void set_some_flags() {
     al_set_new_display_flags(ALLEGRO_WINDOWED);
     al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
-    al_set_new_window_title("fuckwad");
+    al_set_new_window_title("chrus game");
+}
+
+void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
+    // arg should just be the timer as well as the scene manager
+    void **pargs = (void**)args;
+    ALLEGRO_TIMER *draw_timer = (ALLEGRO_TIMER*)pargs[0];
+    chrus_scene_manager *scene_manager = (chrus_scene_manager*)pargs[1];
+    ALLEGRO_DISPLAY *display = (ALLEGRO_DISPLAY*)pargs[2];
+    ALLEGRO_EVENT_QUEUE *queue = al_create_event_queue(); // separate queue that only takes in drawing events
+
+    //bool finished = false;
+    //bool result;
+    //int tick = 0;
+    al_set_target_backbuffer(display);
+
+    ALLEGRO_EVENT event;
+
+    al_register_event_source(queue, al_get_timer_event_source(draw_timer));
+    while (1) {
+        al_wait_for_event(queue, &event);
+        if (al_get_thread_should_stop(this)) break;
+        al_clear_to_color(al_map_rgb(0, 0, 0));
+
+        chrus_scene_manager_draw(scene_manager);
+        // we'll probably return some kind of error code in the future in case there's a catastrophic error with this
+
+        al_flip_display();
+    }
+
+    return NULL;
 }
 
 void run_game_loop() {
@@ -62,7 +92,7 @@ void run_game_loop() {
     chrus_scene_manager_init(&scene_manager);
 
     bool finished = false;
-    bool redraw = false;
+    //bool redraw = false;
 
     al_start_timer(timer);
     al_register_event_source(queue, al_get_keyboard_event_source());
@@ -73,31 +103,19 @@ void run_game_loop() {
     chrus_node* test_node_script = malloc(sizeof(chrus_node));
     chrus_node* datetime_script = malloc(sizeof(chrus_node));
     chrus_node* test_image = malloc(sizeof(chrus_node));
-    *test_node_script = (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/helloworld.lua") };
-    *datetime_script = (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/datetime.lua") };
-    *test_image = (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_SPRITE, chrus_sprite_create("data/test.png")};
-
-    //chrus_sound* sound = chrus_sound_create("data/fruitcake.flac");
-    //chrus_sound_play(sound);
+    *test_node_script = (chrus_node){ "script", NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/helloworld.lua") };
+    *datetime_script = (chrus_node){ "script", NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/datetime.lua") };
+    *test_image = (chrus_node){ "sprite", NULL, chrus_node_vec_create(), CHRUS_NODE_SPRITE, chrus_sprite_create("data/test.png")};
     
     chrus_sprite_translate(test_image->data, 64, 64);
 
-    /*
-    // a thousand test pngs descend on you!
-    for (int i = 0; i < 1000; i++) {
-        chrus_node *image = malloc(sizeof(chrus_node));
-        *image = (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_SPRITE, chrus_sprite_create("data/test.png") };
-        chrus_sprite_translate(image->data, rand() % 1080, rand() % 810);
-        ((chrus_sprite*)(image->data))->flipping = rand() % 2 * ALLEGRO_FLIP_HORIZONTAL;
-        chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), image);
-    }
-    */
-
-    //chrus_node_vec_add_node(&scene_manager.scenes[scene_manager.top]->children, (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/helloworld.lua") });
     chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), test_node_script);
     chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), datetime_script);
     chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), test_image);
-    //chrus_node node = (chrus_node){ NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/helloworld.lua") };
+
+    void *drawing_thread_args[3] = { timer, &scene_manager, display };
+    ALLEGRO_THREAD *drawing_thread = al_create_thread(drawing_handler, drawing_thread_args);
+    al_start_thread(drawing_thread);
 
     while (!finished) {
         al_wait_for_event(queue, &event);
@@ -105,7 +123,7 @@ void run_game_loop() {
         switch (event.type)
         {
         case ALLEGRO_EVENT_TIMER:
-            redraw = true;
+            //redraw = true;
             break;
         case ALLEGRO_EVENT_KEY_DOWN:
             ((chrus_camera*)(chrus_scene_manager_top(&scene_manager)->current_camera->data))->viewport_x += 5;
@@ -117,6 +135,7 @@ void run_game_loop() {
             break;
         }
 
+        /*
         if (redraw) {
             al_clear_to_color(al_map_rgb(0, 0, 0));
 
@@ -125,8 +144,13 @@ void run_game_loop() {
             al_flip_display();
             redraw = false;
         }
+        */
     }
     //chrus_sound_free(sound);
+    void *drawing_result;
+    printf("joined the drawing thread now\n");
+    al_join_thread(drawing_thread, &drawing_result);
+    // need to wait for drawing thread to die before we can close up the scene manager
 
     printf("freeing scene resources now\n");
     chrus_scene_manager_destroy(&scene_manager);
