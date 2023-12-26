@@ -23,7 +23,8 @@ int chrus_scene_manager_add_scene(chrus_scene_manager *this, chrus_scene *new_sc
 }
 
 int chrus_scene_manager_pop_scene(chrus_scene_manager *this) {
-    if (this->top == 0) return -1;
+    printf("popping scene now\n");
+    if (this->top == -1) return -1;
 
     chrus_scene_destroy(this->scenes[this->top]);
     this->scenes[this->top] = NULL;

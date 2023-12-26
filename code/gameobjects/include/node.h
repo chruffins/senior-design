@@ -32,6 +32,7 @@ struct chrus_node_vector_t {
 };
 
 struct chrus_node_t {
+    const char *name;
     chrus_node* parent;
     chrus_node_vec children;
 

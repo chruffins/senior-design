@@ -19,6 +19,7 @@ utils/src/vector.c)
 
 add_executable(${PROJECT_NAME} main/src/main.c)
 
+target_compile_options(chrus_lib PRIVATE -g -Wall)
 target_compile_options(chrus_engine PRIVATE -g -Wall)
 #target_compile_options(chrus_engine -g)
 

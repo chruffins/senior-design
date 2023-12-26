@@ -18,9 +18,13 @@ chrus_scene *chrus_scene_create(const char *name) {
 }
 
 void chrus_scene_destroy(chrus_scene *scene) {
-    for (int i = 0; i < scene->children.size; i++) {
+    printf("destroying %lu nodes\n", scene->children.size);
+    for (size_t i = 0; i < scene->children.size; i++) {
+        printf("destroying node %s now\n", scene->children.data[i]->name);
         chrus_node_destroy(scene->children.data[i]);
     }
+
+    lua_close(scene->lua_vm);
 
     free(scene);
 }
@@ -40,7 +44,8 @@ void chrus_scene_init_lua_vm(chrus_scene* restrict this) {
 
     luaL_openlibs(lua_vm);
     //luaL_dostring(lua_vm, init);
-    luaL_dofile(lua_vm, "data/chrus_ffi.lua");
+    int result = luaL_dofile(lua_vm, "data/chrus_ffi.lua");
+    if (result) printf("%s\n", lua_tostring(lua_vm, -1));
 
     lua_pushlightuserdata(lua_vm, this);
     lua_setglobal(lua_vm, "scene");
@@ -71,6 +76,7 @@ chrus_node* chrus_scene_add_node(chrus_scene* restrict this, void* parent, chrus
         chrus_node *cnparent = (chrus_node*) parent;
         chrus_node_vec_add_node(&cnparent->children, child);
     }
+    child->parent = parent;
 
     switch (child->type)
     {
