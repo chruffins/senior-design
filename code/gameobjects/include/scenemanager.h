@@ -4,6 +4,8 @@
 #include<stdlib.h>
 #include<allegro5/allegro.h>
 
+#include "../../utils/include/rbtree.h"
+
 #include "scene.h"
 
 #define MAX_SCENES 256
@@ -18,6 +20,10 @@ struct chrus_scene_manager_t {
 
     int16_t top; // stack pointer basically
     int16_t current_modal;
+
+    chrus_rbtree sounds;
+    chrus_rbtree bitmaps;
+    //chrus_rbtree 
 };
 
 // because scene managers are only allocated on the stack...

@@ -5,18 +5,6 @@ local al_ffi = require("data/allegro_ffi")
 chrus = {}
 al = {}
 
-local function get_line_count(str)
-    local lines = 1
-    for i = 1, #str do
-        local c = str:sub(i, i)
-        if c == '\n' then lines = lines + 1 end
-    end
-
-    return lines
-end
-
---print(get_line_count(al_ffi.cdef))
-
 ffi.cdef(al_ffi.cdef .. [[
 
 void* malloc(size_t size);
@@ -29,11 +17,11 @@ typedef struct chrus_node_t chrus_node;
 typedef struct chrus_node_vector_t chrus_node_vec;
 typedef struct chrus_camera_t chrus_camera;
 typedef struct chrus_script_t chrus_script;
-typedef struct chrus_sound_t chrus_sound;
+typedef struct chrus_audiostream_t chrus_audiostream;
 typedef struct chrus_sprite_t chrus_sprite;
 typedef struct chrus_vector_t chrus_vector;
 
-typedef struct chrus_node_t chrus_sound_node;
+typedef struct chrus_node_t chrus_audiostream_node;
 typedef struct chrus_node_t chrus_sprite_node;
 
 struct chrus_vector_t { void **data; size_t size; size_t capacity; };
@@ -48,17 +36,17 @@ chrus_node* chrus_scene_add_node(chrus_scene* this, void* parent, chrus_node *ch
 chrus_node* chrus_node_create_camera();
 chrus_node* chrus_node_create_sprite();
 
-chrus_sound *chrus_sound_create(const char *source);
+chrus_audiostream *chrus_audiostream_create(const char *source);
 
 void chrus_node_destroy(chrus_node *this);
 
 chrus_sprite* chrus_sprite_create(const char *source);
 void chrus_sprite_translate(chrus_sprite *this, float dx, float dy);
 
-void chrus_sound_load(chrus_sound* restrict this, const char *source);
-void chrus_sound_play(chrus_sound* restrict this);
-void chrus_sound_stop(chrus_sound* restrict this);
-void chrus_sound_free(chrus_sound* restrict this);
+void chrus_audiostream_load(chrus_audiostream* restrict this, const char *source);
+void chrus_audiostream_play(chrus_audiostream* restrict this);
+void chrus_audiostream_stop(chrus_audiostream* restrict this);
+void chrus_audiostream_free(chrus_audiostream* restrict this);
 
 ]])
 
@@ -120,20 +108,20 @@ local sound_metatable = {
         new.name = "sound"
         new.type = lchrus.CHRUS_NODE_SOUND
         new.parent = nil
-        new.data = lchrus.chrus_sound_create(nil)
+        new.data = lchrus.chrus_audiostream_create(nil)
         return new
     end,
     load = function(this, source)
-        lchrus.chrus_sound_load(this.data, source)
+        lchrus.chrus_audiostream_load(this.data, source)
     end,
     play = function(this)
-        lchrus.chrus_sound_play(this.data)
+        lchrus.chrus_audiostream_play(this.data)
     end,
     stop = function(this)
-        lchrus.chrus_sound_stop(this.data)
+        lchrus.chrus_audiostream_stop(this.data)
     end,
     destroy = function(this)
-        lchrus.chrus_sound_free(this.data)
+        lchrus.chrus_audiostream_free(this.data)
         this = nil
     end,
     reparent = function(this, other)

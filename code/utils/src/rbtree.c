@@ -3,14 +3,16 @@
 static chrus_rbnode *chrus_rbnode_create(void *data);
 static void fix_insert(chrus_rbtree *tree, chrus_rbnode *current);
 static void fix_delete(chrus_rbtree *tree, chrus_rbnode *current);
+static void swap_node_data(chrus_rbnode *a, chrus_rbnode *b);
 static chrus_rbnode *chrus_rbtree_min(chrus_rbnode *root);
 
-chrus_rbtree *chrus_rbtree_create(int (*comparator)(const void *, const void *), void (*destructor)(void *)) {
+chrus_rbtree *chrus_rbtree_create(int (*comparator)(const void *, const void *), void (*destructor)(void *), void* (*insertinator)(const void *)) {
     chrus_rbtree *new_tree = malloc(sizeof(chrus_rbtree));
     if (new_tree == NULL) return NULL;
 
     new_tree->comparator = comparator;
     new_tree->destructor = destructor;
+    new_tree->insertinator = insertinator;
     new_tree->root = NULL;
 
     return new_tree;
@@ -20,11 +22,11 @@ void chrus_rbtree_destroy(chrus_rbtree *this) {
     // need to iterate through every node :skull:
 }
 
-chrus_rbnode *chrus_rbtree_find(chrus_rbtree *this, void *data) {
+chrus_rbnode *chrus_rbtree_find(chrus_rbtree *this, void *key) {
     chrus_rbnode *current = this->root;
 
     while (current != NULL) {
-        int result = this->comparator(data, current->data);
+        int result = this->comparator(key, current->key);
         if (!result) return current;
 
         current = result < 0 ? current->left : current->right;
@@ -33,12 +35,12 @@ chrus_rbnode *chrus_rbtree_find(chrus_rbtree *this, void *data) {
     return NULL;
 }
 
-chrus_rbnode *chrus_rbnode_create(void *data) {
+chrus_rbnode *chrus_rbnode_create(void *key) {
     // this should set red to false, parent, left/right to NULL.
     chrus_rbnode *new_node = calloc(sizeof(chrus_rbnode), 1);
     if (new_node == NULL) return NULL;
 
-    new_node->data = data;
+    new_node->key = key;
     new_node->red = true;
 }
 
@@ -86,12 +88,12 @@ chrus_rbnode *chrus_rbtree_min(chrus_rbnode *root) {
     return current;
 }
 
-chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *this, void *data) {
+chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *this, void *key) {
     chrus_rbnode *current = this->root;
     // case 1: inserted node is root.
     // root is always black.
     if (current == NULL) {
-        this->root = chrus_rbnode_create(data);
+        this->root = chrus_rbnode_create(key);
         this->root->red = false;
         return this->root;
     }
@@ -100,17 +102,17 @@ chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *this, void *data) {
     chrus_rbnode *parent;
     int result;
     while (current) {
-        result = this->comparator(data, current->data);
+        result = this->comparator(key, current->key);
         
         parent = current;
         current = result < 0 ? current->left : current->right;
     }
 
     if (result > 0) {
-        parent->right = chrus_rbnode_create(data);
+        parent->right = chrus_rbnode_create(key);
         current = parent->right;
     } else {
-        parent->left = chrus_rbnode_create(data);
+        parent->left = chrus_rbnode_create(key);
         current = parent->left;
     }
 
@@ -180,24 +182,102 @@ chrus_rbnode *chrus_rbtree_successor(chrus_rbtree *tree, chrus_rbnode *node) {
     return parent;
 }
 
+void swap_node_data(chrus_rbnode *a, chrus_rbnode *b) {
+    if (a == b) return;
+
+    void *temp = b->value;
+    b->value = a->value;
+    a->value = temp;
+
+    temp = b->key;
+    b->key = a->key;
+    a->key = temp;
+}
+
 void fix_delete(chrus_rbtree *tree, chrus_rbnode *current) {
     // try not to kill yourself challenge
+    chrus_rbnode *sibling;
+    int current_dir = chrus_rbnode_child_direction(current->parent, current);
+    do {
+        if (current_dir == 0) {
+            sibling = current->parent->right;
+
+            if (sibling->red) {
+                sibling->red = false;
+                current->parent->red = true;
+                chrus_rbnode_rotate(current->parent, current_dir);
+                sibling = current->parent->right;
+            }
+
+            if ((!sibling->right || !sibling->right->red) && (!sibling->left || !sibling->left->red)) {
+                sibling->red = true;
+                if (current->parent->red) {
+                    current->parent->red = false;
+                    break;
+                } else {
+                    current = current->parent;
+                }
+            } else {
+                if (!sibling->right || !sibling->right->red) {
+                    sibling->left->red = false;
+                    sibling->red = true;
+                    chrus_rbnode_rotate(sibling, !current_dir);
+                    sibling = current->parent->right;
+                }
+
+                sibling->red = current->parent->red;
+                current->parent->red = false;
+                sibling->right->red = false;
+                chrus_rbnode_rotate(current->parent, current_dir);
+                break;
+            }
+        } else {
+            sibling = current->parent->left;
+
+            if (sibling->red) {
+                sibling->red = false;
+                current->parent->red = true;
+                chrus_rbnode_rotate(current->parent, current_dir);
+                sibling = current->parent->left;
+            }
+
+            if ((!sibling->right || !sibling->right->red) && (!sibling->left || !sibling->left->red)) {
+                sibling->red = true;
+                if (current->parent->red) {
+                    current->parent->red = false;
+                    break;
+                } else {
+                    current = current->parent;
+                }
+            } else {
+                if (!sibling->left || !sibling->left->red) {
+                    sibling->right->red = false;
+                    sibling->red = true;
+                    chrus_rbnode_rotate(sibling, !current_dir);
+                    sibling = current->parent->left;
+                }
+
+                sibling->red = current->parent->red;
+                current->parent->red = false;
+                sibling->left->red = false;
+                chrus_rbnode_rotate(current->parent, current_dir);
+                break;
+            }
+        }
+    } while (current != tree->root->left);
 }
 
 // returns the key if found...
-void *chrus_rbtree_delete(chrus_rbtree *this, void *key) {
+int chrus_rbtree_delete(chrus_rbtree *this, void *key) {
     // let's get the node
     chrus_rbnode *dl = chrus_rbtree_find(this, key);
-    if (!dl) return NULL;
-    void *retdata = dl->data;
+    if (!dl) return 1;
 
     // two children, so we just swap values with the in-order successor
     // and then delete the successor instead
     if (dl->left && dl->right) {
         chrus_rbnode *succ = chrus_rbtree_successor(this, dl);
-        void *temp = dl->data;
-        dl->data = succ->data;
-        succ->data = temp;
+        swap_node_data(dl, succ);
         dl = succ;
     }
 
@@ -209,7 +289,6 @@ void *chrus_rbtree_delete(chrus_rbtree *this, void *key) {
     if (!dl->left && !dl->right) {
         if (dl == this->root) {
             this->root = NULL;
-            retdata = dl->data;
             //free(dl);
             //return retdata;
         }
@@ -239,4 +318,8 @@ void *chrus_rbtree_delete(chrus_rbtree *this, void *key) {
             dl->parent->right = child;
         }
     }
+
+    this->destructor(dl->value);
+    free(dl);
+    return 0;
 }
