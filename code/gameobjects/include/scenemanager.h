@@ -1,10 +1,24 @@
+/*         _________________________________________   ________________
+ *        /          /    /   /    /          /    /  /    /          /
+ *       /    ______/    /   /    /    ______/    /  /    /   _______/
+ *      /    /     /    /___/    /    /     /    /  /    /\       \
+ *     /    /     /    ____     /    /     /    /  /    /  \___    \
+ *    /    /_____/    /   /    /    /     /    /__/    /______/    /
+ *   /          /    /   /    /    /     /            /           /
+ *   \_________/____/   /____/____/     /____________/___________/
+ * 
+ * Scenes are managed through a stack. Additional functionality includes
+ * "modality", i.e., a modal scene will be the only scene processing input.
+ * Scenes hande input and are rendered from top to bottom.
+*/
+
 #pragma once
 #include<inttypes.h>
 #include<memory.h>
 #include<stdlib.h>
 #include<allegro5/allegro.h>
 
-#include "../../utils/include/rbtree.h"
+//#include "../../utils/include/rbtree.h"
 
 #include "scene.h"
 
@@ -20,9 +34,6 @@ struct chrus_scene_manager_t {
 
     int16_t top; // stack pointer basically
     int16_t current_modal;
-
-    chrus_rbtree sounds;
-    chrus_rbtree bitmaps;
     //chrus_rbtree 
 };
 

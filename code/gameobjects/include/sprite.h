@@ -1,8 +1,22 @@
+/*         _________________________________________   ________________
+ *        /          /    /   /    /          /    /  /    /          /
+ *       /    ______/    /   /    /    ______/    /  /    /   _______/
+ *      /    /     /    /___/    /    /     /    /  /    /\       \
+ *     /    /     /    ____     /    /     /    /  /    /  \___    \
+ *    /    /_____/    /   /    /    /     /    /__/    /______/    /
+ *   /          /    /   /    /    /     /            /           /
+ *   \_________/____/   /____/____/     /____________/___________/
+ * 
+ * This header defines the sprite, the basic struct used to represent
+ * two-dimensional images.
+*/
 #pragma once
 
 #include<allegro5/allegro.h>
 #include<allegro5/allegro_image.h>
 #include<allegro5/allegro_primitives.h>
+
+#include "../../utils/include/allocator.h"
 
 #include<stdlib.h>
 

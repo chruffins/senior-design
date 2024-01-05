@@ -6,13 +6,13 @@ static void fix_delete(chrus_rbtree *tree, chrus_rbnode *current);
 static void swap_node_data(chrus_rbnode *a, chrus_rbnode *b);
 static chrus_rbnode *chrus_rbtree_min(chrus_rbnode *root);
 
-chrus_rbtree *chrus_rbtree_create(int (*comparator)(const void *, const void *), void (*destructor)(void *), void* (*insertinator)(const void *)) {
+chrus_rbtree *chrus_rbtree_create(chrus_rbtree_comparator comparator, chrus_rbtree_destructor destructor, chrus_rbtree_inserter inserter) {
     chrus_rbtree *new_tree = malloc(sizeof(chrus_rbtree));
     if (new_tree == NULL) return NULL;
 
     new_tree->comparator = comparator;
     new_tree->destructor = destructor;
-    new_tree->insertinator = insertinator;
+    new_tree->inserter = inserter;
     new_tree->root = NULL;
 
     return new_tree;
@@ -22,7 +22,7 @@ void chrus_rbtree_destroy(chrus_rbtree *this) {
     // need to iterate through every node :skull:
 }
 
-chrus_rbnode *chrus_rbtree_find(chrus_rbtree *this, void *key) {
+chrus_rbnode *chrus_rbtree_find(chrus_rbtree *this, const void *key) {
     chrus_rbnode *current = this->root;
 
     while (current != NULL) {
@@ -88,12 +88,13 @@ chrus_rbnode *chrus_rbtree_min(chrus_rbnode *root) {
     return current;
 }
 
-chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *this, void *key) {
+chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *this, const void *key) {
     chrus_rbnode *current = this->root;
     // case 1: inserted node is root.
     // root is always black.
     if (current == NULL) {
         this->root = chrus_rbnode_create(key);
+        this->root->value = this->inserter(key);
         this->root->red = false;
         return this->root;
     }
@@ -103,16 +104,19 @@ chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *this, void *key) {
     int result;
     while (current) {
         result = this->comparator(key, current->key);
-        
+        if (result == 0) return current;
+
         parent = current;
         current = result < 0 ? current->left : current->right;
     }
 
     if (result > 0) {
         parent->right = chrus_rbnode_create(key);
+        parent->right->value = this->inserter(key);
         current = parent->right;
     } else {
         parent->left = chrus_rbnode_create(key);
+        parent->left->value = this->inserter(key);
         current = parent->left;
     }
 

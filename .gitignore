@@ -5,3 +5,7 @@ chrus_engine
 CMakeFiles
 cmake_install.cmake
 Makefile
+launch.json
+settings.json
+luajit
+*.so

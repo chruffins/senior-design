@@ -32,11 +32,11 @@ chrus_node* chrus_node_create_sprite() {
     return new_node;
 }
 
-chrus_node* chrus_node_create_sound() {
-    printf("creating sound node\n");
+chrus_node* chrus_node_create_audiostream() {
+    printf("creating stream node\n");
 
     chrus_node *new_node = malloc(sizeof(chrus_node));
-    *new_node = (chrus_node){ "sound", NULL, chrus_node_vec_create(), CHRUS_NODE_SOUND, chrus_audiostream_create(NULL) };
+    *new_node = (chrus_node){ "audiostream", NULL, chrus_node_vec_create(), CHRUS_NODE_AUDIOSTREAM, chrus_audiostream_create(NULL) };
     return new_node;
 }
 
@@ -50,7 +50,7 @@ void chrus_node_destroy(chrus_node *this) {
     case CHRUS_NODE_SCRIPT:
         //free(this->data);
         break;
-    case CHRUS_NODE_SOUND:
+    case CHRUS_NODE_AUDIOSTREAM:
         chrus_audiostream_free(this->data);
         break;
     default:

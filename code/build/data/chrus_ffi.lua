@@ -10,7 +10,7 @@ ffi.cdef(al_ffi.cdef .. [[
 void* malloc(size_t size);
 void free(void *__ptr);
 
-enum CHRUS_NODE_TYPES { CHRUS_NODE_UNINITIALIZED, CHRUS_NODE_CAMERA, CHRUS_NODE_SCRIPT, CHRUS_NODE_SPRITE, CHRUS_NODE_SOUND };
+enum CHRUS_NODE_TYPES { CHRUS_NODE_UNINITIALIZED, CHRUS_NODE_CAMERA, CHRUS_NODE_SCRIPT, CHRUS_NODE_SPRITE, CHRUS_NODE_SOUND, CHRUS_NODE_AUDIOSTREAM, };
 
 typedef struct chrus_scene_t chrus_scene;
 typedef struct chrus_node_t chrus_node;
@@ -102,11 +102,11 @@ local sprite_metatable = {
     end,
 }
 
-local sound_metatable = {
+local audiostream_metatable = {
     new = function()
         local new = custom_alloc("chrus_node", finalizer)
         new.name = "sound"
-        new.type = lchrus.CHRUS_NODE_SOUND
+        new.type = lchrus.CHRUS_NODE_AUDIOSTREAM
         new.parent = nil
         new.data = lchrus.chrus_audiostream_create(nil)
         return new
@@ -132,11 +132,11 @@ local sound_metatable = {
     end
 }
 
-local sound_enum = tonumber(lchrus.CHRUS_NODE_SOUND)
+local audiostream_enum = tonumber(lchrus.CHRUS_NODE_AUDIOSTREAM)
 local sprite_enum = tonumber(lchrus.CHRUS_NODE_SPRITE)
 
 local lookup_table = {
-    [sound_enum] = sound_metatable,
+    [audiostream_enum] = audiostream_metatable,
     [sprite_enum] = sprite_metatable
 }
 
@@ -147,7 +147,7 @@ local test_metatable = {
 }
 
 local type_table = {
-    sound = sound_metatable.new,
+    audiostream = audiostream_metatable.new,
     sprite = sprite_metatable.new
 }
 

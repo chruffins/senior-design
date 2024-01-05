@@ -9,22 +9,45 @@ chrus_sound* chrus_sound_create(const char* source) {
     new_sound->pan = ALLEGRO_AUDIO_PAN_NONE;
     new_sound->gain = 1;
     new_sound->playmode = ALLEGRO_PLAYMODE_ONCE;
+
+    return new_sound;
 }
 
 void chrus_sound_load(chrus_sound* restrict this, const char *source) {
-    
+    if (this->sample != NULL) {
+        // TODO: figure this out
+    }
+    this->sample = NULL;
+
+    if (source != NULL) {
+        this->sample = chrus_loader_insert(CHRUS_LOADER_SAMPLE, source);
+        this->sample = al_load_sample(source);
+    }
+
+    if (this->sample != NULL) return;
+
+    this->sound = al_create_sample_instance(this->sample);
 }
 
 void chrus_sound_play(chrus_sound* restrict this) {
+    if (!this->sound) return;
 
+    al_play_sample_instance(this->sound);
 }
 
 void chrus_sound_stop(chrus_sound* restrict this) {
+    if (!this->sound) return;
 
+    al_stop_sample_instance(this->sound);
 }
 
 void chrus_sound_destroy(chrus_sound* restrict this) {
-
+    printf("freeing sound\n");
+    if (this->sound) {
+        al_stop_sample_instance(this->sound);
+        al_destroy_sample_instance(this->sound);
+    }
+    
 }
 
 chrus_audiostream *chrus_audiostream_create(const char *source) {
@@ -66,9 +89,9 @@ void chrus_audiostream_play(chrus_audiostream* restrict this) {
     if (this->stream == NULL) return;
     bool result = al_set_audio_stream_playing(this->stream, true);
     if (!result) {
-        printf("sound did not play\n");
+        printf("stream did not play\n");
     } else {
-        printf("sound played successfully\n");
+        printf("stream played successfully\n");
     }
 }
 
@@ -78,7 +101,7 @@ void chrus_audiostream_stop(chrus_audiostream* restrict this) {
 }
 
 void chrus_audiostream_free(chrus_audiostream* restrict this) {
-    printf("freeing sound\n");
+    printf("freeing stream\n");
     if (this->stream != NULL) {
         al_set_audio_stream_playing(this->stream, false);
         al_destroy_audio_stream(this->stream);

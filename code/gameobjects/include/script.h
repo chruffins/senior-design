@@ -1,3 +1,16 @@
+/*         _________________________________________   ________________
+ *        /          /    /   /    /          /    /  /    /          /
+ *       /    ______/    /   /    /    ______/    /  /    /   _______/
+ *      /    /     /    /___/    /    /     /    /  /    /\       \
+ *     /    /     /    ____     /    /     /    /  /    /  \___    \
+ *    /    /_____/    /   /    /    /     /    /__/    /______/    /
+ *   /          /    /   /    /    /     /            /           /
+ *   \_________/____/   /____/____/     /____________/___________/
+ * 
+ * Object that denotes "scripts". Parenting an "enabled" script to 
+ * a scene will cause the scene to execute the script at the path stored 
+ * in source_name.
+*/
 #pragma once
 
 #include<stdbool.h>

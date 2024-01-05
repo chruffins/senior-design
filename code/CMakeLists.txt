@@ -12,7 +12,9 @@ gameobjects/src/script.c
 gameobjects/src/sound.c
 gameobjects/src/sprite.c
 gameobjects/src/chrus.c
-utils/src/vector.c)
+utils/src/vector.c
+utils/src/rbtree.c
+utils/src/allocator.c)
 
 # find the files
 #file(GLOB_RECURSE SOURCES main/*.c main/*.h gameobjects/*.c gameobjects/*.h utils/*.h utils/*.c)

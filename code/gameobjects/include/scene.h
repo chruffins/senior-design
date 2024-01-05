@@ -1,3 +1,16 @@
+/*         _________________________________________   ________________
+ *        /          /    /   /    /          /    /  /    /          /
+ *       /    ______/    /   /    /    ______/    /  /    /   _______/
+ *      /    /     /    /___/    /    /     /    /  /    /\       \
+ *     /    /     /    ____     /    /     /    /  /    /  \___    \
+ *    /    /_____/    /   /    /    /     /    /__/    /______/    /
+ *   /          /    /   /    /    /     /            /           /
+ *   \_________/____/   /____/____/     /____________/___________/
+ * 
+ * Acts as the top-level node in an entity hierarchy. Each scene gets
+ * their own Lua virtual machine to execute scripts.
+*/
+
 #pragma once
 #include<stdlib.h>
 #include<stdio.h>

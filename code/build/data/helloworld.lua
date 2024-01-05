@@ -1,4 +1,4 @@
-local sound = create_node("sound")
+local sound = create_node("audiostream")
 
 sound:load("data/snowpatrol.ogg")
 sound:play()

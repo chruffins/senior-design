@@ -1,3 +1,15 @@
+/*         _________________________________________   ________________
+ *        /          /    /   /    /          /    /  /    /          /
+ *       /    ______/    /   /    /    ______/    /  /    /   _______/
+ *      /    /     /    /___/    /    /     /    /  /    /\       \
+ *     /    /     /    ____     /    /     /    /  /    /  \___    \
+ *    /    /_____/    /   /    /    /     /    /__/    /______/    /
+ *   /          /    /   /    /    /     /            /           /
+ *   \_________/____/   /____/____/     /____________/___________/
+ * 
+ * Defines the sample and audiostream structs, which are used to
+ * contain short-form and long-form audios, respectively.
+*/
 #pragma once
 
 #include<allegro5/allegro_audio.h>
@@ -5,6 +17,8 @@
 
 #include<stdbool.h>
 #include<stdio.h>
+
+#include "../../utils/include/allocator.h"
 
 typedef struct chrus_audiostream_t chrus_audiostream;
 typedef struct chrus_sound_t chrus_sound;

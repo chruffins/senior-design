@@ -1,4 +1,3 @@
-#pragma once
 /*         _________________________________________   ________________
  *        /          /    /   /    /          /    /  /    /          /
  *       /    ______/    /   /    /    ______/    /  /    /   _______/
@@ -13,8 +12,8 @@
  * will rely on the loading in of assets... There should be some kind
  * of garbage collection mechanic as well. Probably when scenes are
  * deloaded.
- * 
 */
+#pragma once
 #include<string.h>
 
 #include<allegro5/allegro.h>
@@ -26,12 +25,12 @@ typedef enum CHRUS_LOADER CHRUS_LOADER;
 
 enum CHRUS_LOADER {
     CHRUS_LOADER_BITMAP=0,
-    CHRUS_LOADER_SOUND,
+    CHRUS_LOADER_SAMPLE,
     CHRUS_LOADER_SCRIPT,
     CHRUS_LOADER_END
 };
 
-static chrus_rbtree* loader_trees[CHRUS_LOADER_END];
-
 void chrus_loader_init();
-void chrus_loader_insert(CHRUS_LOADER, void *key);
+void *chrus_loader_insert(CHRUS_LOADER, const void *key);
+void *chrus_loader_get(CHRUS_LOADER, const void *key);
+void chrus_loader_deinit();

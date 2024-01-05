@@ -97,6 +97,9 @@ void chrus_scene_run_script(chrus_scene* this, chrus_node *script) {
     assert(script->type == CHRUS_NODE_SCRIPT);
     chrus_script* data = script->data;
 
+    //lua_State* new_fiber = lua_newthread(this->lua_vm);
+    //int result = luaL_loadfile(new_fiber, data->source_name) || lua_pcall(new_fiber, 0, 0, 0);
+
     int result = luaL_loadfile(this->lua_vm, data->source_name) || lua_pcall(this->lua_vm, 0, 0, 0);
     if (result) {
         printf("%s\n", lua_tostring(this->lua_vm, -1));

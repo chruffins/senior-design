@@ -10,6 +10,7 @@
 #include<luajit/lauxlib.h>
 
 #include "../../utils/include/utils.h"
+#include "../../utils/include/allocator.h"
 
 #include "../../gameobjects/include/scenemanager.h"
 #include "../../gameobjects/include/node.h"
@@ -42,6 +43,8 @@ void load_allegro_libraries() {
     must_init(al_reserve_samples(16), "reserve samples");
 
     must_init(chrus_init(), "chrus lib");
+
+    chrus_loader_init();
 
     printf("Libraries loaded correctly!\n");
 }
@@ -146,7 +149,7 @@ void run_game_loop() {
         }
         */
     }
-    //chrus_sound_free(sound);
+    //chrus_audiostream_free(sound);
     void *drawing_result;
     printf("joined the drawing thread now\n");
     al_join_thread(drawing_thread, &drawing_result);
