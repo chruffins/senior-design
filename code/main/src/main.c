@@ -12,6 +12,7 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/allocator.h"
 #include "../../utils/include/serializer.h"
+#include "../../utils/include/globals.h"
 
 #include "../../gameobjects/include/scenemanager.h"
 #include "../../gameobjects/include/node.h"
@@ -57,22 +58,23 @@ void set_some_flags() {
 }
 
 void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
-    // arg should just be the timer as well as the scene manager
-    al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
-
-    void **pargs = (void**)args;
-    ALLEGRO_TIMER *draw_timer = (ALLEGRO_TIMER*)pargs[0];
-    chrus_scene_manager *scene_manager = (chrus_scene_manager*)pargs[1];
-    ALLEGRO_DISPLAY *display = (ALLEGRO_DISPLAY*)pargs[2];
+    void** pargs = (void**)args;
+    ALLEGRO_COND* drawing_cond = (ALLEGRO_COND*)pargs[0];
+    chrus_scene_manager* scene_manager = (chrus_scene_manager*)pargs[1];
     ALLEGRO_EVENT_QUEUE *queue = al_create_event_queue(); // separate queue that only takes in drawing events
 
-    //bool finished = false;
-    //bool result;
-    //int tick = 0;
-    al_set_target_backbuffer(display);
-
+    al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
+    chrus_display = al_create_display(1080, 810);
+    
+    ALLEGRO_TIMER* draw_timer = al_create_timer(1.0 / 60.0);
+    //ALLEGRO_DISPLAY *display = (ALLEGRO_DISPLAY*)pargs[2];
     ALLEGRO_EVENT event;
 
+    printf("ready to start main thread again\n");
+
+    al_broadcast_cond(drawing_cond);
+
+    al_start_timer(draw_timer);
     al_register_event_source(queue, al_get_timer_event_source(draw_timer));
     while (1) {
         al_wait_for_event(queue, &event);
@@ -84,12 +86,16 @@ void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
 
         al_flip_display();
     }
+    al_stop_timer(draw_timer);
+    al_destroy_timer(draw_timer);
+    al_destroy_event_queue(queue);
 
     return NULL;
 }
 
 void run_game_loop() {
-    ALLEGRO_DISPLAY *display = al_create_display(1080, 810);
+    ALLEGRO_COND *drawing_loaded = al_create_cond();
+    ALLEGRO_MUTEX *drawing_mutex = al_create_mutex();
     ALLEGRO_EVENT_QUEUE *queue = al_create_event_queue();
     ALLEGRO_TIMER *timer = al_create_timer(1.0 / 60.0);
     ALLEGRO_EVENT event;
@@ -98,30 +104,38 @@ void run_game_loop() {
     chrus_scene_manager_init(&scene_manager);
 
     bool finished = false;
-    //bool redraw = false;
+
+    void *drawing_thread_args[3] = { drawing_loaded, &scene_manager, chrus_display };
+    ALLEGRO_THREAD *drawing_thread = al_create_thread(drawing_handler, drawing_thread_args);
+    printf("waiting until draw thread inits\n");
+    al_start_thread(drawing_thread);
+
+    al_lock_mutex(drawing_mutex);
+    al_wait_cond(drawing_loaded, drawing_mutex);
+    al_unlock_mutex(drawing_mutex);
+
+    printf("now continuing\n");
+
+    al_set_target_backbuffer(chrus_display);
 
     al_start_timer(timer);
     al_register_event_source(queue, al_get_keyboard_event_source());
-    al_register_event_source(queue, al_get_display_event_source(display));
+    al_register_event_source(queue, al_get_display_event_source(chrus_display));
     al_register_event_source(queue, al_get_timer_event_source(timer));
 
     chrus_scene_manager_add_scene(&scene_manager, chrus_scene_create("base test"));
     chrus_node* test_node_script = malloc(sizeof(chrus_node));
     chrus_node* datetime_script = malloc(sizeof(chrus_node));
-    chrus_node* test_image = malloc(sizeof(chrus_node));
+    //chrus_node* test_image = malloc(sizeof(chrus_node));
     *test_node_script = (chrus_node){ "script", NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/helloworld.lua") };
     *datetime_script = (chrus_node){ "script", NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/datetime.lua") };
-    *test_image = (chrus_node){ "sprite", NULL, chrus_node_vec_create(), CHRUS_NODE_SPRITE, chrus_sprite_create("data/test.png")};
+    //*test_image = (chrus_node){ "sprite", NULL, chrus_node_vec_create(), CHRUS_NODE_SPRITE, chrus_sprite_create("data/test.png")};
     
-    chrus_sprite_translate(test_image->data, 64, 64);
+    //chrus_sprite_translate(test_image->data, 64, 64);
 
     chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), test_node_script);
     chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), datetime_script);
-    chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), test_image);
-
-    void *drawing_thread_args[3] = { timer, &scene_manager, display };
-    ALLEGRO_THREAD *drawing_thread = al_create_thread(drawing_handler, drawing_thread_args);
-    al_start_thread(drawing_thread);
+    //chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), test_image);
 
     while (!finished) {
         al_wait_for_event(queue, &event);
@@ -169,8 +183,8 @@ void run_game_loop() {
     al_destroy_timer(timer);
     printf("destroying queue now\n");
     al_destroy_event_queue(queue);
-    printf("destroying display now\n");
-    al_destroy_display(display);
+    //printf("destroying display now\n");
+    //al_destroy_display(display);
 }
 
 void finalize() {

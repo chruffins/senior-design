@@ -4,6 +4,10 @@ static chrus_sprite* chrus_sprite_create_default() {
     static ALLEGRO_BITMAP* default_square;
     if (default_square == NULL) {
         default_square = al_create_bitmap(64, 64);
+        if (default_square == NULL) {
+            printf("failed to create default sprite?\n");
+            return NULL;
+        }
         ALLEGRO_BITMAP *temp = al_get_target_bitmap();
         al_set_target_bitmap(default_square);
         al_draw_filled_rectangle(0, 0, 64, 64, al_map_rgb(255, 255, 255));

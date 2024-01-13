@@ -18,6 +18,7 @@
 
 #include "../../utils/include/allocator.h"
 
+#include<stdio.h>
 #include<stdlib.h>
 
 typedef struct chrus_sprite_t chrus_sprite;

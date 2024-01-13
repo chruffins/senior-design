@@ -13,4 +13,4 @@
 
 #include<allegro5/allegro.h>
 
-//extern ALLEGRO_DISPLAY 
+extern ALLEGRO_DISPLAY* chrus_display;

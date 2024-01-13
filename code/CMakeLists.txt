@@ -15,7 +15,8 @@ gameobjects/src/chrus.c
 utils/src/vector.c
 utils/src/rbtree.c
 utils/src/serializer.c
-utils/src/allocator.c)
+utils/src/allocator.c
+utils/src/globals.c)
 
 # find the files
 #file(GLOB_RECURSE SOURCES main/*.c main/*.h gameobjects/*.c gameobjects/*.h utils/*.h utils/*.c)
