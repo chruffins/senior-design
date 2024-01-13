@@ -5,6 +5,7 @@ static void fix_insert(chrus_rbtree *tree, chrus_rbnode *current);
 static void fix_delete(chrus_rbtree *tree, chrus_rbnode *current);
 static void swap_node_data(chrus_rbnode *a, chrus_rbnode *b);
 static chrus_rbnode *chrus_rbtree_min(chrus_rbnode *root);
+static void delete_node(chrus_rbtree *tree, chrus_rbnode *this);
 
 chrus_rbtree *chrus_rbtree_create(chrus_rbtree_comparator comparator, chrus_rbtree_destructor destructor, chrus_rbtree_inserter inserter) {
     chrus_rbtree *new_tree = malloc(sizeof(chrus_rbtree));
@@ -18,7 +19,18 @@ chrus_rbtree *chrus_rbtree_create(chrus_rbtree_comparator comparator, chrus_rbtr
     return new_tree;
 }
 
+static void delete_node(chrus_rbtree *tree, chrus_rbnode *this) {
+    if (this == NULL) return;
+
+    delete_node(tree, this->left);
+    delete_node(tree, this->right);
+
+    // TODO: what to do with key
+    tree->destructor(this->value);
+}
+
 void chrus_rbtree_destroy(chrus_rbtree *this) {
+    delete_node(this, this->root);
     // need to iterate through every node :skull:
 }
 
@@ -139,7 +151,7 @@ chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *this, const void *key) {
     }
 }
 
-chrus_rbnode *chrus_rbnode_rotate(chrus_rbnode *current, bool right) {
+void chrus_rbnode_rotate(chrus_rbnode *current, bool right) {
     chrus_rbnode *other = right ? current->left : current->right;
 
     if (right) {

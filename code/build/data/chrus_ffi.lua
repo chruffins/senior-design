@@ -41,6 +41,7 @@ chrus_audiostream *chrus_audiostream_create(const char *source);
 void chrus_node_destroy(chrus_node *this);
 
 chrus_sprite* chrus_sprite_create(const char *source);
+void chrus_sprite_load(chrus_sprite* this, const char *source);
 void chrus_sprite_translate(chrus_sprite *this, float dx, float dy);
 
 void chrus_audiostream_load(chrus_audiostream* restrict this, const char *source);
@@ -93,6 +94,9 @@ local sprite_metatable = {
         new.parent = nil
         new.data = lchrus.chrus_sprite_create(nil)
         return new
+    end,
+    load = function(this, source)
+        lchrus.chrus_sprite_load(this.data, source)
     end,
     move = function(this, x, y)
         lchrus.chrus_sprite_translate(this.data, x, y)

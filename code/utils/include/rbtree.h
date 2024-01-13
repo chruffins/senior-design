@@ -49,6 +49,6 @@ chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *, const void *key);
 int chrus_rbtree_delete(chrus_rbtree *, void *key);
 
 int chrus_rbnode_child_direction(chrus_rbnode *parent, chrus_rbnode *child);
-chrus_rbnode *chrus_rbnode_rotate(chrus_rbnode *current, bool right);
+void chrus_rbnode_rotate(chrus_rbnode *current, bool right);
 
 chrus_rbnode *chrus_rbtree_successor(chrus_rbtree *, chrus_rbnode *);

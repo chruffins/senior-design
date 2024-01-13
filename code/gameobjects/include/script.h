@@ -16,9 +16,9 @@
 #include<stdbool.h>
 #include<stdlib.h>
 
-#include<luajit/lua.h>
-#include<luajit/lauxlib.h>
-#include<luajit/lualib.h>
+#include<luajit-2.1/lua.h>
+#include<luajit-2.1/lauxlib.h>
+#include<luajit-2.1/lualib.h>
 
 typedef struct chrus_script_t chrus_script;
 

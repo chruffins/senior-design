@@ -34,6 +34,7 @@ void *chrus_loader_get(CHRUS_LOADER index, const void *key) {
 
 void chrus_loader_deinit() {
     for (int i = 0; i < CHRUS_LOADER_END; i++) {
+        if (!loader_trees[i]) continue;
         chrus_rbtree_destroy(loader_trees[i]);
     }
 }

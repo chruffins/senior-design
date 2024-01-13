@@ -51,7 +51,7 @@ void chrus_node_destroy(chrus_node *this) {
         //free(this->data);
         break;
     case CHRUS_NODE_AUDIOSTREAM:
-        chrus_audiostream_free(this->data);
+        chrus_audiostream_destroy(this->data);
         break;
     default:
         free(this->data);

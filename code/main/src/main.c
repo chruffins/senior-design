@@ -11,6 +11,7 @@
 
 #include "../../utils/include/utils.h"
 #include "../../utils/include/allocator.h"
+#include "../../utils/include/serializer.h"
 
 #include "../../gameobjects/include/scenemanager.h"
 #include "../../gameobjects/include/node.h"
@@ -57,6 +58,8 @@ void set_some_flags() {
 
 void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
     // arg should just be the timer as well as the scene manager
+    al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
+
     void **pargs = (void**)args;
     ALLEGRO_TIMER *draw_timer = (ALLEGRO_TIMER*)pargs[0];
     chrus_scene_manager *scene_manager = (chrus_scene_manager*)pargs[1];
@@ -150,13 +153,18 @@ void run_game_loop() {
         */
     }
     //chrus_audiostream_free(sound);
-    void *drawing_result;
+    //void *drawing_result;
     printf("joined the drawing thread now\n");
-    al_join_thread(drawing_thread, &drawing_result);
+    al_join_thread(drawing_thread, NULL);
     // need to wait for drawing thread to die before we can close up the scene manager
+
+    printf("saving scene to disk\n");
+    chrus_serializer_save_scene(scene_manager.scenes[scene_manager.top], "savedscene.json");
 
     printf("freeing scene resources now\n");
     chrus_scene_manager_destroy(&scene_manager);
+    printf("freeing up cached assets now\n");
+    chrus_loader_deinit();
     printf("destroying timer now\n");
     al_destroy_timer(timer);
     printf("destroying queue now\n");

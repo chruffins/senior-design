@@ -16,9 +16,9 @@
 #include<stdio.h>
 #include<memory.h>
 
-#include<luajit/lua.h>
-#include<luajit/lualib.h>
-#include<luajit/lauxlib.h>
+#include<luajit-2.1/lua.h>
+#include<luajit-2.1/lualib.h>
+#include<luajit-2.1/lauxlib.h>
 
 #include<allegro5/allegro.h>
 #include "node.h"

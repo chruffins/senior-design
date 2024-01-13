@@ -100,7 +100,7 @@ void chrus_audiostream_stop(chrus_audiostream* restrict this) {
     al_set_audio_stream_playing(this->stream, false);
 }
 
-void chrus_audiostream_free(chrus_audiostream* restrict this) {
+void chrus_audiostream_destroy(chrus_audiostream* restrict this) {
     printf("freeing stream\n");
     if (this->stream != NULL) {
         al_set_audio_stream_playing(this->stream, false);

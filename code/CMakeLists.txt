@@ -14,6 +14,7 @@ gameobjects/src/sprite.c
 gameobjects/src/chrus.c
 utils/src/vector.c
 utils/src/rbtree.c
+utils/src/serializer.c
 utils/src/allocator.c)
 
 # find the files
@@ -35,7 +36,7 @@ find_library(AL_AUDIO allegro_audio)
 find_library(AL_ACODEC allegro_acodec)
 find_library(AL_PRIMITIVES allegro_primitives)
 find_library(AL_IMAGE allegro_image)
-find_library(LUAJIT luajit)
+find_library(LUAJIT luajit-5.1)
 
 target_link_libraries(chrus_lib ${AL} ${AL_FONT} ${AL_AUDIO} ${AL_ACODEC} ${AL_PRIMITIVES} ${AL_IMAGE} ${LUAJIT})
 
