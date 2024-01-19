@@ -22,7 +22,7 @@
 
 #include "scene.h"
 
-#define MAX_SCENES 256
+#define MAX_SCENES 64
 
 typedef struct chrus_scene_manager_t chrus_scene_manager;
 
@@ -30,10 +30,12 @@ typedef struct chrus_scene_manager_t chrus_scene_manager;
 // this will ALWAYS be on the stack, never the heap
 struct chrus_scene_manager_t {
     // basically a stack
-    chrus_scene *scenes[MAX_SCENES]; // if you use 257 scenes i hope you die
+    chrus_scene* scenes[MAX_SCENES]; // if you manage to use 65 scenes seek help
+    ALLEGRO_EVENT_QUEUE* queues[MAX_SCENES];
+    ALLEGRO_MUTEX* mutex;
 
-    int16_t top; // stack pointer basically
-    int16_t current_modal;
+    int8_t top; // stack pointer basically
+    int8_t current_modal;
     //chrus_rbtree 
 };
 

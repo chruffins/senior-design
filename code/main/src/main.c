@@ -65,6 +65,8 @@ void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
 
     al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
     chrus_display = al_create_display(1080, 810);
+
+    chrus_sprite_create(NULL);
     
     ALLEGRO_TIMER* draw_timer = al_create_timer(1.0 / 60.0);
     //ALLEGRO_DISPLAY *display = (ALLEGRO_DISPLAY*)pargs[2];
@@ -116,7 +118,7 @@ void run_game_loop() {
 
     printf("now continuing\n");
 
-    al_set_target_backbuffer(chrus_display);
+    // al_set_target_backbuffer(chrus_display);
 
     al_start_timer(timer);
     al_register_event_source(queue, al_get_keyboard_event_source());
@@ -128,7 +130,7 @@ void run_game_loop() {
     chrus_node* datetime_script = malloc(sizeof(chrus_node));
     //chrus_node* test_image = malloc(sizeof(chrus_node));
     *test_node_script = (chrus_node){ "script", NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/helloworld.lua") };
-    *datetime_script = (chrus_node){ "script", NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/datetime.lua") };
+    *datetime_script = (chrus_node){ "script", NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/events.lua") };
     //*test_image = (chrus_node){ "sprite", NULL, chrus_node_vec_create(), CHRUS_NODE_SPRITE, chrus_sprite_create("data/test.png")};
     
     //chrus_sprite_translate(test_image->data, 64, 64);
