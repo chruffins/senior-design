@@ -66,7 +66,7 @@ void chrus_node_reparent(chrus_node *parent, chrus_node *new_child) {
 }
 
 void chrus_node_vec_add_node(chrus_node_vec *this, chrus_node *new_child) {
-    printf("added %s to node vec\n", new_child->name);
+    /* printf("added %s to node vec\n", new_child->name); */
     if (this->size + 1 == this->capacity) {
         void *newdata = realloc(this->data, this->capacity * sizeof(chrus_node*) * 2);
         if (newdata == NULL) {

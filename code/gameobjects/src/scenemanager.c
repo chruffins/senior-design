@@ -2,13 +2,12 @@
 
 void chrus_scene_manager_init(chrus_scene_manager *ptr) {
     memset(ptr->scenes, 0, sizeof(chrus_scene*)*MAX_SCENES);
-    memset(ptr->queues, 0, sizeof(ALLEGRO_EVENT_QUEUE*)*MAX_SCENES);
+    memset(ptr->threads, 0, sizeof(ALLEGRO_THREAD*)*MAX_SCENES);
     ptr->mutex = al_create_mutex_recursive();
     ptr->top = -1;
 }
 
 chrus_scene* chrus_scene_manager_top(chrus_scene_manager *this) {
-
     return this->scenes[this->top];
 }
 
@@ -26,8 +25,10 @@ int chrus_scene_manager_add_scene(chrus_scene_manager *this, chrus_scene *new_sc
         return -1;
     }
     this->top++;
-    this->queues[this->top] = al_create_event_queue(); // replace with chrus_create_scene_event_queue();
+    this->threads[this->top] = al_create_thread(chrus_scene_thread_handler, new_scene); //al_create_event_queue(); // replace with create thread();
     this->scenes[this->top] = new_scene;
+
+    al_start_thread(this->threads[this->top]);
 
     al_unlock_mutex(this->mutex);
     return 0;
@@ -39,9 +40,9 @@ int chrus_scene_manager_pop_scene(chrus_scene_manager *this) {
     printf("popping scene now\n");
     if (this->top == -1) return -1;
 
+    al_join_thread(this->threads[this->top], NULL);
     chrus_scene_destroy(this->scenes[this->top]);
-    al_destroy_event_queue(this->queues[this->top]);
-    this->queues[this->top] = NULL;
+    this->threads[this->top] = NULL;
     this->scenes[this->top] = NULL;
     this->top--;
 
@@ -54,10 +55,10 @@ int chrus_scene_manager_set_modal_scene(chrus_scene_manager *this, int16_t at) {
     al_lock_mutex(this->mutex);
 
     for (int16_t i = 0; i < this->top; i++) {
-        al_pause_event_queue(this->queues[i], true);
+        al_pause_event_queue(this->scenes[i]->event_queue, true);
     }
 
-    al_pause_event_queue(this->queues[at], false);
+    al_pause_event_queue(this->scenes[at]->event_queue, false);
     this->current_modal = at;
 
     al_unlock_mutex(this->mutex);
@@ -68,7 +69,7 @@ void chrus_scene_manager_reset_modal(chrus_scene_manager *this) {
     al_lock_mutex(this->mutex);
 
     for (int16_t i = 0; i < this->top; i++) {
-        al_pause_event_queue(this->queues[i], true);
+        al_pause_event_queue(this->scenes[i]->event_queue, false);
     }
 
     this->current_modal = -1;

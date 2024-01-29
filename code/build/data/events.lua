@@ -1,3 +1,16 @@
+--[[
+
+Each scene gets their own thread. At startup, we pass each scene thread their scene pointer
+and their event queue. 
+
+We'll pass scripts to load to each thread, and they'll also be passed their event queues.
+
+]]
+
+local scene = ffi.cast("chrus_scene*", scene)
+local thread = ffi.cast("ALLEGRO_THREAD*", thread) 
+local event_queue = scene.event_queue
+
 local event = {
     connections = {}
 }
@@ -20,31 +33,29 @@ function event:new(o)
     return o
 end
 
-local event_metatable = {
-    __index = {
-        fire = function(this, ...)
-            for _, v in pairs(this.connections) do
-                v(...)
-            end
-        end,
-        connect = function(this, func)
-            table.insert(this.connections, func)
-        end
-    }
-}
-
 local al_ffi = require("data/allegro_ffi")
 local lallegro = ffi.load("allegro")
 
-local queue = lallegro.al_create_event_queue()
-lallegro.al_register_event_source(queue, lallegro.al_get_keyboard_event_source());
-lallegro.al_register_event_source(queue, lallegro.al_get_mouse_event_source());
+lallegro.al_register_event_source(event_queue, lallegro.al_get_keyboard_event_source());
+lallegro.al_register_event_source(event_queue, lallegro.al_get_mouse_event_source());
 
 --setmetatable(event, event_metatable)
-local e = ffi.new("ALLEGRO_EVENT")
 
 local mouse = {clicked = event:new(), leftclicked = event:new(), rightclicked = event:new() }
 local keyboard = {keydown = event:new()}
+local tick = {tick = event:new()}
+
+get_mouse = function()
+    return mouse
+end
+
+get_keyboard = function()
+    return keyboard
+end
+
+get_tick = function()
+    return tick
+end
 
 --[[
 mouse.clicked:connect(function(x, y)
@@ -64,17 +75,54 @@ keyboard.keydown:connect(function(keycode)
     print(string.format("Cheesed to meet you, %d!", keycode))
 end)
 
---mouse.clicked:fire()
-while true do
-    lallegro.al_wait_for_event(queue, e)
-    if (e.type == al_ffi.ALLEGRO_EVENT_KEY_DOWN) then
+-- TODO: fill out event params n stuff
+-- TODO: need something to do in response to loading a script
+local e = ffi.new("ALLEGRO_EVENT")
+
+local loaded_scripts = {}
+
+local event_responses = {
+    [al_ffi.ALLEGRO_EVENT_KEY_DOWN] = function ()
         keyboard.keydown:fire(e.keyboard.keycode)
-    elseif e.type == al_ffi.ALLEGRO_EVENT_MOUSE_BUTTON_DOWN then
+    end,
+    [al_ffi.ALLEGRO_EVENT_MOUSE_BUTTON_DOWN] = function ()
         mouse.clicked:fire(e.mouse.x, e.mouse.y)
         if e.mouse.button == 1 then
             mouse.leftclicked:fire(e.mouse.x, e.mouse.y)
         else
             mouse.rightclicked:fire(e.mouse.x, e.mouse.y)
         end
+    end,
+    [al_ffi.ALLEGRO_EVENT_TIMER] = function ()
+        tick.tick:fire()
+    end,
+    [1667591283] = function ()
+        print("script loading now!!")
+        local script = ffi.cast("chrus_node*", e.user.data1)
+        local src = ffi.string(script:get_source())
+        if src == nil then
+            warn("loading an empty script...?")
+            return
+        end
+
+        loaded_scripts[src] = loadfile(src)
+
+        local result, err = pcall(loaded_scripts[src])
+        if not result then
+            print(err)
+        end
     end
+}
+
+setmetatable(event_responses, {__index = function(t, k) t[k] = function() end return function () end end})
+
+lallegro.al_start_timer(scene.tick_timer)
+
+while true do
+    if lallegro.al_get_thread_should_stop(thread) then
+        break
+    end
+    lallegro.al_wait_for_event(event_queue, e)
+
+    event_responses[e.type]()
 end

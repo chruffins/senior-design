@@ -31,7 +31,7 @@ typedef struct chrus_scene_manager_t chrus_scene_manager;
 struct chrus_scene_manager_t {
     // basically a stack
     chrus_scene* scenes[MAX_SCENES]; // if you manage to use 65 scenes seek help
-    ALLEGRO_EVENT_QUEUE* queues[MAX_SCENES];
+    ALLEGRO_THREAD* threads[MAX_SCENES];
     ALLEGRO_MUTEX* mutex;
 
     int8_t top; // stack pointer basically

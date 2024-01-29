@@ -26,15 +26,26 @@
 #include "sprite.h"
 #include "../../utils/include/vector.h"
 
+//#define CHRUS_EVENT_LOAD_SCRIPT ALLEGRO_GET_EVENT_TYPE('c', 'e', 'l', 's')
+
+/* probably should move this enum declaration someplace else */
+enum CHRUS_EVENT {
+    CHRUS_EVENT_LOAD_SCRIPT = 1667591283,
+};
+
 typedef struct chrus_scene_t chrus_scene;
 
 // basically a top level node lol
 struct chrus_scene_t {
-    const char *name;
-    chrus_node *current_camera;
-    lua_State *lua_vm; // we run the scripts in this environemnt
+    ALLEGRO_EVENT_SOURCE event_source;
+
+    const char* name;
+    chrus_node* current_camera;
     chrus_node_vec children;
-    chrus_vector sprites_cache; // component we use for direct access to sprite pointers
+    chrus_vector sprites_cache;
+    lua_State* lua_vm;
+    ALLEGRO_EVENT_QUEUE* event_queue;
+    ALLEGRO_TIMER* tick_timer;
 };
 
 chrus_scene *chrus_scene_create(const char *name);
@@ -43,9 +54,11 @@ chrus_scene *chrus_scene_from_file(const char *filename);
 
 void chrus_scene_init_lua_vm(chrus_scene* restrict this);
 
+void* chrus_scene_thread_handler(ALLEGRO_THREAD* restrict this, void* args);
+
 void chrus_scene_process_input(chrus_scene* restrict this, ALLEGRO_EVENT *event);
 void chrus_scene_draw(chrus_scene* restrict this);
 chrus_node* chrus_scene_add_node(chrus_scene* this, void* parent, chrus_node *child);
 
 void chrus_scene_add_spritecache(chrus_scene* restrict this, chrus_sprite *sprite);
-void chrus_scene_run_script(chrus_scene* restrict this, chrus_node *script);
+void chrus_scene_queue_script(chrus_scene* restrict this, chrus_node *script);

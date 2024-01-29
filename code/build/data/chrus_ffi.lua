@@ -1,4 +1,4 @@
-local ffi = require("ffi")
+ffi = require("ffi")
 
 local al_ffi = require("data/allegro_ffi")
 
@@ -24,10 +24,10 @@ typedef struct chrus_vector_t chrus_vector;
 typedef struct chrus_node_t chrus_audiostream_node;
 typedef struct chrus_node_t chrus_sprite_node;
 
+struct chrus_node_vector_t { chrus_node** data; size_t size; size_t capacity; };
 struct chrus_vector_t { void **data; size_t size; size_t capacity; };
 struct chrus_camera_t { float screen_x, screen_y; float screen_width, screen_height; float viewport_width, viewport_height; float viewport_x, viewport_y; ALLEGRO_TRANSFORM _scaler; };
-/*struct chrus_scene_t { const char *name; chrus_node *current_camera; void *lua_vm; chrus_node_vec children; chrus_vector sprites_cache; };*/
-struct chrus_node_vector_t { chrus_node **data; size_t size; size_t capacity; };
+struct chrus_scene_t { ALLEGRO_EVENT_SOURCE event_source; const char* name; chrus_node* current_camera; chrus_node_vec children; chrus_vector sprites_cache; void* lua_vm; ALLEGRO_EVENT_QUEUE* event_queue; ALLEGRO_TIMER* tick_timer; };
 struct chrus_node_t { const char *name; chrus_node* parent; chrus_node_vec children; enum CHRUS_NODE_TYPES type; void *data; };
 struct chrus_sprite_t { float x; float y; int width; int height; int flipping; float rotation; ALLEGRO_BITMAP *image_data; };
 
@@ -43,6 +43,8 @@ void chrus_node_destroy(chrus_node *this);
 chrus_sprite* chrus_sprite_create(const char *source);
 void chrus_sprite_load(chrus_sprite* this, const char *source);
 void chrus_sprite_translate(chrus_sprite *this, float dx, float dy);
+
+const char* chrus_script_get_source(chrus_script* restrict this);
 
 void chrus_audiostream_load(chrus_audiostream* restrict this, const char *source);
 void chrus_audiostream_play(chrus_audiostream* restrict this);
@@ -74,17 +76,13 @@ local function custom_alloc(typestr, finalizer)
     return ptr
 end
 
-
 local finalizer = function (this)
     if this.parent == nil then
         print(tostring(this.type) .. " node garbage collected")
         lchrus.chrus_node_destroy(this)
     else
-        --print("lua gc is trying to clean this object up but it's part of the scene")
     end
 end
-
---local node = custom_alloc("chrus_node", finalizer)
 
 local sprite_metatable = {
     new = function()
@@ -136,12 +134,20 @@ local audiostream_metatable = {
     end
 }
 
+local script_metatable = {
+    get_source = function(this)
+        return lchrus.chrus_script_get_source(this.data)
+    end
+}
+
 local audiostream_enum = tonumber(lchrus.CHRUS_NODE_AUDIOSTREAM)
 local sprite_enum = tonumber(lchrus.CHRUS_NODE_SPRITE)
+local script_enum = tonumber(lchrus.CHRUS_NODE_SCRIPT)
 
 local lookup_table = {
     [audiostream_enum] = audiostream_metatable,
-    [sprite_enum] = sprite_metatable
+    [sprite_enum] = sprite_metatable,
+    [script_enum] = script_metatable
 }
 
 local test_metatable = {
@@ -155,9 +161,12 @@ local type_table = {
     sprite = sprite_metatable.new
 }
 
+--local mouse = {clicked = event:new(), leftclicked = event:new(), rightclicked = event:new() }
+
 function create_node(type)
     return type_table[type]()
 end
+
 --chrus.sound = {}
 --chrus.sprite = {}
 --setmetatable(chrus.sound, sound_metatable)

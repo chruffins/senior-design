@@ -5,6 +5,7 @@ chrus_camera *chrus_camera_create() {
 
     if (new_camera == NULL) {
         printf("camera failed to create!\n");
+        return NULL;
     }
 
     new_camera->screen_x = 0;

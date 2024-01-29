@@ -5,24 +5,35 @@ chrus_scene *chrus_scene_create(const char *name) {
 
     chrus_scene *new_scene = malloc(sizeof(chrus_scene));
     
+    al_init_user_event_source(&new_scene->event_source);
     new_scene->name = name;
     new_scene->children = chrus_node_vec_create();
     new_scene->lua_vm = luaL_newstate();
     new_scene->current_camera = chrus_node_create_camera();
+    new_scene->event_queue = al_create_event_queue();
+    new_scene->tick_timer = al_create_timer(1.0 / 30.0);
+
+    al_register_event_source(new_scene->event_queue, (ALLEGRO_EVENT_SOURCE*)new_scene);
+    al_register_event_source(new_scene->event_queue, al_get_timer_event_source(new_scene->tick_timer));
 
     chrus_scene_add_node(new_scene, new_scene, new_scene->current_camera);
-    chrus_scene_init_lua_vm(new_scene);
+    //chrus_scene_init_lua_vm(new_scene);
 
     new_scene->sprites_cache = chrus_vector_create();
     return new_scene;
 }
 
+/* needs to be called after the thread is joined */
 void chrus_scene_destroy(chrus_scene *scene) {
     printf("destroying %lu nodes\n", scene->children.size);
     for (size_t i = 0; i < scene->children.size; i++) {
-        printf("destroying node %s now\n", scene->children.data[i]->name);
+        /* printf("destroying node %s now\n", scene->children.data[i]->name); */
         chrus_node_destroy(scene->children.data[i]);
     }
+
+    al_destroy_user_event_source(&scene->event_source);
+    al_destroy_timer(scene->tick_timer);
+    al_destroy_event_queue(scene->event_queue);
 
     lua_close(scene->lua_vm);
 
@@ -35,6 +46,35 @@ chrus_scene *chrus_scene_from_file(const char *filename) {
     // TODO: design the storage of scenes
 
     return new_scene;
+}
+
+/* oh fuck yeah */
+void* chrus_scene_thread_handler(ALLEGRO_THREAD* restrict this, void* args) {
+    chrus_scene* scene = (chrus_scene*) args;
+    
+    printf("scene thread %p: starting now\n", this);
+
+    luaL_openlibs(scene->lua_vm);
+
+    int result = luaL_dofile(scene->lua_vm, "data/chrus_ffi.lua");
+    if (result) printf("%s\n", lua_tostring(scene->lua_vm, -1));
+
+    lua_pushlightuserdata(scene->lua_vm, scene);
+    lua_setglobal(scene->lua_vm, "scene");
+
+    lua_pushlightuserdata(scene->lua_vm, this);
+    lua_setglobal(scene->lua_vm, "thread");
+
+    printf("scene thread %p: lua VM initialized\n", this);
+
+    /* the thread now runs the event loop. the loop will end when join_thread is called */
+    result = luaL_dofile(scene->lua_vm, "data/events.lua");
+    if (result) {
+        printf("scene thread %p: really big fuck up\n", this);
+        printf("scene thread %p: %s\n", this, lua_tostring(scene->lua_vm, -1));
+    }
+
+    return NULL;
 }
 
 void chrus_scene_init_lua_vm(chrus_scene* restrict this) {
@@ -81,7 +121,7 @@ chrus_node* chrus_scene_add_node(chrus_scene* restrict this, void* parent, chrus
     switch (child->type)
     {
     case CHRUS_NODE_SCRIPT:
-        chrus_scene_run_script(this, child);
+        chrus_scene_queue_script(this, child);
         break;
     case CHRUS_NODE_SPRITE:
         chrus_vector_append(&this->sprites_cache, child->data);
@@ -93,15 +133,13 @@ chrus_node* chrus_scene_add_node(chrus_scene* restrict this, void* parent, chrus
     return child;
 }
 
-void chrus_scene_run_script(chrus_scene* this, chrus_node *script) {
+void chrus_scene_queue_script(chrus_scene* this, chrus_node* script) {
     assert(script->type == CHRUS_NODE_SCRIPT);
-    chrus_script* data = script->data;
 
-    //lua_State* new_fiber = lua_newthread(this->lua_vm);
-    //int result = luaL_loadfile(new_fiber, data->source_name) || lua_pcall(new_fiber, 0, 0, 0);
+    /* the new event only needs these fields filled out */
+    ALLEGRO_EVENT new_event;
+    new_event.user.type = CHRUS_EVENT_LOAD_SCRIPT;
+    new_event.user.data1 = (intptr_t)script;
 
-    int result = luaL_loadfile(this->lua_vm, data->source_name) || lua_pcall(this->lua_vm, 0, 0, 0);
-    if (result) {
-        printf("%s\n", lua_tostring(this->lua_vm, -1));
-    }
+    al_emit_user_event((ALLEGRO_EVENT_SOURCE*)this, &new_event, NULL);
 }

@@ -8,3 +8,7 @@ chrus_script *chrus_script_create(const char *source) {
 
     return new_script;
 }
+
+const char* chrus_script_get_source(chrus_script* restrict this) {
+    return this->source_name;
+}
