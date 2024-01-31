@@ -1,3 +1,5 @@
+#pragma once
+
 #ifdef DEBUG
 #define DEBUG_PRINTF(fmt, ...) \
             do { fprintf(stderr, fmt, __VA_ARGS__); } while (0)

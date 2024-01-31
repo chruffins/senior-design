@@ -21,6 +21,8 @@ struct chrus_camera_t {
     // x and y represent the CENTER of the rectangle of objects rendered...
     float viewport_x, viewport_y;
 
+    ALLEGRO_BITMAP* _buffer;
+
     // private object that transforms the view to the camera when rendering
     ALLEGRO_TRANSFORM _scaler;
 };

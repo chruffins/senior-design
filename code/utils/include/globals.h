@@ -10,7 +10,4 @@
  * Please forgive me.
 */
 #pragma once
-
 #include<allegro5/allegro.h>
-
-extern ALLEGRO_DISPLAY* chrus_display;
