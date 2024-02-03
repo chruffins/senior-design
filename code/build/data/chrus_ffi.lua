@@ -126,11 +126,7 @@ local sprite_metatable = {
 -- members need to have .member but implicitly call a function
 -- methods can be written the same way
 -- text_functions(table, key)
-local text_functions = function(table, key)
-
-end
-
-local text_index = {
+local text_methods = {
     new = function()
         local new = custom_node_alloc("chrus_node", finalizer)
         new.name = "text"
@@ -144,18 +140,31 @@ local text_index = {
     end,
 }
 
-setmetatable(text_index, {
-    __index = function(this, key)
-        if key == "text" then
-            for i,v in pairs(this) do
-                print(i,v)
-            end
-            return lchrus.chrus_text_get_text(this)
-        end
-    end,
-})
+local text_members = {
+    text = function(this)
+        return lchrus.chrus_text_get_text(this)
+    end
+}
 
-local audiostream_metatable = {
+local create_node_indexfunc = function(methods, members)
+    return function (node, key)
+        if methods[key] then
+            return methods[key]
+        elseif members[key] then
+            return members[key](node.data)
+        end
+    end
+end
+
+local text_index = create_node_indexfunc(text_methods, text_members)
+
+local text_newindex = function(node, key, value)
+    if key == "text" then
+        lchrus.chrus_text_set_text(node.data, value)
+    end
+end
+
+local audiostream_methods = {
     new = function()
         local new = custom_node_alloc("chrus_node", finalizer)
         new.name = "sound"
@@ -180,39 +189,60 @@ local audiostream_metatable = {
     reparent = function(this, other)
         lchrus.chrus_scene_add_node(scene, other, this)
     end,
+}
+
+local audiostream_members = {
     volume = function(this)
-        return this.data.volume
+        return this.volume
     end
 }
 
-local script_metatable = {
+local audiostream_index = create_node_indexfunc(audiostream_methods, audiostream_members)
+
+local script_methods = {
     get_source = function(this)
         return lchrus.chrus_script_get_source(this.data)
     end
 }
+
+local script_index = function(table, key)
+    if script_methods[key] then
+        return script_methods[key]
+    end
+end
 
 local audiostream_enum = tonumber(lchrus.CHRUS_NODE_AUDIOSTREAM)
 local sprite_enum = tonumber(lchrus.CHRUS_NODE_SPRITE)
 local script_enum = tonumber(lchrus.CHRUS_NODE_SCRIPT)
 local text_enum = tonumber(lchrus.CHRUS_NODE_TEXT)
 
-local lookup_table = {
-    [audiostream_enum] = audiostream_metatable,
+local index_table = {
+    --[[
+    
     [sprite_enum] = sprite_metatable,
-    [script_enum] = script_metatable,
+    ]]
+    [audiostream_enum] = audiostream_index,
+    [script_enum] = script_index,
     [text_enum] = text_index,
 }
 
+local newindex_table = {
+    [text_enum] = text_newindex,
+}
+
 local test_metatable = {
-    __index = function (table, key)
-        return lookup_table[tonumber(table.type)][key]
+    __index = function (node, key)
+        return index_table[tonumber(node.type)](node, key)
+    end,
+    __newindex = function (node, key, value)
+        return newindex_table[tonumber(node.type)](node, key, value)
     end
 }
 
 local type_table = {
-    audiostream = audiostream_metatable.new,
+    audiostream = audiostream_methods.new,
     sprite = sprite_metatable.new,
-    text = text_index.new,
+    text = text_methods.new,
 }
 
 --local mouse = {clicked = event:new(), leftclicked = event:new(), rightclicked = event:new() }

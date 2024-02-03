@@ -1,4 +1,5 @@
 print("Hello world!")
+
 local sound = create_node("audiostream")
 
 sound:load("data/snowpatrol.ogg")
@@ -9,9 +10,10 @@ local sprites = {}
 local cap = 5
 
 local text = create_node("text")
-print(text.text)
+text.text = "Die."
 text:reparent(scene)
 
+--[[
 for i = 1, cap do
     sprites[i] = create_node("sprite")
     sprites[i]:load("data/test.png")
@@ -28,3 +30,4 @@ end)
 get_keyboard().keydown:connect(function()
     sound:stop()
 end)
+]]
