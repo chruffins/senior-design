@@ -1,9 +1,5 @@
 #include "../include/drawing_thread.h"
 
-ALLEGRO_DISPLAY* chrus_display = NULL;
-ALLEGRO_EVENT_QUEUE* chrus_drawing_queue = NULL;
-ALLEGRO_EVENT_SOURCE chrus_drawing_event_source;
-
 void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
     void** pargs = (void**)args;
     ALLEGRO_COND* drawing_cond = (ALLEGRO_COND*)pargs[0];
@@ -35,9 +31,29 @@ void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
 
     al_start_timer(draw_timer);
     al_register_event_source(queue, al_get_timer_event_source(draw_timer));
+    al_register_event_source(queue, &chrus_drawing_event_source);
+
+    bool redraw = false;
+    bool finished = false;
     while (1) {
         al_wait_for_event(queue, &event);
-        if (al_get_thread_should_stop(this)) break;
+        switch (event.type)
+        {
+        case CHRUS_EVENT_JOIN_DRAWING:
+            finished = true;
+            break;
+        case CHRUS_EVENT_CONVERT_BITMAP:
+            al_convert_memory_bitmaps();
+            //al_convert_bitmap((ALLEGRO_BITMAP*)event.user.data1);
+            break;
+        case ALLEGRO_EVENT_TIMER:
+            redraw = true;
+            break;
+        }
+
+        if (finished) break;
+        if (!redraw || !al_is_event_queue_empty(queue)) continue;
+
         al_clear_to_color(al_map_rgb(0, 0, 0));
 
         chrus_scene_manager_draw(scene_manager);
@@ -55,6 +71,7 @@ void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
         }  
 
         frames_done++;
+        redraw = false;
     }
     al_stop_timer(draw_timer);
     al_destroy_timer(draw_timer);

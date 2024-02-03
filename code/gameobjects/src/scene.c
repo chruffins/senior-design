@@ -107,6 +107,23 @@ void chrus_scene_draw(chrus_scene* restrict this) {
     al_set_target_bitmap(current_camera->_buffer);
     al_clear_to_color(al_map_rgb(0, 0, 0));
 
+    //al_hold_bitmap_drawing(true);
+
+    for (int i = 0; i < this->children.size; i++) {
+        chrus_node* node = this->children.data[i];
+        switch (node->type)
+        {
+        case CHRUS_NODE_SPRITE:
+            chrus_sprite_draw(node->data, -current_camera->viewport_x, -current_camera->viewport_y);
+            break;
+        case CHRUS_NODE_TEXT:
+            chrus_text_draw(node->data, -current_camera->viewport_x, -current_camera->viewport_y);
+            break;
+        default:
+            break;
+        }
+    }
+    /*
     for (int i = 0; i < this->sprites_cache.size; i++) {
         chrus_sprite* restrict s = (chrus_sprite*)this->sprites_cache.data[i];
         if ((s->x + s->width > current_camera->viewport_x && s->x < current_camera->viewport_x + current_camera->viewport_width) && 
@@ -114,6 +131,9 @@ void chrus_scene_draw(chrus_scene* restrict this) {
             chrus_sprite_draw(s, -current_camera->viewport_x, -current_camera->viewport_y);
         }
     }
+    */
+
+    //al_hold_bitmap_drawing(false);
 
     al_set_target_backbuffer(current_display);
     al_use_transform(&current_camera->_scaler);

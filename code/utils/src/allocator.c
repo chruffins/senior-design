@@ -19,7 +19,7 @@ static void chrus_loader_destructor(const void *something) {
 //}
 
 void chrus_loader_init() {
-    loader_trees[CHRUS_LOADER_BITMAP] = chrus_rbtree_create((chrus_rbtree_comparator)strcmp, (chrus_rbtree_destructor)al_destroy_bitmap, (chrus_rbtree_inserter)al_load_bitmap);
+    loader_trees[CHRUS_LOADER_BITMAP] = chrus_rbtree_create((chrus_rbtree_comparator)strcmp, (chrus_rbtree_destructor)al_destroy_bitmap, (chrus_rbtree_inserter)chrus_load_bitmap);
     //loader_trees[CHRUS_LOADER_SCRIPT] = chrus_rbtree_create(strcmp, );
     loader_trees[CHRUS_LOADER_SAMPLE] = chrus_rbtree_create((chrus_rbtree_comparator)strcmp, (chrus_rbtree_destructor)al_destroy_sample, (chrus_rbtree_inserter)al_load_sample);
 }

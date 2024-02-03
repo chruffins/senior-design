@@ -7,18 +7,31 @@
  *   /          /    /   /    /    /     /            /           /
  *   \_________/____/   /____/____/     /____________/___________/
  * 
- * This header stores the functionality for the drawing thread. All
- * bitmaps are owned by the display, which is owned by a single thread.
- * I want to avoid giving threads the context as necessary... because
- * I'm not entirely sure how that works.
+ * This header stores information for representing text.
 */
 #pragma once
+
 #include<allegro5/allegro.h>
 #include<allegro5/allegro_font.h>
+#include<allegro5/allegro_ttf.h>
 
-#include "../../gameobjects/include/scenemanager.h"
-#include "utils.h"
-#include "globals.h"
+typedef struct chrus_text_t chrus_text;
 
-/* all drawing calls are handled in this thread, and bitmaps need to be converted in here */
-void* drawing_handler(ALLEGRO_THREAD *this, void *args);
+struct chrus_text_t {
+    ALLEGRO_FONT* font;
+    ALLEGRO_COLOR color;
+    float x;
+    float y;
+    float max_width;
+    float line_height;
+    int flags;
+    const char* text;
+};
+
+chrus_text* chrus_text_create();
+void chrus_text_draw(chrus_text* restrict this, float dx, float dy);
+void chrus_text_destroy(chrus_text* restrict this);
+
+const char* chrus_text_get_text(chrus_text* restrict this);
+
+void chrus_text_set_text(chrus_text* restrict this, const char* new_text);

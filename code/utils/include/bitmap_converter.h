@@ -16,7 +16,8 @@
 #pragma once
 #include<allegro5/allegro.h>
 
-#include "drawing_thread.h"
+#include "globals.h"
+#include "enums.h"
 
 /* these functions tell the drawing thread to do stuff */
 ALLEGRO_BITMAP* chrus_create_bitmap(int w, int h);

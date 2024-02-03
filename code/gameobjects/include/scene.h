@@ -24,14 +24,9 @@
 #include "node.h"
 #include "script.h"
 #include "sprite.h"
+#include "text.h"
 #include "../../utils/include/vector.h"
-
-//#define CHRUS_EVENT_LOAD_SCRIPT ALLEGRO_GET_EVENT_TYPE('c', 'e', 'l', 's')
-
-/* probably should move this enum declaration someplace else */
-enum CHRUS_EVENT {
-    CHRUS_EVENT_LOAD_SCRIPT = 1667591283,
-};
+#include "../../utils/include/enums.h"
 
 typedef struct chrus_scene_t chrus_scene;
 

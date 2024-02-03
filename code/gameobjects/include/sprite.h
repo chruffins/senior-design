@@ -39,7 +39,7 @@ struct chrus_sprite_t {
 //chrus_sprite* chrus_sprite_create_default();
 chrus_sprite* chrus_sprite_create(const char *source);
 void chrus_sprite_load(chrus_sprite* restrict this, const char *source);
-void chrus_sprite_draw(chrus_sprite *this, float dx, float dy);
+void chrus_sprite_draw(chrus_sprite* restrict this, float dx, float dy);
 //void chrus_sprite_destroy();
 
 void chrus_sprite_translate(chrus_sprite *this, float dx, float dy);

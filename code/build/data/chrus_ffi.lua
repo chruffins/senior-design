@@ -10,7 +10,7 @@ ffi.cdef(al_ffi.cdef .. [[
 void* malloc(size_t size);
 void free(void *__ptr);
 
-enum CHRUS_NODE_TYPES { CHRUS_NODE_UNINITIALIZED, CHRUS_NODE_CAMERA, CHRUS_NODE_SCRIPT, CHRUS_NODE_SPRITE, CHRUS_NODE_SOUND, CHRUS_NODE_AUDIOSTREAM, };
+enum CHRUS_NODE_TYPES { CHRUS_NODE_UNINITIALIZED, CHRUS_NODE_CAMERA, CHRUS_NODE_SCRIPT, CHRUS_NODE_SPRITE, CHRUS_NODE_SOUND, CHRUS_NODE_AUDIOSTREAM, CHRUS_NODE_TEXT, };
 
 typedef struct chrus_scene_t chrus_scene;
 typedef struct chrus_node_t chrus_node;
@@ -23,6 +23,7 @@ typedef struct chrus_vector_t chrus_vector;
 
 typedef struct chrus_node_t chrus_audiostream_node;
 typedef struct chrus_node_t chrus_sprite_node;
+typedef struct chrus_text_t chrus_text;
 
 struct chrus_node_vector_t { chrus_node** data; size_t size; size_t capacity; };
 struct chrus_vector_t { void **data; size_t size; size_t capacity; };
@@ -30,9 +31,20 @@ struct chrus_camera_t { float screen_x, screen_y; float screen_width, screen_hei
 struct chrus_scene_t { ALLEGRO_EVENT_SOURCE event_source; const char* name; chrus_node* current_camera; chrus_node_vec children; chrus_vector sprites_cache; void* lua_vm; ALLEGRO_EVENT_QUEUE* event_queue; ALLEGRO_TIMER* tick_timer; };
 struct chrus_node_t { const char *name; chrus_node* parent; chrus_node_vec children; enum CHRUS_NODE_TYPES type; void *data; };
 struct chrus_sprite_t { float x; float y; int width; int height; int flipping; float rotation; ALLEGRO_BITMAP *image_data; };
+struct chrus_text_t {
+    ALLEGRO_FONT* font;
+    ALLEGRO_COLOR color;
+    float x;
+    float y;
+    float max_width;
+    float line_height;
+    int flags;
+    const char* text;
+};
 
 chrus_node* chrus_scene_add_node(chrus_scene* this, void* parent, chrus_node *child);
 
+chrus_node* chrus_node_create_uninit();
 chrus_node* chrus_node_create_camera();
 chrus_node* chrus_node_create_sprite();
 
@@ -51,6 +63,13 @@ void chrus_audiostream_play(chrus_audiostream* restrict this);
 void chrus_audiostream_stop(chrus_audiostream* restrict this);
 void chrus_audiostream_free(chrus_audiostream* restrict this);
 
+chrus_text* chrus_text_create();
+void chrus_text_draw(chrus_text* restrict this);
+void chrus_text_destroy(chrus_text* restrict this);
+const char* chrus_text_get_text(chrus_text* restrict this);
+
+void chrus_text_set_text(chrus_text* restrict this, const char* new_text);
+
 ]])
 
 --ffi.load("allegro")
@@ -58,7 +77,7 @@ local lchrus = ffi.load("chrus_lib")
 lallegro = ffi.load("allegro")
 --chrus.sound = ffi.typeof("chrus_node")
 
-local function custom_alloc(typestr, finalizer)
+local function custom_node_alloc(typestr, finalizer)
     -- use free as the default finalizer
     if not finalizer then finalizer = ffi.C.free end
 
@@ -66,10 +85,10 @@ local function custom_alloc(typestr, finalizer)
     local ptr_typestr = ffi.typeof(typestr .. "*")
 
     -- how many bytes to allocate?
-    local typesize    = ffi.sizeof(typestr)
+    --local typesize    = ffi.sizeof(typestr)
 
     -- do the allocation and cast the pointer result
-    local ptr = ffi.cast(ptr_typestr, ffi.C.malloc(typesize))
+    local ptr = ffi.cast(ptr_typestr, lchrus.chrus_node_create_uninit())
 
     -- install the finalizer
     ffi.gc( ptr, finalizer )
@@ -86,7 +105,7 @@ end
 
 local sprite_metatable = {
     new = function()
-        local new = custom_alloc("chrus_node", finalizer)
+        local new = custom_node_alloc("chrus_node", finalizer)
         new.name = "sprite"
         new.type = lchrus.CHRUS_NODE_SPRITE
         new.parent = nil
@@ -104,9 +123,41 @@ local sprite_metatable = {
     end,
 }
 
+-- members need to have .member but implicitly call a function
+-- methods can be written the same way
+-- text_functions(table, key)
+local text_functions = function(table, key)
+
+end
+
+local text_index = {
+    new = function()
+        local new = custom_node_alloc("chrus_node", finalizer)
+        new.name = "text"
+        new.type = lchrus.CHRUS_NODE_TEXT
+        new.parent = nil
+        new.data = lchrus.chrus_text_create()
+        return new
+    end,
+    reparent = function(this, other)
+        lchrus.chrus_scene_add_node(scene, other, this)
+    end,
+}
+
+setmetatable(text_index, {
+    __index = function(this, key)
+        if key == "text" then
+            for i,v in pairs(this) do
+                print(i,v)
+            end
+            return lchrus.chrus_text_get_text(this)
+        end
+    end,
+})
+
 local audiostream_metatable = {
     new = function()
-        local new = custom_alloc("chrus_node", finalizer)
+        local new = custom_node_alloc("chrus_node", finalizer)
         new.name = "sound"
         new.type = lchrus.CHRUS_NODE_AUDIOSTREAM
         new.parent = nil
@@ -143,11 +194,13 @@ local script_metatable = {
 local audiostream_enum = tonumber(lchrus.CHRUS_NODE_AUDIOSTREAM)
 local sprite_enum = tonumber(lchrus.CHRUS_NODE_SPRITE)
 local script_enum = tonumber(lchrus.CHRUS_NODE_SCRIPT)
+local text_enum = tonumber(lchrus.CHRUS_NODE_TEXT)
 
 local lookup_table = {
     [audiostream_enum] = audiostream_metatable,
     [sprite_enum] = sprite_metatable,
-    [script_enum] = script_metatable
+    [script_enum] = script_metatable,
+    [text_enum] = text_index,
 }
 
 local test_metatable = {
@@ -158,7 +211,8 @@ local test_metatable = {
 
 local type_table = {
     audiostream = audiostream_metatable.new,
-    sprite = sprite_metatable.new
+    sprite = sprite_metatable.new,
+    text = text_index.new,
 }
 
 --local mouse = {clicked = event:new(), leftclicked = event:new(), rightclicked = event:new() }

@@ -15,6 +15,7 @@
 
 #include<stdlib.h>
 #include<stdbool.h>
+#include<stdio.h>
 
 typedef struct chrus_rbnode_t chrus_rbnode;
 typedef struct chrus_rbtree_t chrus_rbtree;
@@ -27,7 +28,7 @@ struct chrus_rbnode_t {
     chrus_rbnode *parent;
     chrus_rbnode *left;
     chrus_rbnode *right;
-    void *key;
+    const void *key;
     void *value;
     bool red; // 0 is black, 1 is red
 };
@@ -46,7 +47,7 @@ void chrus_rbtree_destroy(chrus_rbtree *);
 chrus_rbnode *chrus_rbtree_find(chrus_rbtree *, const void *key);
 chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *, const void *key);
 
-int chrus_rbtree_delete(chrus_rbtree *, void *key);
+int chrus_rbtree_delete(chrus_rbtree *, const void *key);
 
 int chrus_rbnode_child_direction(chrus_rbnode *parent, chrus_rbnode *child);
 void chrus_rbnode_rotate(chrus_rbnode *current, bool right);

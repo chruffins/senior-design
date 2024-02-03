@@ -1,5 +1,3 @@
-#pragma once
-
 /*         _________________________________________   ________________
  *        /          /    /   /    /          /    /  /    /          /
  *       /    ______/    /   /    /    ______/    /  /    /   _______/
@@ -9,26 +7,12 @@
  *   /          /    /   /    /    /     /            /           /
  *   \_________/____/   /____/____/     /____________/___________/
  * 
- * Vector implementation.
+ * Enums. Simple as
 */
 #pragma once
 
-#include<memory.h>
-#include<stdlib.h>
-
-typedef struct chrus_vector_t chrus_vector;
-
-struct chrus_vector_t {
-    void **data;
-    size_t size;
-    size_t capacity;
+enum CHRUS_EVENT {
+    CHRUS_EVENT_JOIN_DRAWING = 1667591282,
+    CHRUS_EVENT_LOAD_SCRIPT = 1667591283,
+    CHRUS_EVENT_CONVERT_BITMAP = 1667591284
 };
-
-chrus_vector chrus_vector_create();
-
-void chrus_vector_append(chrus_vector *this, void *data);
-void* chrus_vector_pop(chrus_vector *this);
-void chrus_vector_remove(chrus_vector *this, void *match);
-void chrus_vector_insert(chrus_vector *this, void *data, size_t position);
-
-void chrus_vector_destroy(chrus_vector *this);

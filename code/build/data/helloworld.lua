@@ -6,7 +6,11 @@ sound:play()
 sound:reparent(scene)
 
 local sprites = {}
-local cap = 300
+local cap = 5
+
+local text = create_node("text")
+print(text.text)
+text:reparent(scene)
 
 for i = 1, cap do
     sprites[i] = create_node("sprite")

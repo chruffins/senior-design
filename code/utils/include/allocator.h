@@ -20,6 +20,7 @@
 #include<allegro5/allegro_audio.h>
 
 #include "rbtree.h"
+#include "bitmap_converter.h"
 
 typedef enum CHRUS_LOADER CHRUS_LOADER;
 

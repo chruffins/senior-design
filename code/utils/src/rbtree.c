@@ -1,6 +1,6 @@
 #include "../include/rbtree.h"
 
-static chrus_rbnode *chrus_rbnode_create(void *data);
+static chrus_rbnode *chrus_rbnode_create(const void *data);
 static void fix_insert(chrus_rbtree *tree, chrus_rbnode *current);
 static void fix_delete(chrus_rbtree *tree, chrus_rbnode *current);
 static void swap_node_data(chrus_rbnode *a, chrus_rbnode *b);
@@ -47,13 +47,15 @@ chrus_rbnode *chrus_rbtree_find(chrus_rbtree *this, const void *key) {
     return NULL;
 }
 
-chrus_rbnode *chrus_rbnode_create(void *key) {
+chrus_rbnode *chrus_rbnode_create(const void *key) {
     // this should set red to false, parent, left/right to NULL.
     chrus_rbnode *new_node = calloc(sizeof(chrus_rbnode), 1);
     if (new_node == NULL) return NULL;
 
     new_node->key = key;
     new_node->red = true;
+
+    return new_node;
 }
 
 int chrus_rbnode_child_direction(chrus_rbnode *parent, chrus_rbnode *child) {
@@ -149,6 +151,9 @@ chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *this, const void *key) {
         this->root->red = false;
         return current;
     }
+
+    /* this actually won't be reached but here to suppress warnings */
+    return NULL;
 }
 
 void chrus_rbnode_rotate(chrus_rbnode *current, bool right) {
@@ -205,7 +210,7 @@ void swap_node_data(chrus_rbnode *a, chrus_rbnode *b) {
     b->value = a->value;
     a->value = temp;
 
-    temp = b->key;
+    temp = (void*)b->key;
     b->key = a->key;
     a->key = temp;
 }
@@ -284,7 +289,7 @@ void fix_delete(chrus_rbtree *tree, chrus_rbnode *current) {
 }
 
 // returns the key if found...
-int chrus_rbtree_delete(chrus_rbtree *this, void *key) {
+int chrus_rbtree_delete(chrus_rbtree *this, const void *key) {
     // let's get the node
     chrus_rbnode *dl = chrus_rbtree_find(this, key);
     if (!dl) return 1;

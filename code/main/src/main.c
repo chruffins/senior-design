@@ -134,6 +134,7 @@ void run_game_loop() {
     //chrus_audiostream_free(sound);
     //void *drawing_result;
     DEBUG_PRINTF("joined the drawing thread now\n");
+    chrus_join_drawing_thread();
     al_join_thread(drawing_thread, NULL);
     // need to wait for drawing thread to die before we can close up the scene manager
 
