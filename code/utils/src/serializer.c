@@ -2,16 +2,17 @@
 
 static inline void fprintspaces(FILE* restrict fp, int tabs);
 static inline void fprintnewfield(FILE* restrict fp, bool last);
-static void fprintint(FILE* restrict fp, const char* key, int data, int tabs, bool last);
-static void fprintptr(FILE* restrict fp, const char* key, void* data, int tabs, bool last);
-static void fprintstr(FILE* restrict fp, const char* key, const char* data, int tabs, bool last);
-static void fprintfloat(FILE* restrict fp, const char* key, double data, int tabs, bool last);
+static void fprintint(FILE* restrict fp, const char* key, int data, bool last);
+static void fprintptr(FILE* restrict fp, const char* key, void* data, bool last);
+static void fprintstr(FILE* restrict fp, const char* key, const char* data, bool last);
+static void fprintfloat(FILE* restrict fp, const char* key, double data, bool last);
 static const char *safestr(const char* str);
 
 static const char *chrus_node_type_to_str(enum CHRUS_NODE_TYPES);
 
-static void serialize_children(FILE* restrict fp, chrus_node_vec* children, int tabs);
-static void serialize_node(FILE* restrict fp, chrus_node* node, int tabs);
+static void serialize_and_enqueue_children(ALLEGRO_EVENT_SOURCE* restrict event_source, FILE* restrict fp, chrus_node_vec* children);
+static void serialize_node(ALLEGRO_EVENT_SOURCE* restrict event_source, FILE* restrict fp, chrus_node* restrict node);
+static void queue_children(ALLEGRO_EVENT_SOURCE* restrict event_source, chrus_node_vec* restrict children);
 
 static inline void fprintspaces(FILE* restrict fp, int tabs) {
     fprintf(fp, "%*c", tabs * 2, ' ');
@@ -24,26 +25,26 @@ static inline void fprintnewfield(FILE* restrict fp, bool last) {
     fputc('\n', fp);
 }
 
-static void fprintint(FILE* restrict fp, const char* key, int data, int tabs, bool last) {
-    fprintspaces(fp, tabs);
+static void fprintint(FILE* restrict fp, const char* key, int data, bool last) {
+    fprintspaces(fp, 1);
     fprintf(fp, "\"%s\": \"%d\"", key, data);
     fprintnewfield(fp, last);
 }
 
-static void fprintptr(FILE* restrict fp, const char* key, void* data, int tabs, bool last) {
-    fprintspaces(fp, tabs);
+static void fprintptr(FILE* restrict fp, const char* key, void* data, bool last) {
+    fprintspaces(fp, 1);
     fprintf(fp, "\"%s\": \"%p\"", key, data);
     fprintnewfield(fp, last);
 }
 
-static void fprintstr(FILE* restrict fp, const char* key, const char* data, int tabs, bool last) {
-    fprintspaces(fp, tabs);
+static void fprintstr(FILE* restrict fp, const char* key, const char* data, bool last) {
+    fprintspaces(fp, 1);
     fprintf(fp, "\"%s\": \"%s\"", key, safestr(data));
     fprintnewfield(fp, last);
 }
 
-static void fprintfloat(FILE* restrict fp, const char* key, double data, int tabs, bool last) {
-    fprintspaces(fp, tabs);
+static void fprintfloat(FILE* restrict fp, const char* key, double data, bool last) {
+    fprintspaces(fp, 1);
     fprintf(fp, "\"%s\": \"%f\"", key, data);
     fprintnewfield(fp, last);
 }
@@ -73,39 +74,79 @@ static const char *chrus_node_type_to_str(enum CHRUS_NODE_TYPES type) {
     return "invalid";
 }
 
-static void serialize_children(FILE* restrict fp, chrus_node_vec* children, int tabs) {
-    fprintspaces(fp, tabs);
+static void serialize_and_enqueue_children(ALLEGRO_EVENT_SOURCE* restrict event_source, FILE* restrict fp, chrus_node_vec* children) {
+    ALLEGRO_EVENT e;
+    e.user.type = 9001;
+
+    fprintspaces(fp, 1);
     fprintf(fp, "\"children\": [\n");
-    for (int i = 0; i < children->size-1; i++) {
-        serialize_node(fp, children->data[i], tabs+1);
-        fputs(",\n", fp);
+    if (children->size > 0) {
+        for (int i = 0; i < children->size-1; i++) {
+            printf("%p\n", children->data[i]);
+            e.user.data1 = children->data[i];
+            al_emit_user_event(event_source, &e, NULL);
+            fprintf(fp, "    \"%p\",\n", children->data[i]);
+        }
+        e.user.data1 = children->data[children->size-1];
+        al_emit_user_event(event_source, &e, NULL);
+        fprintf(fp, "    \"%p\"\n");
     }
-    serialize_node(fp, children->data[children->size-1], tabs+1);
-    fputc('\n', fp);
-    fprintspaces(fp, tabs);
+    fprintspaces(fp, 1);
     fprintf(fp, "]\n");
 }
 
-static void serialize_node(FILE* restrict fp, chrus_node* node, int tabs) {
-    fprintspaces(fp, tabs);
+static void serialize_node(ALLEGRO_EVENT_SOURCE* restrict event_source, FILE* restrict fp, chrus_node* node) {
     fprintf(fp, "{\n");
-    fprintstr(fp, "name", node->name, tabs+1, false);
-    fprintstr(fp, "type", chrus_node_type_to_str(node->type), tabs+1, false);
-    fprintptr(fp, "parent", node->parent, tabs+1, true);
-    fprintspaces(fp, tabs);
-    fputc('}', fp);
+    fprintptr(fp, "id", node, false);
+    fprintstr(fp, "name", node->name, false);
+    fprintstr(fp, "type", chrus_node_type_to_str(node->type), false);
+    fprintptr(fp, "parent", node->parent, false);
+    /* implicitly enqueues children */
+    serialize_and_enqueue_children(event_source, fp, &node->children);
+    fputs("},\n", fp);
+}
+
+static void queue_children(ALLEGRO_EVENT_SOURCE* restrict event_source, chrus_node_vec* restrict children) {
+    ALLEGRO_EVENT e;
+    e.user.type = 9001; // really doesn't matter
+    
+    for (size_t i = 0; i < children->size; i++) {
+        e.user.data1 = children->data[i];
+
+        al_emit_user_event(event_source, &e, NULL);
+    }
 }
 
 void chrus_serializer_save_scene(chrus_scene* scene, const char* filename) {
+    ALLEGRO_EVENT_QUEUE* scene_queue = al_create_event_queue();
+    ALLEGRO_EVENT_SOURCE node_saver;
+    ALLEGRO_EVENT current_event;
+    al_init_user_event_source(&node_saver);
+    al_register_event_source(scene_queue, &node_saver);
+
     FILE *fp = fopen(filename, "w");
-    //int level = 0;
+
+    /* need to manually save the scene node first. i know*/
     fprintf(fp, "{\n");
     //fprintspaces(fp, 1);
-    fprintstr(fp, "name", scene->name, 1, false);
-    fprintptr(fp, "current_camera", scene->current_camera, 1, false);
-    serialize_children(fp, &scene->children, 1);
-    fprintf(fp, "}");
+    fprintptr(fp, "id", scene, false);
+    fprintstr(fp, "name", scene->name, false);
+    fprintptr(fp, "current_camera", scene->current_camera, false);
+    serialize_and_enqueue_children(&node_saver, fp, &scene->children);
+    fprintf(fp, "},\n");
+
+    /* this implementation is breadth-first search :cry: */
+    while (al_get_next_event(scene_queue, &current_event)) {
+        chrus_node* current_node = current_event.user.data1;
+
+        /* this function implicitly queues more nodes */
+        serialize_node(&scene_queue, fp, current_node);
+    }
+    
+    //int level = 0;
     //fprintf(fp, "{\n  \"name\": \"%s\",\n  \"current_camera\": \"%p\"}", safestr(scene->name), (void*)scene->current_camera);
 
     fclose(fp);
+    al_destroy_user_event_source(&node_saver);
+    al_destroy_event_queue(scene_queue);
 }
