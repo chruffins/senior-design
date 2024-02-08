@@ -1,1 +1,0 @@
-gcc *.c -o test.out -lluajit -lallegro && ./test.out
