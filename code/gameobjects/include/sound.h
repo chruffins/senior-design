@@ -54,3 +54,26 @@ void chrus_audiostream_load(chrus_audiostream* restrict this, const char *source
 void chrus_audiostream_play(chrus_audiostream* restrict this);
 void chrus_audiostream_stop(chrus_audiostream* restrict this);
 void chrus_audiostream_destroy(chrus_audiostream* restrict this);
+
+// void chrus_sound_set_length(chrus_sound* restrict this, float new);
+void chrus_sound_set_playmode(chrus_sound* restrict this, ALLEGRO_PLAYMODE new);
+void chrus_sound_set_gain(chrus_sound* restrict this, float new);
+void chrus_sound_set_pan(chrus_sound* restrict this, float new);
+void chrus_sound_set_speed(chrus_sound* restrict this, float new);
+
+void chrus_audiostream_set_playmode(chrus_audiostream* restrict this, ALLEGRO_PLAYMODE new);
+void chrus_audiostream_set_gain(chrus_audiostream* restrict this, float new);
+void chrus_audiostream_set_pan(chrus_audiostream* restrict this, float new);
+void chrus_audiostream_set_speed(chrus_audiostream* restrict this, float new);
+
+float chrus_sound_get_length(chrus_sound* restrict this);
+ALLEGRO_PLAYMODE chrus_sound_get_playmode(chrus_sound* restrict this);
+float chrus_sound_get_gain(chrus_sound* restrict this);
+float chrus_sound_get_pan(chrus_sound* restrict this);
+float chrus_sound_get_speed(chrus_sound* restrict this);
+
+float chrus_audiostream_get_length(chrus_audiostream* restrict this);
+ALLEGRO_PLAYMODE chrus_audiostream_get_playmode(chrus_audiostream* restrict this);
+float chrus_audiostream_get_gain(chrus_audiostream* restrict this);
+float chrus_audiostream_get_pan(chrus_audiostream* restrict this);
+float chrus_audiostream_get_speed(chrus_audiostream* restrict this);

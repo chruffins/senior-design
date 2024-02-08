@@ -22,6 +22,8 @@
 #include<stdlib.h>
 
 typedef struct chrus_sprite_t chrus_sprite;
+typedef struct chrus_animation_t chrus_animation;
+typedef struct chrus_animation_frame_t chrus_animation_frame;
 
 struct chrus_sprite_t {
     float x;
@@ -32,6 +34,18 @@ struct chrus_sprite_t {
     float rotation;
 
     ALLEGRO_BITMAP *image_data;
+};
+
+struct chrus_animation_t {
+    int current_frame;
+    int num_frames;
+    int frame_counter;
+    chrus_animation_frame* frames;
+};
+
+struct chrus_animation_frame_t {
+    int frame_duration;
+    ALLEGRO_BITMAP* frame_data;
 };
 
 //static ALLEGRO_BITMAP *default_image;

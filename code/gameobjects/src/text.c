@@ -31,8 +31,56 @@ void chrus_text_destroy(chrus_text* restrict this) {
     free(this);
 }
 
+ALLEGRO_COLOR chrus_text_get_color(chrus_text* restrict this) {
+    return this->color;
+}
+
+float chrus_text_get_x(chrus_text* restrict this) {
+    return this->x;
+}
+
+float chrus_text_get_y(chrus_text* restrict this) {
+    return this->y;
+}
+
+float chrus_text_get_max_width(chrus_text* restrict this) {
+    return this->max_width;
+}
+
+float chrus_text_get_line_height(chrus_text* restrict this) {
+    return this->line_height;
+}
+
+int chrus_text_get_flags(chrus_text* restrict this) {
+    return this->flags;
+}
+
 const char* chrus_text_get_text(chrus_text* restrict this) {
     return this->text;
+}
+
+void chrus_text_set_color(chrus_text* restrict this, ALLEGRO_COLOR new) {
+    this->color = new;
+}
+
+void chrus_text_set_x(chrus_text* restrict this, float new) {
+    this->x = new;
+}
+
+void chrus_text_set_y(chrus_text* restrict this, float new) {
+    this->y = new;
+}
+
+void chrus_text_set_max_width(chrus_text* restrict this, float new) {
+    this->max_width = new;
+}
+
+void chrus_text_set_line_height(chrus_text* restrict this, float new) {
+    this->line_height = new;
+}
+
+void chrus_text_set_flags(chrus_text* restrict this, int new) {
+    this->flags = new;
 }
 
 void chrus_text_set_text(chrus_text* restrict this, const char* new_text) {
