@@ -31,7 +31,10 @@ struct chrus_sprite_t {
     int width;
     int height;
     int flipping;
+    float sx;
+    float sy;
     float rotation;
+    bool visible;
 
     ALLEGRO_BITMAP *image_data;
 };
@@ -57,3 +60,21 @@ void chrus_sprite_draw(chrus_sprite* restrict this, float dx, float dy);
 //void chrus_sprite_destroy();
 
 void chrus_sprite_translate(chrus_sprite *this, float dx, float dy);
+
+float chrus_sprite_get_x(chrus_sprite* restrict this);
+float chrus_sprite_get_y(chrus_sprite* restrict this);
+int chrus_sprite_get_width(chrus_sprite* restrict this);
+int chrus_sprite_get_height(chrus_sprite* restrict this);
+float chrus_sprite_get_sx(chrus_sprite* restrict this);
+float chrus_sprite_get_sy(chrus_sprite* restrict this);
+int chrus_sprite_get_flipping(chrus_sprite* restrict this);
+float chrus_sprite_get_rotation(chrus_sprite* restrict this);
+bool chrus_sprite_get_visible(chrus_sprite* restrict this);
+
+void chrus_sprite_set_x(chrus_sprite* restrict this, float new);
+void chrus_sprite_set_y(chrus_sprite* restrict this, float new);
+void chrus_sprite_set_sx(chrus_sprite* restrict this, float new);
+void chrus_sprite_set_sy(chrus_sprite* restrict this, float new);
+void chrus_sprite_set_flipping(chrus_sprite* restrict this, int new);
+void chrus_sprite_set_rotation(chrus_sprite* restrict this, float new);
+void chrus_sprite_set_visible(chrus_sprite* restrict this, bool new);

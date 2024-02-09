@@ -48,18 +48,86 @@ chrus_sprite* chrus_sprite_create(const char *source) {
     new_sprite->y = 0;
     new_sprite->width = al_get_bitmap_width(loader);
     new_sprite->height = al_get_bitmap_height(loader);
+    new_sprite->sx = 1;
+    new_sprite->sy = 1;
     new_sprite->rotation = 0;
     new_sprite->flipping = 0;
+    new_sprite->visible = true;
     new_sprite->image_data = loader;
 
     return new_sprite;
 }
 
 void chrus_sprite_draw(chrus_sprite *this, float dx, float dy) {
-    al_draw_bitmap(this->image_data, this->x + dx, this->y + dy, this->flipping);
+    al_draw_rotated_bitmap(this->image_data, this->x + (this->width / 2), this->y + (this->height / 2), this->x, this->y, this->rotation, this->flipping);
+    // al_draw_bitmap(this->image_data, this->x + dx, this->y + dy, this->flipping);
 }
 
 void chrus_sprite_translate(chrus_sprite *this, float dx, float dy) {
     this->x += dx;
     this->y += dy;
+}
+
+float chrus_sprite_get_x(chrus_sprite* restrict this) {
+    return this->x;
+}
+
+float chrus_sprite_get_y(chrus_sprite* restrict this) {
+    return this->y;
+}
+
+int chrus_sprite_get_width(chrus_sprite* restrict this) {
+    return this->width;
+}
+
+int chrus_sprite_get_height(chrus_sprite* restrict this) {
+    return this->height;
+}
+
+float chrus_sprite_get_sx(chrus_sprite* restrict this) {
+    return this->sx;
+}
+
+float chrus_sprite_get_sy(chrus_sprite* restrict this) {
+    return this->sy;
+}
+
+int chrus_sprite_get_flipping(chrus_sprite* restrict this) {
+    return this->flipping;
+}
+
+float chrus_sprite_get_rotation(chrus_sprite* restrict this) {
+    return this->rotation;
+}
+
+bool chrus_sprite_get_visible(chrus_sprite* restrict this) {
+    return this->visible;
+}
+
+void chrus_sprite_set_x(chrus_sprite* restrict this, float new) {
+    this->x = new;
+}
+
+void chrus_sprite_set_y(chrus_sprite* restrict this, float new) {
+    this->y = new;
+}
+
+void chrus_sprite_set_sx(chrus_sprite* restrict this, float new) {
+    this->sx = new;
+}
+
+void chrus_sprite_set_sy(chrus_sprite* restrict this, float new) {
+    this->sy = new;
+}
+
+void chrus_sprite_set_flipping(chrus_sprite* restrict this, int new) {
+    this->flipping = new;
+}
+
+void chrus_sprite_set_rotation(chrus_sprite* restrict this, float new) {
+    this->rotation = new;
+}
+
+void chrus_sprite_set_visible(chrus_sprite* restrict this, bool new) {
+    this->visible = new;
 }

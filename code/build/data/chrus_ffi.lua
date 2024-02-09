@@ -190,7 +190,7 @@ local sprite_methods = {
 }
 
 local sprite_members = {
-
+    
 }
 
 local sprite_index = create_node_indexfunc(sprite_methods, sprite_members)
