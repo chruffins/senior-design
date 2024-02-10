@@ -8,4 +8,4 @@ I, Chris Lee, am expected to design, document, and implement both the game engin
 ## Team Members
 **Chris Lee**
 * Email: lee4cr@mail.uc.edu
-* Discord: chocolatematter
+* Discord: chruffins
