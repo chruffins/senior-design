@@ -17,5 +17,15 @@
 #include<stdint.h>
 
 #include "../../gameobjects/include/scene.h"
+#include "pdjson.h"
+#include "vector.h"
+
+enum chrus_serializing_codes {
+    CHRUS_PARSER_ERROR=1,
+    CHRUS_PARSER_OBJECT_ENDED=2,
+    
+};
 
 void chrus_serializer_save_scene(chrus_scene*, const char*);
+
+chrus_scene* chrus_serializer_deserialize_scene(const char* filename);
