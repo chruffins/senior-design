@@ -156,6 +156,61 @@ chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *this, const void *key) {
     return NULL;
 }
 
+/* TODO: compact this and regular insert together?*/
+chrus_rbnode *chrus_rbtree_insert_pair(chrus_rbtree* this, const void* key, void* value) {
+    chrus_rbnode *current = this->root;
+    // case 1: inserted node is root.
+    // root is always black.
+    if (current == NULL) {
+        this->root = chrus_rbnode_create(key);
+        this->root->value = value;
+        this->root->red = false;
+        return this->root;
+    }
+
+    // insert like normal BST
+    chrus_rbnode *parent;
+    int result;
+    while (current) {
+        result = this->comparator(key, current->key);
+        if (result == 0) return current;
+
+        parent = current;
+        current = result < 0 ? current->left : current->right;
+    }
+
+    if (result > 0) {
+        parent->right = chrus_rbnode_create(key);
+        parent->right->value = value;
+        current = parent->right;
+    } else {
+        parent->left = chrus_rbnode_create(key);
+        parent->left->value = value;
+        current = parent->left;
+    }
+
+    // case 2: parent is black. black nodes can have red children
+    // else: case 3 and 4
+    chrus_rbnode *gp;
+    //chrus_rbnode *uncle;
+    if (parent->red == false) {
+        return current;
+    }
+
+    // implies parent is red now, and the existence of a grandparent
+    gp = parent->parent;
+    if (gp->left->red && gp->right->red) {
+        fix_insert(this, current);
+        // apparently the tree doesn't need to be rotated...
+        // but the root should be recolored black.
+        this->root->red = false;
+        return current;
+    }
+
+    /* this actually won't be reached but here to suppress warnings */
+    return NULL;
+}
+
 void chrus_rbnode_rotate(chrus_rbnode *current, bool right) {
     chrus_rbnode *other = right ? current->left : current->right;
 

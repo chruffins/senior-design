@@ -45,7 +45,12 @@ chrus_rbtree *chrus_rbtree_create(chrus_rbtree_comparator, chrus_rbtree_destruct
 void chrus_rbtree_destroy(chrus_rbtree *);
 
 chrus_rbnode *chrus_rbtree_find(chrus_rbtree *, const void *key);
+
+/* implicitly calls insertinator in order to get value */
 chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *, const void *key);
+
+/* you explicitly pass the key-value pair here! */
+chrus_rbnode *chrus_rbtree_insert_pair(chrus_rbtree* this, const void* key, void* value);
 
 int chrus_rbtree_delete(chrus_rbtree *, const void *key);
 
