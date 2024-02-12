@@ -14,12 +14,12 @@ struct chrus_camera_t {
     // these measure in pixels how much of the camera will fill
     float screen_width, screen_height;
 
+    // x and y represent the CENTER of the rectangle of objects rendered...
+    float viewport_x, viewport_y;
+
     // this measures the "resolution of the camera" -- that is, how many pixels in the virtual game world are shown
     // in addition, these are "diameters"...
     float viewport_width, viewport_height;
-
-    // x and y represent the CENTER of the rectangle of objects rendered...
-    float viewport_x, viewport_y;
 
     ALLEGRO_BITMAP* _buffer;
 
