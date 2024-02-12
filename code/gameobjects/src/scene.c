@@ -142,7 +142,7 @@ void chrus_scene_draw(chrus_scene* restrict this) {
     // set target backbuffer is called by scenemanager
 }
 
-chrus_node* chrus_scene_add_node(chrus_scene* restrict this, void* parent, chrus_node *child) {
+chrus_node* chrus_scene_add_node(chrus_scene* this, void* parent, chrus_node *child) {
     if (parent == this) {
         chrus_node_vec_add_node(&this->children, child);
     } else {

@@ -26,6 +26,8 @@ typedef struct chrus_animation_t chrus_animation;
 typedef struct chrus_animation_frame_t chrus_animation_frame;
 
 struct chrus_sprite_t {
+    const char* source; // path
+
     float x;
     float y;
     int width;
@@ -35,8 +37,8 @@ struct chrus_sprite_t {
     float sy;
     float rotation;
     bool visible;
-
-    ALLEGRO_BITMAP *image_data;
+    
+    ALLEGRO_BITMAP* image_data;
 };
 
 struct chrus_animation_t {

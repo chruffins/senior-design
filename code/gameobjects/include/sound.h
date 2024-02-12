@@ -27,6 +27,7 @@ typedef struct chrus_sound_t chrus_sound;
 struct chrus_sound_t {
     ALLEGRO_SAMPLE *sample;
     ALLEGRO_SAMPLE_INSTANCE *sound;
+    const char* source;
     float length;
     ALLEGRO_PLAYMODE playmode;
     float gain;
@@ -36,6 +37,7 @@ struct chrus_sound_t {
 
 struct chrus_audiostream_t {
     ALLEGRO_AUDIO_STREAM *stream;
+    const char* source;
     float length;
     ALLEGRO_PLAYMODE playmode;
     float gain;

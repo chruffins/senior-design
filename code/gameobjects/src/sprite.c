@@ -15,18 +15,23 @@ static chrus_sprite* chrus_sprite_create_default() {
     }
 
     chrus_sprite *new_sprite = malloc(sizeof(chrus_sprite));
+    new_sprite->source = NULL;
     new_sprite->x = 0;
     new_sprite->y = 0;
     new_sprite->width = 64;
     new_sprite->height = 64;
     new_sprite->rotation = 0;
     new_sprite->flipping = 0;
+    new_sprite->sx = 1;
+    new_sprite->sy = 1;
+    new_sprite->visible = true;
     new_sprite->image_data = default_square;
 
     return new_sprite;
 }
 
 void chrus_sprite_load(chrus_sprite* this, const char *source) {
+    this->source = source;
     this->image_data = NULL;
     if (source == NULL) return;
 

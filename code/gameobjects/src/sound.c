@@ -65,6 +65,7 @@ chrus_audiostream *chrus_audiostream_create(const char *source) {
 }
 
 void chrus_audiostream_load(chrus_audiostream* restrict this, const char *source) {
+    this->source = source;
     if (this->stream != NULL) {
         al_destroy_audio_stream(this->stream);
     }
