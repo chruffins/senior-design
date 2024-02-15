@@ -27,5 +27,9 @@ struct chrus_camera_t {
     ALLEGRO_TRANSFORM _scaler;
 };
 
+/* this creates the data with default values, does NOT create the buffer */
 chrus_camera *chrus_camera_create();
+
+/* this creates the buffer and recalculates the transform */
+void chrus_camera_init(chrus_camera* restrict this);
 void chrus_camera_calc_transform(chrus_camera* restrict this);

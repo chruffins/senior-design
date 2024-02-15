@@ -56,6 +56,7 @@ void* chrus_scene_thread_handler(ALLEGRO_THREAD* restrict this, void* args) {
     /* we need this to create bitmaps in a thread successfully */
     al_set_new_bitmap_flags(ALLEGRO_CONVERT_BITMAP);
     scene->current_camera = chrus_node_create_camera();
+    chrus_camera_init(scene->current_camera);
     chrus_scene_add_node(scene, scene, scene->current_camera);
 
     luaL_openlibs(scene->lua_vm);
