@@ -15,20 +15,27 @@
 
 #include<stdlib.h>
 #include<stdbool.h>
+#include<stdint.h>
 #include<stdio.h>
 
 typedef struct chrus_rbnode_t chrus_rbnode;
 typedef struct chrus_rbtree_t chrus_rbtree;
+typedef union chrus_rbkey chrus_rbkey;
 
-typedef int (*chrus_rbtree_comparator)(const void *, const void *);
+typedef int (*chrus_rbtree_comparator)(chrus_rbkey, chrus_rbkey);
 typedef void (*chrus_rbtree_destructor)(void *);
-typedef void *(*chrus_rbtree_inserter)(const void *);
+typedef void *(*chrus_rbtree_inserter)(chrus_rbkey);
+
+union chrus_rbkey {
+    const void* keyptr;
+    uint64_t keynum;
+};
 
 struct chrus_rbnode_t {
     chrus_rbnode *parent;
     chrus_rbnode *left;
     chrus_rbnode *right;
-    const void *key;
+    chrus_rbkey key;
     void *value;
     bool red; // 0 is black, 1 is red
 };
@@ -44,17 +51,19 @@ struct chrus_rbtree_t {
 chrus_rbtree *chrus_rbtree_create(chrus_rbtree_comparator, chrus_rbtree_destructor, chrus_rbtree_inserter);
 void chrus_rbtree_destroy(chrus_rbtree *);
 
-chrus_rbnode *chrus_rbtree_find(chrus_rbtree *, const void *key);
+chrus_rbnode *chrus_rbtree_find(chrus_rbtree *, chrus_rbkey key);
 
 /* implicitly calls insertinator in order to get value */
-chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *, const void *key);
+chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *, chrus_rbkey key);
 
 /* you explicitly pass the key-value pair here! */
-chrus_rbnode *chrus_rbtree_insert_pair(chrus_rbtree* this, const void* key, void* value);
+chrus_rbnode *chrus_rbtree_insert_pair(chrus_rbtree* this, chrus_rbkey key, void* value);
 
-int chrus_rbtree_delete(chrus_rbtree *, const void *key);
+int chrus_rbtree_delete(chrus_rbtree *, chrus_rbkey key);
 
 int chrus_rbnode_child_direction(chrus_rbnode *parent, chrus_rbnode *child);
 void chrus_rbnode_rotate(chrus_rbnode *current, bool right);
 
 chrus_rbnode *chrus_rbtree_successor(chrus_rbtree *, chrus_rbnode *);
+
+chrus_rbkey chrus_rbkey_create(const void* keyptr);

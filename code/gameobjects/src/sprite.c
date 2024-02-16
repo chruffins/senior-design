@@ -35,7 +35,7 @@ void chrus_sprite_load(chrus_sprite* this, const char *source) {
     this->image_data = NULL;
     if (source == NULL) return;
 
-    ALLEGRO_BITMAP *loader = chrus_loader_insert(CHRUS_LOADER_BITMAP, source);
+    ALLEGRO_BITMAP *loader = chrus_loader_insert(CHRUS_LOADER_BITMAP, chrus_rbkey_create(source));
     if (!loader) return;
 
     this->image_data = loader;
@@ -44,7 +44,7 @@ void chrus_sprite_load(chrus_sprite* this, const char *source) {
 chrus_sprite* chrus_sprite_create(const char *source) {
     if (source == NULL) return chrus_sprite_create_default();
 
-    ALLEGRO_BITMAP *loader = chrus_loader_insert(CHRUS_LOADER_BITMAP, source);
+    ALLEGRO_BITMAP *loader = chrus_loader_insert(CHRUS_LOADER_BITMAP, chrus_rbkey_create(source));
     if (!loader) return chrus_sprite_create_default();
 
     chrus_sprite *new_sprite = malloc(sizeof(chrus_sprite));

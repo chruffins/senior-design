@@ -32,6 +32,6 @@ enum CHRUS_LOADER {
 };
 
 void chrus_loader_init();
-void *chrus_loader_insert(CHRUS_LOADER, const void *key);
-void *chrus_loader_get(CHRUS_LOADER, const void *key);
+void* chrus_loader_insert(CHRUS_LOADER loader, chrus_rbkey key);
+void* chrus_loader_get(CHRUS_LOADER loader, chrus_rbkey key);
 void chrus_loader_deinit();

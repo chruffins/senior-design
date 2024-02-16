@@ -2,33 +2,43 @@
 
 static chrus_rbtree* loader_trees[CHRUS_LOADER_END] = {0};
 
-static int chrus_loader_comparator(const void *, const void *);
-static void chrus_loader_destructor(const void *);
+static int chrus_loader_comparator(chrus_rbkey, chrus_rbkey);
+static void chrus_loader_destructor(chrus_rbkey);
 //static void* chrus_loader_insertinator(const void *);
 
-static int chrus_loader_comparator(const void *search, const void *nodekey) {
-    return strcmp(search, nodekey);
+static int chrus_loader_comparator(chrus_rbkey search, chrus_rbkey nodekey) {
+    return strcmp(search.keyptr, nodekey.keyptr);
 }
 
-static void chrus_loader_destructor(const void *something) {
+static void chrus_loader_destructor(chrus_rbkey something) {
     return;
 }
+
+static inline void* load_bitmap(chrus_rbkey key);
+static inline void* load_sample(chrus_rbkey key);
 
 //static void* chrus_loader_insertinator(const void *key) {
     // this function needs to deal wi
 //}
-
-void chrus_loader_init() {
-    loader_trees[CHRUS_LOADER_BITMAP] = chrus_rbtree_create((chrus_rbtree_comparator)strcmp, (chrus_rbtree_destructor)al_destroy_bitmap, (chrus_rbtree_inserter)chrus_load_bitmap);
-    //loader_trees[CHRUS_LOADER_SCRIPT] = chrus_rbtree_create(strcmp, );
-    loader_trees[CHRUS_LOADER_SAMPLE] = chrus_rbtree_create((chrus_rbtree_comparator)strcmp, (chrus_rbtree_destructor)al_destroy_sample, (chrus_rbtree_inserter)al_load_sample);
+static inline void* load_bitmap(chrus_rbkey key) {
+    return chrus_load_bitmap(key.keyptr);
 }
 
-void *chrus_loader_insert(CHRUS_LOADER index, const void *key) {
+static inline void* load_sample(chrus_rbkey key) {
+    return al_load_sample(key.keyptr);
+}
+
+void chrus_loader_init() {
+    loader_trees[CHRUS_LOADER_BITMAP] = chrus_rbtree_create(chrus_loader_comparator, (chrus_rbtree_destructor)al_destroy_bitmap, load_bitmap);
+    //loader_trees[CHRUS_LOADER_SCRIPT] = chrus_rbtree_create(strcmp, );
+    loader_trees[CHRUS_LOADER_SAMPLE] = chrus_rbtree_create(chrus_loader_comparator, (chrus_rbtree_destructor)al_destroy_sample, load_sample);
+}
+
+void *chrus_loader_insert(CHRUS_LOADER index, chrus_rbkey key) {
     return chrus_rbtree_insert(loader_trees[index], key)->value;
 }
 
-void *chrus_loader_get(CHRUS_LOADER index, const void *key) {
+void *chrus_loader_get(CHRUS_LOADER index, chrus_rbkey key) {
     return chrus_rbtree_find(loader_trees[index], key)->value;
 }
 

@@ -1,6 +1,6 @@
 #include "../include/rbtree.h"
 
-static chrus_rbnode *chrus_rbnode_create(const void *data);
+static chrus_rbnode *chrus_rbnode_create(chrus_rbkey data);
 static void fix_insert(chrus_rbtree *tree, chrus_rbnode *current);
 static void fix_delete(chrus_rbtree *tree, chrus_rbnode *current);
 static void swap_node_data(chrus_rbnode *a, chrus_rbnode *b);
@@ -34,7 +34,7 @@ void chrus_rbtree_destroy(chrus_rbtree *this) {
     // need to iterate through every node :skull:
 }
 
-chrus_rbnode *chrus_rbtree_find(chrus_rbtree *this, const void *key) {
+chrus_rbnode *chrus_rbtree_find(chrus_rbtree *this, chrus_rbkey key) {
     chrus_rbnode *current = this->root;
 
     while (current != NULL) {
@@ -47,7 +47,7 @@ chrus_rbnode *chrus_rbtree_find(chrus_rbtree *this, const void *key) {
     return NULL;
 }
 
-chrus_rbnode *chrus_rbnode_create(const void *key) {
+chrus_rbnode *chrus_rbnode_create(chrus_rbkey key) {
     // this should set red to false, parent, left/right to NULL.
     chrus_rbnode *new_node = calloc(sizeof(chrus_rbnode), 1);
     if (new_node == NULL) return NULL;
@@ -102,7 +102,7 @@ chrus_rbnode *chrus_rbtree_min(chrus_rbnode *root) {
     return current;
 }
 
-chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *this, const void *key) {
+chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *this, chrus_rbkey key) {
     chrus_rbnode *current = this->root;
     // case 1: inserted node is root.
     // root is always black.
@@ -157,7 +157,7 @@ chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *this, const void *key) {
 }
 
 /* TODO: compact this and regular insert together?*/
-chrus_rbnode *chrus_rbtree_insert_pair(chrus_rbtree* this, const void* key, void* value) {
+chrus_rbnode *chrus_rbtree_insert_pair(chrus_rbtree* this, chrus_rbkey key, void* value) {
     chrus_rbnode *current = this->root;
     // case 1: inserted node is root.
     // root is always black.
@@ -265,9 +265,9 @@ void swap_node_data(chrus_rbnode *a, chrus_rbnode *b) {
     b->value = a->value;
     a->value = temp;
 
-    temp = (void*)b->key;
+    chrus_rbkey tempkey = b->key;
     b->key = a->key;
-    a->key = temp;
+    a->key = tempkey;
 }
 
 void fix_delete(chrus_rbtree *tree, chrus_rbnode *current) {
@@ -344,7 +344,7 @@ void fix_delete(chrus_rbtree *tree, chrus_rbnode *current) {
 }
 
 // returns the key if found...
-int chrus_rbtree_delete(chrus_rbtree *this, const void *key) {
+int chrus_rbtree_delete(chrus_rbtree *this, chrus_rbkey key) {
     // let's get the node
     chrus_rbnode *dl = chrus_rbtree_find(this, key);
     if (!dl) return 1;
@@ -398,4 +398,8 @@ int chrus_rbtree_delete(chrus_rbtree *this, const void *key) {
     this->destructor(dl->value);
     free(dl);
     return 0;
+}
+
+chrus_rbkey chrus_rbkey_create(const void* keyptr) {
+    return (chrus_rbkey){ .keyptr = keyptr };
 }

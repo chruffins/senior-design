@@ -20,7 +20,7 @@ void chrus_sound_load(chrus_sound* restrict this, const char *source) {
     this->sample = NULL;
 
     if (source != NULL) {
-        this->sample = chrus_loader_insert(CHRUS_LOADER_SAMPLE, source);
+        this->sample = chrus_loader_insert(CHRUS_LOADER_SAMPLE, chrus_rbkey_create(source));
         this->sample = al_load_sample(source);
     }
 
