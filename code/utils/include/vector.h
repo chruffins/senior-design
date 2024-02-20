@@ -15,6 +15,7 @@
 
 #include<memory.h>
 #include<stdlib.h>
+#include<stdbool.h>
 
 typedef struct chrus_vector_t chrus_vector;
 
@@ -26,9 +27,10 @@ struct chrus_vector_t {
 
 chrus_vector chrus_vector_create();
 
-void chrus_vector_append(chrus_vector *this, void *data);
+bool chrus_vector_append(chrus_vector *this, void *data);
 void* chrus_vector_pop(chrus_vector *this);
-void chrus_vector_remove(chrus_vector *this, void *match);
-void chrus_vector_insert(chrus_vector *this, void *data, size_t position);
+bool chrus_vector_remove(chrus_vector *this, void *match);
+bool chrus_vector_insert(chrus_vector *this, void *data, size_t position);
+bool chrus_vector_reserve(chrus_vector* restrict this, size_t new_capacity);
 
 void chrus_vector_destroy(chrus_vector *this);
