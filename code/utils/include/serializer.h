@@ -20,4 +20,4 @@
 
 void chrus_serializer_save_scene(chrus_scene*, const char*);
 
-chrus_scene* chrus_serializer_deserialize_scene(const char* filename);
+chrus_scene* chrus_deserialize_scene(const char* filename);

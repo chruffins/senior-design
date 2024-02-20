@@ -8,6 +8,8 @@
  *   \_________/____/   /____/____/     /____________/___________/
  * 
  * Scenes are saved and loaded from JSON files. This deals with loading them.
+ * There are some ugly hacks here and they're dependent on the assumption
+ * that pointers to objects are always the same size...
 */
 #pragma once
 
@@ -25,4 +27,4 @@ enum chrus_serializing_codes {
     CHRUS_PARSER_WRONG_FIELDNAME=3,
 };
 
-chrus_scene* chrus_serializer_deserialize_scene(const char* filename);
+chrus_scene* chrus_deserialize_scene(const char* filename);

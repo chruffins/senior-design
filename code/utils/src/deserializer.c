@@ -40,6 +40,14 @@ static inline chrus_node* deserialize_sound(json_stream* stream);
 static inline chrus_node* deserialize_audiostream(json_stream* stream);
 static inline chrus_node* deserialize_text(json_stream* stream);
 
+static const char* json_get_string_copy(json_stream* stream);
+
+/* advances through entire stream, returns children stored */
+static inline int store_children_in_rbtree(chrus_vector* restrict vec, chrus_rbtree* restrict tree, json_stream* restrict stream);
+
+/* advances through entire stream */
+static inline int count_children(json_stream* restrict stream);
+
 static inline int is_correct_fieldname(json_stream* stream, const char* fieldname) {
     enum json_type valuetype;
     const char* fieldbuffer;
@@ -47,11 +55,9 @@ static inline int is_correct_fieldname(json_stream* stream, const char* fieldnam
     if (valuetype != JSON_STRING) return CHRUS_PARSER_ERROR;
 
     fieldbuffer = json_get_string(stream, NULL);
-    if (strcmp(fieldbuffer, fieldname) == 0) {
-        free(fieldbuffer);
+    if (fieldbuffer && strcmp(fieldbuffer, fieldname) == 0) {
         return 0;
     } else {
-        free(fieldbuffer);
         return 1;
     }
 }
@@ -212,7 +218,7 @@ static inline chrus_node* deserialize_object(chrus_rbtree* restrict tree, json_s
     /* collect this from the first three fields */
     enum CHRUS_NODE_TYPES node_type;
     const char* node_name;
-    uint64_t* node_ptr = malloc(sizeof(uint64_t));
+    uint64_t node_id;
 
     /* TODO: figure out what to do if we error */
     current_type = json_next(stream);
@@ -222,22 +228,21 @@ static inline chrus_node* deserialize_object(chrus_rbtree* restrict tree, json_s
     current_type = json_next(stream);
     if (current_type != JSON_NUMBER) return NULL;
     node_type = (int)json_get_number(stream);
-    final_node->type = node_type; /* set the node type now */
+    
 
     is_correct_fieldname(stream, "id");
     current_type = json_next(stream);
     if (current_type != JSON_STRING) return NULL;
     /* extracting hexstring into uint64 so that we can use it as a key */
     const char* hexbuffer = json_get_string(stream, NULL);
-    sscanf(hexbuffer, "%"SCNx64"", node_ptr);
+    sscanf(hexbuffer, "%"SCNx64"", &node_id);
     free(hexbuffer);
 
     is_correct_fieldname(stream, "name");
     current_type = json_next(stream);
     if (current_type != JSON_STRING) return NULL;
-    node_name = json_get_string(stream, NULL);
+    node_name = json_get_string_copy(stream);
     /* TODO: string interning? but then garbage collection... */
-    final_node->name = node_name;
 
     switch (node_type)
     {
@@ -268,12 +273,68 @@ static inline chrus_node* deserialize_object(chrus_rbtree* restrict tree, json_s
 
     if (final_node == NULL) return NULL;
 
+    final_node->type = node_type; /* set the node type now */
+    final_node->name = node_name;
+
     /* building our treemap now */
-    chrus_rbtree_insert_pair(tree, node_ptr, final_node);
+    chrus_rbtree_insert_pair(tree, (chrus_rbkey){.keynum=node_id}, final_node);
     return final_node;
 }
 
-chrus_scene* chrus_serializer_deserialize_scene(const char* filename) {
+static const char* json_get_string_copy(json_stream* stream) {
+    const char* buffer;
+    const char* real;
+    size_t string_size;
+
+    buffer = json_get_string(stream, &string_size);
+    real = malloc(sizeof(char)*string_size);
+    strcpy(real, buffer);
+}
+
+static inline int store_children_in_rbtree(chrus_vector* restrict vec, chrus_rbtree* restrict tree, json_stream* restrict stream) {
+    /* expects JSON_ARRAY first*/
+    enum json_type current_type;
+    int children = 0;
+    const char* buffer;
+    uint64_t child_id;
+    chrus_rbnode* data;
+
+    current_type = json_next(stream);
+    if (current_type != JSON_ARRAY) return -1;
+
+    while ((current_type = json_next(stream)) == JSON_STRING) {
+        buffer = json_get_string(stream, NULL);
+        sscanf(buffer, "%"SCNx64"", &child_id);
+        data = chrus_rbtree_insert(tree, chrus_rbkey_from_uint(child_id));
+        /* incredibly cursed way to store children lol*/
+        chrus_vector_append(vec, data);
+        children++;
+        printf("children stored: %d\n", children);
+    }
+
+    if (current_type != JSON_ARRAY_END) return -1;
+
+    return children;
+}
+
+static inline int count_children(json_stream* stream) {
+    /* expects JSON_ARRAY first*/
+    enum json_type current_type;
+    int children = 0;
+
+    current_type = json_next(stream);
+    if (current_type != JSON_ARRAY) return -1;
+
+    while ((current_type = json_next(stream)) == JSON_STRING) {
+        children++;
+    }
+
+    if (current_type != JSON_ARRAY_END) return -1;
+
+    return children;
+}
+
+chrus_scene* chrus_deserialize_scene(const char* filename) {
     FILE* fp = fopen(filename, "r");
     if (!fp) return NULL;
 
@@ -287,28 +348,58 @@ chrus_scene* chrus_serializer_deserialize_scene(const char* filename) {
 
     size_t field_length;
     const char* str_buffer;
+    uint64_t scene_id;
     double number_buffer;
+    int result = 0;
+    int scene_children;
 
     json_open_stream(&first_pass_stream, fp);
 
     // let's make sure we're reading a json array then a json object
     // we need to do some assertions too...
     current_type = json_next(&first_pass_stream);
-    if (current_type != JSON_ARRAY) goto failure;
+    if (result || current_type != JSON_ARRAY) goto failure;
     /* reading the scene object now */
     current_type = json_next(&first_pass_stream);
-    if (current_type != JSON_OBJECT) goto failure;
+    if (result || current_type != JSON_OBJECT) goto failure;
+
+    result = is_correct_fieldname(&first_pass_stream, "type");
+    current_type = json_next(&first_pass_stream);
+    if (result || current_type != JSON_NUMBER) goto failure;
+
+    /* can create the scene now */
+    result = is_correct_fieldname(&first_pass_stream, "id");
+    current_type = json_next(&first_pass_stream);
+    if (result || current_type != JSON_STRING) goto failure;
+    str_buffer = json_get_string(&first_pass_stream, NULL);
+    sscanf(str_buffer, "%"SCNx64"", &scene_id);
+
+    result = is_correct_fieldname(&first_pass_stream, "name");
     current_type = json_next(&first_pass_stream);
     if (current_type != JSON_STRING) goto failure;
+    str_buffer = json_get_string_copy(&first_pass_stream);
+    final_scene = chrus_scene_create(str_buffer);
+    printf("got past name: %s\n", final_scene->name);
 
-    while (get_key_and_value_type(&first_pass_stream, str_buffer, &field_length, &current_type) == 0) {
-        
-    }
-    str_buffer = json_get_string(&first_pass_stream, &field_length);
-    printf("scene field: %s\n", str_buffer);
+    /* we ignore pointers in the first pass with the exception of id */
+    result = is_correct_fieldname(&first_pass_stream, "current_camera");
     current_type = json_next(&first_pass_stream);
-    number_buffer = json_get_number(&first_pass_stream);
-    printf("scene type: %d\n", (int)number_buffer);
+    if (result || current_type != JSON_STRING) goto failure;
+
+    result = is_correct_fieldname(&first_pass_stream, "children");
+    /* relies on the assumption that sizeof(void**) == sizeof(chrus_node**) */
+    scene_children = store_children_in_rbtree((chrus_vector*)&final_scene->children, pointer_dictionary, &first_pass_stream);
+
+    /* 0 <= scene_children <= number of nodes*/
+    result = chrus_vector_reserve(&nodes, scene_children); 
+    printf("scene children: %d\n", scene_children);
+
+    /* deserialize all nodes in the first pass... */
+    chrus_node* current_node;
+    while ((current_node = deserialize_object(pointer_dictionary, &first_pass_stream)) != NULL) {
+        bool append_success = chrus_vector_append(&nodes, current_node);
+    }
+
     goto success;
 
     failure:
