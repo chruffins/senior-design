@@ -56,14 +56,18 @@ chrus_rbnode *chrus_rbtree_find(chrus_rbtree *, chrus_rbkey key);
 /* implicitly calls insertinator in order to get value */
 chrus_rbnode *chrus_rbtree_insert(chrus_rbtree *, chrus_rbkey key);
 
-/* you explicitly pass the key-value pair here! */
+/* you explicitly pass the key-value pair here! also, this overwrites if it finds the key lol */
 chrus_rbnode *chrus_rbtree_insert_pair(chrus_rbtree* this, chrus_rbkey key, void* value);
+
+int chrus_rbtree_height(chrus_rbtree* this, chrus_rbnode* current);
+int chrus_rbtree_black_height(chrus_rbtree* this, chrus_rbnode* current);
+bool chrus_rbtree_valid(chrus_rbtree* this, chrus_rbnode* current);
 
 int chrus_rbtree_delete(chrus_rbtree *, chrus_rbkey key);
 
 int chrus_rbnode_child_direction(chrus_rbnode *parent, chrus_rbnode *child);
-void chrus_rbnode_rotate(chrus_rbnode *current, bool right);
 
 chrus_rbnode *chrus_rbtree_successor(chrus_rbtree *, chrus_rbnode *);
 
 chrus_rbkey chrus_rbkey_create(const void* keyptr);
+chrus_rbkey chrus_rbkey_from_uint(uint64_t key);
