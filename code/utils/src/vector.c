@@ -5,6 +5,8 @@ chrus_vector chrus_vector_create() {
 }
 
 bool chrus_vector_append(chrus_vector *this, void *data) {
+    if (data == NULL) return false;
+
     if (this->data == NULL) {
         this->data = malloc(sizeof(void*));
         this->capacity = 1;

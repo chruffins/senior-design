@@ -188,10 +188,7 @@ chrus_rbnode *chrus_rbtree_insert_pair(chrus_rbtree* this, chrus_rbkey key, void
     int result;
     while (current) {
         result = this->comparator(key, current->key);
-        /* overwrites the current value */
-        if (result == 0) {
-            current->value = value;
-        }
+        if (result == 0) return current;
 
         parent = current;
         current = result < 0 ? current->left : current->right;
@@ -207,26 +204,20 @@ chrus_rbnode *chrus_rbtree_insert_pair(chrus_rbtree* this, chrus_rbkey key, void
         current = parent->left;
     }
 
+    current->parent = parent;
+
     // case 2: parent is black. black nodes can have red children
     // else: case 3 and 4
-    chrus_rbnode *gp;
+    //chrus_rbnode *gp;
     //chrus_rbnode *uncle;
     if (parent->red == false) {
         return current;
-    }
-
-    // implies parent is red now, and the existence of a grandparent
-    gp = parent->parent;
-    if ((gp->left && gp->left->red) && (gp->right && gp->right->red)) {
+    } else {
+        // implies the existence of a grandparent
         fix_insert(this, current);
-        // apparently the tree doesn't need to be rotated...
-        // but the root should be recolored black.
         this->root->red = false;
         return current;
     }
-
-    /* this actually won't be reached but here to suppress warnings */
-    return NULL;
 }
 
 static void chrus_rbnode_rotate(chrus_rbtree* tree, chrus_rbnode *current, bool right) {
