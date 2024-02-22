@@ -56,6 +56,7 @@ struct chrus_animation_frame_t {
 //static ALLEGRO_BITMAP *default_image;
 
 //chrus_sprite* chrus_sprite_create_default();
+chrus_sprite* chrus_sprite_create_uninit();
 chrus_sprite* chrus_sprite_create(const char *source);
 void chrus_sprite_load(chrus_sprite* restrict this, const char *source);
 void chrus_sprite_draw(chrus_sprite* restrict this, float dx, float dy);

@@ -1,21 +1,21 @@
 #include "../include/deserializer.h"
 
-#define READ_JSON_NUMBER(stream, jfieldname, fieldname) if (is_correct_fieldname(stream, jfieldname) || is_correct_type(stream, JSON_NUMBER)) { \
+#define READ_JSON_NUMBER(stream, jfieldname, fieldname) if (is_correct_fieldname(stream, jfieldname) != 0 || is_correct_type(stream, JSON_NUMBER) != 0) { \
         goto cleanup; \
     }   else {\
         fieldname = json_get_number(stream);\
     }
 
-#define READ_JSON_NUMBER_WITH_CAST(stream, jfieldname, fieldname, cast_type) if (is_correct_fieldname(stream, jfieldname) || is_correct_type(stream, JSON_NUMBER)) { \
+#define READ_JSON_NUMBER_WITH_CAST(stream, jfieldname, fieldname, cast_type) if (is_correct_fieldname(stream, jfieldname) != 0 || is_correct_type(stream, JSON_NUMBER) != 0) { \
         goto cleanup; \
     }   else {\
         fieldname = (cast_type)json_get_number(stream);\
     }
 
-#define READ_JSON_STRING(stream, jfieldname, fieldname) if (is_correct_fieldname(stream, jfieldname) || is_correct_type(stream, JSON_STRING)) { \
+#define READ_JSON_STRING(stream, jfieldname, fieldname) if (is_correct_fieldname(stream, jfieldname) != 0 || is_correct_type(stream, JSON_STRING) != 0) { \
         goto cleanup; \
     }   else {\
-        fieldname = json_get_string(stream, NULL);\
+        fieldname = json_get_string_copy(stream);\
     }
 /* deserialization:
     first pass through json: allocate ALL of the nodes
@@ -79,17 +79,6 @@ static inline int get_number_field(json_stream* stream, const char* fieldname, d
     *number_buffer = json_get_number(stream);
 }
 
-static int get_key_and_value_type(json_stream* stream, const char* keybuffer, size_t* keylength, enum json_type* valuetype) {
-    *valuetype = json_next(&stream);
-    if (*valuetype == JSON_OBJECT_END) return CHRUS_PARSER_OBJECT_ENDED;
-    if (*valuetype != JSON_STRING) return CHRUS_PARSER_ERROR;
-    
-    keybuffer = json_get_string(&stream, keylength);
-    *valuetype = json_next(&stream);
-
-    return 0;
-}
-
 static inline chrus_node* deserialize_camera(json_stream* stream) {
     chrus_node* node = chrus_node_create_uninit();
     chrus_camera* camera = chrus_camera_create();
@@ -129,7 +118,7 @@ static inline chrus_node* deserialize_script(json_stream* stream) {
 
 static inline chrus_node* deserialize_sprite(json_stream* stream) {
     chrus_node* node = chrus_node_create_uninit();
-    chrus_sprite* sprite = chrus_sprite_create(NULL);
+    chrus_sprite* sprite = chrus_sprite_create_uninit();
 
     node->data = sprite;
 
@@ -194,7 +183,8 @@ static inline chrus_node* deserialize_text(json_stream* stream) {
     READ_JSON_NUMBER(stream, "y", text->x)
     READ_JSON_NUMBER(stream, "max_width", text->x)
     READ_JSON_NUMBER(stream, "line_height", text->x)
-    READ_JSON_NUMBER_WITH_CAST(stream, "x", text->flags, int)
+    READ_JSON_NUMBER_WITH_CAST(stream, "flags", text->flags, int)
+    READ_JSON_STRING(stream, "text", text->text)
 
     return node;
     cleanup:
@@ -219,6 +209,7 @@ static inline chrus_node* deserialize_object(chrus_rbtree* restrict tree, json_s
     enum CHRUS_NODE_TYPES node_type;
     const char* node_name;
     uint64_t node_id;
+    int result;
 
     /* TODO: figure out what to do if we error */
     current_type = json_next(stream);
@@ -236,7 +227,6 @@ static inline chrus_node* deserialize_object(chrus_rbtree* restrict tree, json_s
     /* extracting hexstring into uint64 so that we can use it as a key */
     const char* hexbuffer = json_get_string(stream, NULL);
     sscanf(hexbuffer, "%"SCNx64"", &node_id);
-    free(hexbuffer);
 
     is_correct_fieldname(stream, "name");
     current_type = json_next(stream);
@@ -273,11 +263,20 @@ static inline chrus_node* deserialize_object(chrus_rbtree* restrict tree, json_s
 
     if (final_node == NULL) return NULL;
 
+    //current_type = json_peek(stream);
+
+    result = is_correct_fieldname(stream, "children");
+    //if (result != 0) return NULL; 
+    int children = store_children_in_rbtree((chrus_vector*)&final_node->children, tree, stream);
+
     final_node->type = node_type; /* set the node type now */
     final_node->name = node_name;
 
     /* building our treemap now */
     chrus_rbtree_insert_pair(tree, (chrus_rbkey){.keynum=node_id}, final_node);
+
+    current_type = json_next(stream);
+    if (current_type != JSON_OBJECT_END) return -1;
     return final_node;
 }
 
@@ -309,7 +308,7 @@ static inline int store_children_in_rbtree(chrus_vector* restrict vec, chrus_rbt
         /* incredibly cursed way to store children lol*/
         chrus_vector_append(vec, data);
         children++;
-        printf("children stored: %d\n", children);
+        /* printf("children stored: %d\n", children); */
     }
 
     if (current_type != JSON_ARRAY_END) return -1;
@@ -381,7 +380,7 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
     final_scene = chrus_scene_create(str_buffer);
     printf("got past name: %s\n", final_scene->name);
 
-    /* we ignore pointers in the first pass with the exception of id */
+    /* we put ALL pointers in the first pass with the exception of id */
     result = is_correct_fieldname(&first_pass_stream, "current_camera");
     current_type = json_next(&first_pass_stream);
     if (result || current_type != JSON_STRING) goto failure;
@@ -394,15 +393,42 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
     result = chrus_vector_reserve(&nodes, scene_children); 
     printf("scene children: %d\n", scene_children);
 
+    printf("red-black tree black height: %d\n", chrus_rbtree_black_height(pointer_dictionary, pointer_dictionary->root));
+    printf("red-black tree valid: %d\n", chrus_rbtree_valid(pointer_dictionary, pointer_dictionary->root));
+
+    current_type = json_next(&first_pass_stream);
+    if (current_type != JSON_OBJECT_END) goto failure;
+
     /* deserialize all nodes in the first pass... */
     chrus_node* current_node;
+    int nodes_added = 0;
     while ((current_node = deserialize_object(pointer_dictionary, &first_pass_stream)) != NULL) {
         bool append_success = chrus_vector_append(&nodes, current_node);
+        nodes_added += 1;
+        if (!append_success) goto failure;
+    }
+
+    printf("added %d nodes w/o failure\n", nodes_added);
+
+    /* create the connections, then we can probably pass the scene off here ...? */
+    for (int i = 0; i < nodes.size; i++) {
+        current_node = nodes.data[i];
+        switch (current_node->type)
+        {
+        default:
+            break;
+        }
+        for (int j = 0; j < current_node->children.size; j++) {
+            chrus_node* child_node = ((chrus_rbnode*)current_node->children.data[j])->value;
+            current_node->children.data[j] = child_node;
+            child_node->parent = current_node;
+        }
     }
 
     goto success;
 
     failure:
+    /* cleanup anything initialized */
     printf("experienced a failure\n");
     if (final_scene) chrus_scene_destroy(final_scene);
     return NULL;

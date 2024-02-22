@@ -16,6 +16,7 @@ gameobjects/src/text.c
 utils/src/vector.c
 utils/src/rbtree.c
 utils/src/serializer.c
+utils/src/deserializer.c
 utils/src/allocator.c
 utils/src/globals.c
 utils/src/drawing_thread.c

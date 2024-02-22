@@ -107,7 +107,7 @@ static void serialize_node(ALLEGRO_EVENT_SOURCE* restrict event_source, FILE* re
     fprintint(fp, "type", node->type, false);
     fprintptr(fp, "id", node, false);
     fprintstr(fp, "name", node->name, false);
-    fprintptr(fp, "parent", node->parent, false);
+    //fprintptr(fp, "parent", node->parent, false);
     switch (node->type)
     {
     case CHRUS_NODE_UNINITIALIZED:

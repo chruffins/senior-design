@@ -41,6 +41,12 @@ void chrus_sprite_load(chrus_sprite* this, const char *source) {
     this->image_data = loader;
 }
 
+chrus_sprite* chrus_sprite_create_uninit() {
+    chrus_sprite *new_sprite = malloc(sizeof(chrus_sprite));
+
+    return new_sprite;
+}
+
 chrus_sprite* chrus_sprite_create(const char *source) {
     if (source == NULL) return chrus_sprite_create_default();
 
