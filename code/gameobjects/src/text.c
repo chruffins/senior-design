@@ -9,6 +9,13 @@ static ALLEGRO_FONT* get_default_font() {
     return default_font;
 }
 
+bool chrus_load_default_font() {
+    if (!default_font) default_font = al_create_builtin_font();
+
+    if (!default_font) return false;
+    return true;
+}
+
 chrus_text* chrus_text_create() {
     chrus_text* new_text = malloc(sizeof(chrus_text));
     new_text->font = get_default_font();

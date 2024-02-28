@@ -15,6 +15,8 @@
 #include<allegro5/allegro_font.h>
 #include<allegro5/allegro_ttf.h>
 
+#include<stdbool.h>
+
 typedef struct chrus_text_t chrus_text;
 
 struct chrus_text_t {
@@ -27,6 +29,8 @@ struct chrus_text_t {
     int flags;
     const char* text;
 };
+
+bool chrus_load_default_font();
 
 chrus_text* chrus_text_create();
 void chrus_text_draw(chrus_text* restrict this, float dx, float dy);

@@ -36,7 +36,10 @@ void chrus_sprite_load(chrus_sprite* this, const char *source) {
     if (source == NULL) return;
 
     ALLEGRO_BITMAP *loader = chrus_loader_insert(CHRUS_LOADER_BITMAP, chrus_rbkey_create(source));
-    if (!loader) return;
+    if (!loader) {
+        printf("sprite failed to load\n");
+        return;
+    }
 
     this->image_data = loader;
 }
@@ -70,7 +73,7 @@ chrus_sprite* chrus_sprite_create(const char *source) {
 }
 
 void chrus_sprite_draw(chrus_sprite *this, float dx, float dy) {
-    al_draw_rotated_bitmap(this->image_data, this->x + (this->width / 2), this->y + (this->height / 2), this->x, this->y, this->rotation, this->flipping);
+    al_draw_rotated_bitmap(this->image_data, this->x + (this->width / 2), this->y + (this->height / 2), this->x + dx, this->y + dy, this->rotation, this->flipping);
     // al_draw_bitmap(this->image_data, this->x + dx, this->y + dy, this->flipping);
 }
 
