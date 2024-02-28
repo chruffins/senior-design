@@ -12,6 +12,7 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/allocator.h"
 #include "../../utils/include/serializer.h"
+#include "../../utils/include/deserializer.h"
 #include "../../utils/include/globals.h"
 #include "../../utils/include/drawing_thread.h"
 
@@ -54,7 +55,7 @@ void load_allegro_libraries() {
 
 void set_some_flags() {
     al_set_new_display_flags(ALLEGRO_WINDOWED);
-    al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
+    al_set_new_bitmap_flags(ALLEGRO_CONVERT_BITMAP);
     al_set_new_window_title("chrus game");
 }
 
@@ -72,14 +73,14 @@ void run_game_loop() {
 
     void *drawing_thread_args[3] = { drawing_loaded, &scene_manager, chrus_display };
     ALLEGRO_THREAD *drawing_thread = al_create_thread(drawing_handler, drawing_thread_args);
-    DEBUG_PRINTF("waiting until draw thread inits\n");
+    printf("waiting until draw thread inits\n");
     al_start_thread(drawing_thread);
 
     al_lock_mutex(drawing_mutex);
     al_wait_cond(drawing_loaded, drawing_mutex);
     al_unlock_mutex(drawing_mutex);
 
-    DEBUG_PRINTF("now continuing\n");
+    printf("drawing thread running\n");
 
     // al_set_target_backbuffer(chrus_display);
 
@@ -88,17 +89,19 @@ void run_game_loop() {
     al_register_event_source(queue, al_get_display_event_source(chrus_display));
     al_register_event_source(queue, al_get_timer_event_source(timer));
 
-    chrus_scene_manager_add_scene(&scene_manager, chrus_scene_create("base test"));
-    chrus_node* test_node_script = malloc(sizeof(chrus_node));
+    chrus_scene_manager_load_scene(&scene_manager, "savedscene.json");
+
+    //chrus_scene_manager_add_scene(&scene_manager, chrus_scene_create("base test"));
+    //chrus_node* test_node_script = malloc(sizeof(chrus_node));
     //chrus_node* datetime_script = malloc(sizeof(chrus_node));
     //chrus_node* test_image = malloc(sizeof(chrus_node));
-    *test_node_script = (chrus_node){ "script", NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/helloworld.lua") };
+    //*test_node_script = (chrus_node){ "script", NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/helloworld.lua") };
     //*datetime_script = (chrus_node){ "script", NULL, chrus_node_vec_create(), CHRUS_NODE_SCRIPT, chrus_script_create("data/events.lua") };
     //*test_image = (chrus_node){ "sprite", NULL, chrus_node_vec_create(), CHRUS_NODE_SPRITE, chrus_sprite_create("data/test.png")};
     
     //chrus_sprite_translate(test_image->data, 64, 64);
 
-    chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), test_node_script);
+    //chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), test_node_script);
     //chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), datetime_script);
     //chrus_scene_add_node(chrus_scene_manager_top(&scene_manager), chrus_scene_manager_top(&scene_manager), test_image);
 
@@ -138,8 +141,8 @@ void run_game_loop() {
     al_join_thread(drawing_thread, NULL);
     // need to wait for drawing thread to die before we can close up the scene manager
 
-    DEBUG_PRINTF("saving scene to disk\n");
-    chrus_serializer_save_scene(scene_manager.scenes[scene_manager.top], "savedscene.json");
+    //printf("saving scene to disk\n");
+    //chrus_serializer_save_scene(scene_manager.scenes[scene_manager.top], "savedscene.json");
 
     DEBUG_PRINTF("freeing scene resources now\n");
     chrus_scene_manager_destroy(&scene_manager);
@@ -163,6 +166,7 @@ int main(int argc, char **argv) {
 
     set_some_flags();
 
+    //chrus_deserialize_scene("savedscene.json");
     run_game_loop();
 
     finalize();

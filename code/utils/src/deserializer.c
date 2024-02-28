@@ -131,6 +131,8 @@ static inline chrus_node* deserialize_sprite(json_stream* stream) {
     READ_JSON_NUMBER(stream, "rotation", sprite->x)
     READ_JSON_NUMBER_WITH_CAST(stream, "visible", sprite->x, bool)
 
+    chrus_sprite_load(sprite, sprite->source);
+
     return node;
     cleanup:
     chrus_node_destroy(node);
@@ -288,6 +290,8 @@ static const char* json_get_string_copy(json_stream* stream) {
     buffer = json_get_string(stream, &string_size);
     real = malloc(sizeof(char)*string_size);
     strcpy(real, buffer);
+
+    return real;
 }
 
 static inline int store_children_in_rbtree(chrus_vector* restrict vec, chrus_rbtree* restrict tree, json_stream* restrict stream) {
@@ -348,6 +352,7 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
     size_t field_length;
     const char* str_buffer;
     uint64_t scene_id;
+    uint64_t camera_id;
     double number_buffer;
     int result = 0;
     int scene_children;
@@ -384,6 +389,9 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
     result = is_correct_fieldname(&first_pass_stream, "current_camera");
     current_type = json_next(&first_pass_stream);
     if (result || current_type != JSON_STRING) goto failure;
+    str_buffer = json_get_string(&first_pass_stream, NULL);
+    sscanf(str_buffer, "%"SCNx64"", &camera_id);
+
 
     result = is_correct_fieldname(&first_pass_stream, "children");
     /* relies on the assumption that sizeof(void**) == sizeof(chrus_node**) */
@@ -411,6 +419,14 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
     printf("added %d nodes w/o failure\n", nodes_added);
 
     /* create the connections, then we can probably pass the scene off here ...? */
+    /* second assumption: the deserialized file constitutes a single tree where the root is the scene */
+    /* actually this is just correct behavior */
+    for (int i = 0; i < final_scene->children.size; i++) {
+        void** ptr_to_rbnode = (void**)&final_scene->children.data[i];
+        chrus_scene_replace_rbnode(final_scene, final_scene, ptr_to_rbnode);
+    }
+    final_scene->current_camera = chrus_rbtree_find(pointer_dictionary, chrus_rbkey_from_uint(camera_id))->value;
+
     for (int i = 0; i < nodes.size; i++) {
         current_node = nodes.data[i];
         switch (current_node->type)
@@ -419,9 +435,8 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
             break;
         }
         for (int j = 0; j < current_node->children.size; j++) {
-            chrus_node* child_node = ((chrus_rbnode*)current_node->children.data[j])->value;
-            current_node->children.data[j] = child_node;
-            child_node->parent = current_node;
+            void** ptr_to_rbnode = (void**)&final_scene->children.data[i];
+            chrus_scene_replace_rbnode(final_scene, current_node, ptr_to_rbnode);
         }
     }
 
@@ -430,8 +445,14 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
     failure:
     /* cleanup anything initialized */
     printf("experienced a failure\n");
+    json_close(&first_pass_stream);
+    fclose(fp);
+    chrus_rbtree_destroy(pointer_dictionary);
     if (final_scene) chrus_scene_destroy(final_scene);
     return NULL;
     success:
+    json_close(&first_pass_stream);
+    fclose(fp);
+    chrus_rbtree_destroy(pointer_dictionary);
     return final_scene;
 }

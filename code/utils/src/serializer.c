@@ -6,6 +6,7 @@ static void fprintint(FILE* restrict fp, const char* key, int data, bool last);
 static void fprintptr(FILE* restrict fp, const char* key, void* data, bool last);
 static void fprintstr(FILE* restrict fp, const char* key, const char* data, bool last);
 static void fprintfloat(FILE* restrict fp, const char* key, double data, bool last);
+static void fprintcolor(FILE* restrict fp, const char* key, ALLEGRO_COLOR data, bool last);
 static const char *safestr(const char* str);
 
 //static const char *chrus_node_type_to_str(enum CHRUS_NODE_TYPES);
@@ -52,6 +53,27 @@ static void fprintstr(FILE* restrict fp, const char* key, const char* data, bool
 static void fprintfloat(FILE* restrict fp, const char* key, double data, bool last) {
     fprintspaces(fp, 1);
     fprintf(fp, "\"%s\": %f", key, data);
+    fprintnewfield(fp, last);
+}
+
+static void fprintcolor(FILE* restrict fp, const char* key, ALLEGRO_COLOR data, bool last) {
+    static const char hex_chars[] = "0123456789ABCDEF";
+
+    char colorstr[10];
+    colorstr[0] = '#';
+    colorstr[9] = '\0';
+
+    colorstr[1] = hex_chars[(int)(data.r * 255) >> 4];
+    colorstr[2] = hex_chars[(int)(data.r * 255) & 0xF];
+    colorstr[3] = hex_chars[(int)(data.g * 255) >> 4];
+    colorstr[4] = hex_chars[(int)(data.g * 255) & 0xF];
+    colorstr[5] = hex_chars[(int)(data.b * 255) >> 4];
+    colorstr[6] = hex_chars[(int)(data.b * 255) & 0xF];
+    colorstr[7] = hex_chars[(int)(data.a * 255) >> 4];
+    colorstr[8] = hex_chars[(int)(data.a * 255) & 0xF];
+
+    fprintspaces(fp, 1);
+    fprintf(fp, "\"%s\": \"%s\"", key, colorstr);
     fprintnewfield(fp, last);
 }
 
@@ -195,7 +217,7 @@ static inline void serialize_text(FILE* restrict fp, chrus_node* restrict node) 
     chrus_text text = *(chrus_text*)(node->data);
     
     /* we probably need a font object... */
-    /* todo: serialize color? */
+    fprintcolor(fp, "color", text.color, false);
     fprintfloat(fp, "x", text.x, false);
     fprintfloat(fp, "y", text.y, false);
     fprintfloat(fp, "max_width", text.max_width, false);

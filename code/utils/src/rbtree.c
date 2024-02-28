@@ -36,12 +36,11 @@ static void delete_node(chrus_rbtree *tree, chrus_rbnode *this) {
     delete_node(tree, this->right);
 
     // TODO: what to do with key
-    tree->destructor(this->value);
+    if (tree->destructor) tree->destructor(this->value);
 }
 
 void chrus_rbtree_destroy(chrus_rbtree *this) {
     delete_node(this, this->root);
-    // need to iterate through every node :skull:
 }
 
 chrus_rbnode *chrus_rbtree_find(chrus_rbtree *this, chrus_rbkey key) {
@@ -188,8 +187,10 @@ chrus_rbnode *chrus_rbtree_insert_pair(chrus_rbtree* this, chrus_rbkey key, void
     int result;
     while (current) {
         result = this->comparator(key, current->key);
-        if (result == 0) return current;
-
+        if (result == 0) {
+            current->value = value;
+            return current;
+        }
         parent = current;
         current = result < 0 ? current->left : current->right;
     }
