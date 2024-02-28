@@ -34,6 +34,30 @@ int chrus_scene_manager_add_scene(chrus_scene_manager *this, chrus_scene *new_sc
     return 0;
 }
 
+int chrus_scene_manager_load_scene(chrus_scene_manager* restrict this, const char* restrict scene_filename) {
+    al_lock_mutex(this->mutex);
+
+    if (this->top == MAX_SCENES - 1) {
+        al_unlock_mutex(this->mutex);
+        return -1;
+    }
+
+    chrus_scene* new_scene = chrus_deserialize_scene(scene_filename);
+
+    if (new_scene == NULL) {
+        al_unlock_mutex(this->mutex);
+        return -1;
+    }
+    
+    this->threads[this->top + 1] = al_create_thread(chrus_scene_thread_handler, new_scene); //al_create_event_queue(); // replace with create thread();
+    this->scenes[this->top + 1] = new_scene;
+
+    al_start_thread(this->threads[this->top + 1]);
+
+    this->top++;
+    al_unlock_mutex(this->mutex);
+}
+
 int chrus_scene_manager_pop_scene(chrus_scene_manager *this) {
     al_lock_mutex(this->mutex);
 

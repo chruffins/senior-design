@@ -10,6 +10,7 @@ chrus_scene *chrus_scene_create(const char *name) {
     new_scene->children = chrus_node_vec_create();
     new_scene->lua_vm = luaL_newstate();
     /* we need to defer creating the camera to the thread handle*/
+    new_scene->current_camera = NULL;
     new_scene->event_queue = al_create_event_queue();
     new_scene->tick_timer = al_create_timer(1.0 / 30.0);
 
@@ -55,9 +56,13 @@ void* chrus_scene_thread_handler(ALLEGRO_THREAD* restrict this, void* args) {
 
     /* we need this to create bitmaps in a thread successfully */
     al_set_new_bitmap_flags(ALLEGRO_CONVERT_BITMAP);
-    scene->current_camera = chrus_node_create_camera();
-    chrus_camera_init(scene->current_camera->data);
-    chrus_scene_add_node(scene, scene, scene->current_camera);
+    if (!scene->current_camera) {
+        scene->current_camera = chrus_node_create_camera();
+        chrus_camera_init(scene->current_camera->data);
+        chrus_scene_add_node(scene, scene, scene->current_camera);
+    } else {
+        chrus_camera_init(scene->current_camera->data);
+    }
 
     luaL_openlibs(scene->lua_vm);
 
@@ -105,6 +110,7 @@ void chrus_scene_draw(chrus_scene* restrict this) {
     ALLEGRO_DISPLAY* current_display = al_get_current_display();
 
     //al_use_transform(&current_camera->_scaler);
+    if (!current_camera->_buffer) return;
     al_set_target_bitmap(current_camera->_buffer);
     al_clear_to_color(al_map_rgb(0, 0, 0));
 
@@ -159,6 +165,32 @@ chrus_node* chrus_scene_add_node(chrus_scene* this, void* parent, chrus_node *ch
         break;
     case CHRUS_NODE_SPRITE:
         chrus_vector_append(&this->sprites_cache, child->data);
+        break;
+    default:
+        break;
+    }
+
+    return child;
+}
+
+chrus_node* chrus_scene_replace_rbnode(chrus_scene* this, void* parent, void** vec_ptr) {
+    chrus_node* child = ((chrus_rbnode*)*(vec_ptr))->value;
+
+    if (!child) return NULL; /* this really shouldn't happen... */
+
+    *vec_ptr = child; /* replaces the pointer in the vector with the pointer to the child */
+    child->parent = parent;
+
+    switch (child->type)
+    {
+    case CHRUS_NODE_SCRIPT:
+        chrus_scene_queue_script(this, child);
+        break;
+    case CHRUS_NODE_SPRITE:
+        chrus_vector_append(&this->sprites_cache, child->data);
+        break;
+    case CHRUS_NODE_TEXT:
+        //((chrus_text*)child->data)->font = chrus_text
         break;
     default:
         break;

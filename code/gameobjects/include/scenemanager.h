@@ -21,6 +21,7 @@
 //#include "../../utils/include/rbtree.h"
 
 #include "scene.h"
+#include "../../utils/include/deserializer.h"
 
 #define MAX_SCENES 64
 
@@ -46,6 +47,7 @@ chrus_scene *chrus_scene_manager_top(chrus_scene_manager* restrict this);
 chrus_scene *chrus_scene_manager_at(chrus_scene_manager* restrict this, int16_t at);
 
 int chrus_scene_manager_add_scene(chrus_scene_manager* restrict this, chrus_scene *new_scene);
+int chrus_scene_manager_load_scene(chrus_scene_manager* restrict this, const char* restrict scene_filename);
 int chrus_scene_manager_pop_scene(chrus_scene_manager* restrict this);
 int chrus_scene_manager_set_modal_scene(chrus_scene_manager* restrict this, int16_t at); // setting a scene to modal means that only this scene will process input
 void chrus_scene_manager_reset_modal(chrus_scene_manager* restrict this); // this internally sets the current modal scene to -1
