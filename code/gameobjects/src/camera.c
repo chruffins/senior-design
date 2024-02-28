@@ -29,9 +29,9 @@ void chrus_camera_init(chrus_camera* restrict this) {
     if (this->_buffer) {
         // do something about it
     }
-    this->_buffer = al_create_bitmap((int)this->viewport_width, (int)this->viewport_height);
+    this->_buffer = chrus_create_bitmap((int)this->viewport_width, (int)this->viewport_height);
     if (!this->_buffer) {
-        printf("what the fuck\n");
+        printf("camera buffer did not load, you're fucked now\n");
     }
 
     chrus_camera_calc_transform(this);

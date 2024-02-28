@@ -4,6 +4,8 @@
 
 #include<stdio.h>
 
+#include "../../utils/include/bitmap_converter.h"
+
 typedef struct chrus_camera_t chrus_camera;
 
 // game objects can be seen from cameras
