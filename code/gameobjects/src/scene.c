@@ -25,27 +25,19 @@ chrus_scene *chrus_scene_create(const char *name) {
 
 /* needs to be called after the thread is joined */
 void chrus_scene_destroy(chrus_scene *scene) {
-    printf("destroying %lu nodes\n", scene->children.size);
-    for (size_t i = 0; i < scene->children.size; i++) {
-        /* printf("destroying node %s now\n", scene->children.data[i]->name); */
-        chrus_node_destroy(scene->children.data[i]);
-    }
-
     al_destroy_user_event_source(&scene->event_source);
     al_destroy_timer(scene->tick_timer);
     al_destroy_event_queue(scene->event_queue);
 
     lua_close(scene->lua_vm);
 
+    printf("destroying %lu nodes\n", scene->children.size);
+    for (size_t i = 0; i < scene->children.size; i++) {
+        /* printf("destroying node %s now\n", scene->children.data[i]->name); */
+        chrus_node_destroy(scene->children.data[i]);
+    }
+
     free(scene);
-}
-
-chrus_scene *chrus_scene_from_file(const char *filename) {
-    chrus_scene *new_scene = malloc(sizeof(chrus_scene));
-
-    // TODO: design the storage of scenes
-
-    return new_scene;
 }
 
 /* oh fuck yeah */
@@ -101,9 +93,11 @@ void chrus_scene_init_lua_vm(chrus_scene* restrict this) {
     lua_setglobal(lua_vm, "scene");
 }
 
+/*
 void chrus_scene_process_input(chrus_scene* this, ALLEGRO_EVENT *event) {
     // TODO: invent listeners
 }
+*/
 
 void chrus_scene_draw(chrus_scene* restrict this) {
     chrus_camera* restrict current_camera = (chrus_camera*)this->current_camera->data;
@@ -116,7 +110,7 @@ void chrus_scene_draw(chrus_scene* restrict this) {
 
     //al_hold_bitmap_drawing(true);
 
-    for (int i = 0; i < this->children.size; i++) {
+    for (size_t i = 0; i < this->children.size; i++) {
         chrus_node* node = this->children.data[i];
         switch (node->type)
         {

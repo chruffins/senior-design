@@ -45,13 +45,12 @@ struct chrus_scene_t {
 
 chrus_scene *chrus_scene_create(const char *name);
 void chrus_scene_destroy(chrus_scene *scene);
-chrus_scene *chrus_scene_from_file(const char *filename);
 
 void chrus_scene_init_lua_vm(chrus_scene* restrict this);
 
 void* chrus_scene_thread_handler(ALLEGRO_THREAD* restrict this, void* args);
 
-void chrus_scene_process_input(chrus_scene* restrict this, ALLEGRO_EVENT *event);
+//void chrus_scene_process_input(chrus_scene* restrict this, ALLEGRO_EVENT *event);
 void chrus_scene_draw(chrus_scene* restrict this);
 chrus_node* chrus_scene_add_node(chrus_scene* this, void* parent, chrus_node *child);
 chrus_node* chrus_scene_replace_rbnode(chrus_scene* this, void* parent, void** vec_ptr);
