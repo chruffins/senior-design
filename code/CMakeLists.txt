@@ -4,6 +4,8 @@ project(chrus_engine C)
 # set C standard
 set(CMAKE_C_STANDARD 11)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -g")
+
 add_library(chrus_lib SHARED gameobjects/src/camera.c
 gameobjects/src/node.c
 gameobjects/src/scene.c
@@ -28,8 +30,8 @@ utils/src/pdjson.c)
 
 add_executable(${PROJECT_NAME} main/src/main.c)
 
-target_compile_options(chrus_lib PRIVATE -g -Wall)
-target_compile_options(chrus_engine PRIVATE -g -Wall)
+target_compile_options(chrus_lib PRIVATE)
+target_compile_options(chrus_engine PRIVATE)
 #target_compile_options(chrus_engine -g)
 
 # set some compiler flags
