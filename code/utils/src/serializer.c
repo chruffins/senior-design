@@ -111,7 +111,7 @@ static void serialize_and_enqueue_children(ALLEGRO_EVENT_SOURCE* restrict event_
     fprintspaces(fp, 1);
     fprintf(fp, "\"children\": [\n");
     if (children->size > 0) {
-        for (int i = 0; i < children->size-1; i++) {
+        for (size_t i = 0; i < children->size-1; i++) {
             e.user.data1 = (intptr_t)children->data[i];
             al_emit_user_event(event_source, &e, NULL);
             fprintf(fp, "    \"%p\",\n", (void*)children->data[i]);

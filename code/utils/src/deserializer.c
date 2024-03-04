@@ -17,6 +17,13 @@
     }   else {\
         fieldname = json_get_string_copy(stream);\
     }
+
+#define READ_JSON_COLOR(stream, jfieldname, fieldname) if (is_correct_fieldname(stream, jfieldname) != 0 || is_correct_type(stream, JSON_STRING) != 0) { \
+        goto cleanup; \
+    }   else {\
+        uint32_t temp_value = strtoul(json_get_string(stream, NULL) + 1, NULL, 16);\
+        fieldname = al_map_rgba((temp_value) >> 24 & 0xFF, (temp_value >> 16) & 0xFF, (temp_value) >> 8 & 0xFF, temp_value & 0xFF);\
+    }
 /* deserialization:
     first pass through json: allocate ALL of the nodes
     second pass through json: create the connections!!
@@ -28,9 +35,6 @@ static inline int is_correct_fieldname(json_stream* stream, const char* fieldnam
 /* NOT A PURE FUNCTION!! THIS ADVANCES THE STREAM TO CHECK CORRECTNESS */
 static inline int is_correct_type(json_stream* stream, enum json_type jtype);
 
-static inline int get_number_field(json_stream* stream, const char* fieldname, double* number_buffer);
-static inline int get_string_field(json_stream* stream, const char* fieldname, const char** string_buffer);
-
 /* chrus_rbtree* restrict tree, */
 static inline chrus_node* deserialize_object(chrus_rbtree* restrict tree, json_stream* restrict stream);
 static inline chrus_node* deserialize_camera(json_stream* stream);
@@ -40,6 +44,7 @@ static inline chrus_node* deserialize_sound(json_stream* stream);
 static inline chrus_node* deserialize_audiostream(json_stream* stream);
 static inline chrus_node* deserialize_text(json_stream* stream);
 
+/* your responsibility to free the string */
 static const char* json_get_string_copy(json_stream* stream);
 
 /* advances through entire stream, returns children stored */
@@ -68,15 +73,6 @@ static inline int is_correct_type(json_stream* stream, enum json_type jtype) {
     } else {
         return 1;
     }
-}
-
-static inline int get_number_field(json_stream* stream, const char* fieldname, double* number_buffer) {
-    enum json_type valuetype;
-    valuetype = json_next(stream);
-    if (valuetype == JSON_OBJECT_END) return CHRUS_PARSER_OBJECT_ENDED;
-    if (valuetype != JSON_STRING) return CHRUS_PARSER_ERROR;
-
-    *number_buffer = json_get_number(stream);
 }
 
 static inline chrus_node* deserialize_camera(json_stream* stream) {
@@ -159,7 +155,7 @@ static inline chrus_node* deserialize_sound(json_stream* stream) {
 
 static inline chrus_node* deserialize_audiostream(json_stream* stream) {
     chrus_node* node = chrus_node_create_uninit();
-    chrus_sound* sound = chrus_audiostream_create(NULL);
+    chrus_audiostream* sound = chrus_audiostream_create(NULL);
 
     node->data = sound;
 
@@ -181,6 +177,7 @@ static inline chrus_node* deserialize_text(json_stream* stream) {
 
     node->data = text;
 
+    READ_JSON_COLOR(stream, "color", text->color)
     READ_JSON_NUMBER(stream, "x", text->x)
     READ_JSON_NUMBER(stream, "y", text->x)
     READ_JSON_NUMBER(stream, "max_width", text->x)
@@ -278,7 +275,7 @@ static inline chrus_node* deserialize_object(chrus_rbtree* restrict tree, json_s
     chrus_rbtree_insert_pair(tree, (chrus_rbkey){.keynum=node_id}, final_node);
 
     current_type = json_next(stream);
-    if (current_type != JSON_OBJECT_END) return -1;
+    if (current_type != JSON_OBJECT_END) NULL;
     return final_node;
 }
 
@@ -349,11 +346,11 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
     chrus_rbtree* pointer_dictionary = chrus_rbtree_create(NULL, NULL, NULL);
     chrus_vector nodes = chrus_vector_create();
 
-    size_t field_length;
+    //size_t field_length;
     const char* str_buffer;
     uint64_t scene_id;
     uint64_t camera_id;
-    double number_buffer;
+    //double number_buffer;
     int result = 0;
     int scene_children;
 
@@ -421,20 +418,20 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
     /* create the connections, then we can probably pass the scene off here ...? */
     /* second assumption: the deserialized file constitutes a single tree where the root is the scene */
     /* actually this is just correct behavior */
-    for (int i = 0; i < final_scene->children.size; i++) {
+    for (size_t i = 0; i < final_scene->children.size; i++) {
         void** ptr_to_rbnode = (void**)&final_scene->children.data[i];
         chrus_scene_replace_rbnode(final_scene, final_scene, ptr_to_rbnode);
     }
     final_scene->current_camera = chrus_rbtree_find(pointer_dictionary, chrus_rbkey_from_uint(camera_id))->value;
 
-    for (int i = 0; i < nodes.size; i++) {
+    for (size_t i = 0; i < nodes.size; i++) {
         current_node = nodes.data[i];
         switch (current_node->type)
         {
         default:
             break;
         }
-        for (int j = 0; j < current_node->children.size; j++) {
+        for (size_t j = 0; j < current_node->children.size; j++) {
             void** ptr_to_rbnode = (void**)&final_scene->children.data[i];
             chrus_scene_replace_rbnode(final_scene, current_node, ptr_to_rbnode);
         }
