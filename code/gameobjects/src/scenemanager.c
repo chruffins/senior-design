@@ -56,6 +56,8 @@ int chrus_scene_manager_load_scene(chrus_scene_manager* restrict this, const cha
 
     this->top++;
     al_unlock_mutex(this->mutex);
+
+    return 0;
 }
 
 int chrus_scene_manager_pop_scene(chrus_scene_manager *this) {
@@ -114,13 +116,13 @@ void chrus_scene_manager_draw(chrus_scene_manager *this) {
 void chrus_scene_manager_process_input(chrus_scene_manager *this, ALLEGRO_EVENT *event) {
     // TODO: remove this.
     //al_lock_mutex(this->mutex);
-
+    (void) event;
     if (this->current_modal < 0) {
         for (int i = 0; i < this->top; i++) {
-            chrus_scene_process_input(this->scenes[i], event);
+            //chrus_scene_process_input(this->scenes[i], event);
         }
     } else {
-        chrus_scene_process_input(this->scenes[this->current_modal], event);
+        //chrus_scene_process_input(this->scenes[this->current_modal], event);
     }
 
     //al_unlock_mutex(this->mutex);

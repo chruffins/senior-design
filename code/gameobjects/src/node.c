@@ -45,6 +45,11 @@ chrus_node_vec chrus_node_vec_create() {
 }
 
 void chrus_node_destroy(chrus_node *this) {
+    for (size_t i = 0; i < this->children.size; i++) {
+        chrus_node_destroy(this->children.data[i]);
+    }
+    chrus_node_vec_destroy(&this->children);
+
     switch (this->type)
     {
     case CHRUS_NODE_SCRIPT:
@@ -61,20 +66,33 @@ void chrus_node_destroy(chrus_node *this) {
     free(this);
 }
 
+/*
 void chrus_node_reparent(chrus_node *parent, chrus_node *new_child) {
     // we should probably propagate child added up the chain...
 }
+*/
 
-void chrus_node_vec_add_node(chrus_node_vec *this, chrus_node *new_child) {
+/* equivalent to emptying */
+void chrus_node_vec_destroy(chrus_node_vec* this) {
+    if (this->capacity == 0 || this->data == NULL) return;
+
+    free(this->data);
+    this->capacity = 0;
+    this->size = 0;
+}
+
+bool chrus_node_vec_add_node(chrus_node_vec *this, chrus_node *new_child) {
     /* printf("added %s to node vec\n", new_child->name); */
-    if (this->size + 1 == this->capacity) {
+    if (this->size + 1 >= this->capacity) {
         void *newdata = realloc(this->data, this->capacity * sizeof(chrus_node*) * 2);
         if (newdata == NULL) {
-            // TODO: some kind of way to tell the world that we fucked up
+            return false;
         }
         this->capacity *= 2;
         this->data = newdata;
     }
     this->data[this->size] = new_child;
     this->size++;
+
+    return true;
 }

@@ -14,6 +14,7 @@
 #include<stddef.h>
 #include<stdlib.h>
 #include<memory.h>
+#include<stdbool.h>
 
 #include "node_types.h"
 #include "camera.h"
@@ -48,6 +49,7 @@ chrus_node* chrus_node_create_audiostream();
 chrus_node_vec chrus_node_vec_create();
 
 void chrus_node_destroy(chrus_node *this);
-void chrus_node_reparent(chrus_node *parent, chrus_node *new_child);
+//void chrus_node_reparent(chrus_node *parent, chrus_node *new_child);
 
-void chrus_node_vec_add_node(chrus_node_vec *this, chrus_node *new_child);
+void chrus_node_vec_destroy(chrus_node_vec* this);
+bool chrus_node_vec_add_node(chrus_node_vec *this, chrus_node *new_child);

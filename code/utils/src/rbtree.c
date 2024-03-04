@@ -37,10 +37,13 @@ static void delete_node(chrus_rbtree *tree, chrus_rbnode *this) {
 
     // TODO: what to do with key
     if (tree->destructor) tree->destructor(this->value);
+
+    free(this);
 }
 
 void chrus_rbtree_destroy(chrus_rbtree *this) {
     delete_node(this, this->root);
+    free(this);
 }
 
 chrus_rbnode *chrus_rbtree_find(chrus_rbtree *this, chrus_rbkey key) {
@@ -461,7 +464,7 @@ bool chrus_rbtree_valid(chrus_rbtree* this, chrus_rbnode* current) {
 
     /* red nodes don't have red children */
     if (current->red == true) {
-        if (current->left && current->left->red || current->right && current->right->red) return false;
+        if ((current->left && current->left->red) || (current->right && current->right->red)) return false;
     }
 
     return true && chrus_rbtree_valid(this, current->left) && chrus_rbtree_valid(this, current->right);

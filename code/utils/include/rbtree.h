@@ -67,7 +67,7 @@ int chrus_rbtree_delete(chrus_rbtree *, chrus_rbkey key);
 
 int chrus_rbnode_child_direction(chrus_rbnode *parent, chrus_rbnode *child);
 
-chrus_rbnode *chrus_rbtree_successor(chrus_rbtree *, chrus_rbnode *);
+chrus_rbnode *chrus_rbtree_successor(chrus_rbtree*, chrus_rbnode *);
 
 chrus_rbkey chrus_rbkey_create(const void* keyptr);
 chrus_rbkey chrus_rbkey_from_uint(uint64_t key);
