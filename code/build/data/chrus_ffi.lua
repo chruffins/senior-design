@@ -31,7 +31,7 @@ struct chrus_vector_t { void **data; size_t size; size_t capacity; };
 struct chrus_camera_t { float screen_x, screen_y; float screen_width, screen_height; float viewport_width, viewport_height; float viewport_x, viewport_y; ALLEGRO_TRANSFORM _scaler; };
 struct chrus_scene_t { ALLEGRO_EVENT_SOURCE event_source; const char* name; chrus_node* current_camera; chrus_node_vec children; chrus_vector sprites_cache; void* lua_vm; ALLEGRO_EVENT_QUEUE* event_queue; ALLEGRO_TIMER* tick_timer; };
 struct chrus_node_t { const char *name; chrus_node* parent; chrus_node_vec children; enum CHRUS_NODE_TYPES type; void *data; };
-struct chrus_sprite_t { float x; float y; int width; int height; int flipping; float rotation; ALLEGRO_BITMAP *image_data; };
+struct chrus_sprite_t { const char* source; float x; float y; int width; int height; int flipping; float sx; float sy; float rotation; bool visible; ALLEGRO_BITMAP* image_data; };
 struct chrus_text_t {
     ALLEGRO_FONT* font;
     ALLEGRO_COLOR color;
@@ -65,6 +65,24 @@ void chrus_node_destroy(chrus_node *this);
 chrus_sprite* chrus_sprite_create(const char *source);
 void chrus_sprite_load(chrus_sprite* this, const char *source);
 void chrus_sprite_translate(chrus_sprite *this, float dx, float dy);
+
+float chrus_sprite_get_x(chrus_sprite* restrict this);
+float chrus_sprite_get_y(chrus_sprite* restrict this);
+int chrus_sprite_get_width(chrus_sprite* restrict this);
+int chrus_sprite_get_height(chrus_sprite* restrict this);
+float chrus_sprite_get_sx(chrus_sprite* restrict this);
+float chrus_sprite_get_sy(chrus_sprite* restrict this);
+int chrus_sprite_get_flipping(chrus_sprite* restrict this);
+float chrus_sprite_get_rotation(chrus_sprite* restrict this);
+bool chrus_sprite_get_visible(chrus_sprite* restrict this);
+
+void chrus_sprite_set_x(chrus_sprite* restrict this, float new);
+void chrus_sprite_set_y(chrus_sprite* restrict this, float new);
+void chrus_sprite_set_sx(chrus_sprite* restrict this, float new);
+void chrus_sprite_set_sy(chrus_sprite* restrict this, float new);
+void chrus_sprite_set_flipping(chrus_sprite* restrict this, int new);
+void chrus_sprite_set_rotation(chrus_sprite* restrict this, float new);
+void chrus_sprite_set_visible(chrus_sprite* restrict this, bool new);
 
 const char* chrus_script_get_source(chrus_script* restrict this);
 
@@ -190,7 +208,33 @@ local sprite_methods = {
 }
 
 local sprite_members = {
-    
+    x = function(node)
+        return lchrus.chrus_sprite_get_x(node)
+    end,
+    y = function(node)
+        return lchrus.chrus_sprite_get_y(node)
+    end,
+    width = function(node)
+        return lchrus.chrus_sprite_get_width(node)
+    end,
+    height = function(node)
+        return lchrus.chrus_sprite_get_height(node)
+    end,
+    flipping = function(node)
+        return lchrus.chrus_sprite_get_flipping(node)
+    end,
+    sx = function(node)
+        return lchrus.chrus_sprite_get_sx(node)
+    end,
+    sy = function(node)
+        return lchrus.chrus_sprite_get_sy(node)
+    end,
+    rotation = function(node)
+        return lchrus.chrus_sprite_get_rotation(node)
+    end,
+    visible = function(node)
+        return lchrus.chrus_sprite_get_visible(node)
+    end,
 }
 
 local sprite_index = create_node_indexfunc(sprite_methods, sprite_members)

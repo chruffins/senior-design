@@ -57,6 +57,14 @@ get_tick = function()
     return tick
 end
 
+sprite_connect_leftclicked = function(sprite, func)
+    mouse.leftclicked:connect(function(x, y)
+        if sprite.x < x and x < sprite.x + sprite.width and sprite.y < y and y < sprite.y + sprite.height then
+            func()
+        end
+    end)
+end
+
 --[[
 mouse.clicked:connect(function(x, y)
     print(string.format("I clicked at (%d, %d)!", x, y))
