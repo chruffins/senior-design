@@ -116,7 +116,7 @@ local event_responses = {
         loaded_scripts[src] = loadfile(src)
 
         local result, err = pcall(loaded_scripts[src])
-        if not result then
+        if result == nil then
             print(err)
         end
     end

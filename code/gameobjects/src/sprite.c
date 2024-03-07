@@ -42,6 +42,8 @@ void chrus_sprite_load(chrus_sprite* this, const char *source) {
     }
 
     this->image_data = loader;
+    this->width = al_get_bitmap_width(this->image_data);
+    this->height = al_get_bitmap_height(this->image_data);
 }
 
 chrus_sprite* chrus_sprite_create_uninit() {
@@ -73,8 +75,8 @@ chrus_sprite* chrus_sprite_create(const char *source) {
 }
 
 void chrus_sprite_draw(chrus_sprite *this, float dx, float dy) {
-    al_draw_rotated_bitmap(this->image_data, this->x + (this->width / 2), this->y + (this->height / 2), this->x + dx, this->y + dy, this->rotation, this->flipping);
-    // al_draw_bitmap(this->image_data, this->x + dx, this->y + dy, this->flipping);
+    //al_draw_rotated_bitmap(this->image_data, (this->width / 2), (this->height / 2), this->x + dx, this->y + dy, this->rotation, this->flipping);
+    al_draw_bitmap(this->image_data, this->x + dx, this->y + dy, this->flipping);
 }
 
 void chrus_sprite_translate(chrus_sprite *this, float dx, float dy) {

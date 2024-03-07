@@ -237,7 +237,38 @@ local sprite_members = {
     end,
 }
 
+local sprite_newindex_members = {
+    x = function(node, data)
+        return lchrus.chrus_sprite_set_x(node.data, data)
+    end,
+    y = function(node, data)
+        return lchrus.chrus_sprite_set_y(node.data, data)
+    end,
+    width = function(node, data)
+        return lchrus.chrus_sprite_set_width(node.data, data)
+    end,
+    height = function(node, data)
+        return lchrus.chrus_sprite_set_height(node.data, data)
+    end,
+    flipping = function(node, data)
+        return lchrus.chrus_sprite_set_flipping(node.data, data)
+    end,
+    sx = function(node, data)
+        return lchrus.chrus_sprite_set_sx(node.data, data)
+    end,
+    sy = function(node, data)
+        return lchrus.chrus_sprite_set_sy(node.data, data)
+    end,
+    rotation = function(node, data)
+        return lchrus.chrus_sprite_set_rotation(node.data, data)
+    end,
+    visible = function(node, data)
+        return lchrus.chrus_sprite_set_visible(node.data, data)
+    end,
+}
+
 local sprite_index = create_node_indexfunc(sprite_methods, sprite_members)
+local sprite_newindex = create_node_newindexfunc(sprite_newindex_members)
 
 local text_methods = {
     new = function()
@@ -254,9 +285,24 @@ local text_methods = {
 }
 
 local text_members = {
-    text = function(node)
-        return lchrus.chrus_text_get_text(node)
-    end
+    color = function(node, value)
+        lchrus.chrus_text_get_color(node.data, value)
+    end,
+    x = function(node, value)
+        lchrus.chrus_text_get_x(node.data, value)
+    end,
+    y = function(node, value)
+        lchrus.chrus_text_get_y(node.data, value)
+    end,
+    max_width = function(node, value)
+        lchrus.chrus_text_get_max_width(node.data, value)
+    end,
+    line_height = function(node, value)
+        lchrus.chrus_text_get_line_height(node.data, value)
+    end,
+    text = function(node, value)
+        lchrus.chrus_text_get_text(node.data, value)
+    end,
 }
 
 local text_index = create_node_indexfunc(text_methods, text_members)
@@ -280,7 +326,6 @@ local text_newindex_members = {
     text = function(node, value)
         lchrus.chrus_text_set_text(node.data, value)
     end,
-
 }
 
 local text_newindex = create_node_newindexfunc(text_newindex_members)
@@ -378,6 +423,7 @@ local index_table = {
 local newindex_table = {
     [text_enum] = text_newindex,
     [audiostream_enum] = audiostream_newindex,
+    [sprite_enum] = sprite_newindex,
 }
 
 local test_metatable = {
