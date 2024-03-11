@@ -16,6 +16,7 @@
 #include<allegro5/allegro.h>
 #include<allegro5/allegro_primitives.h>
 #include<string.h>
+#include<stdio.h>
 
 typedef struct chrus_primitive_t chrus_prim;
 typedef enum CHRUS_PRIMITIVE_TYPE CHRUS_PRIMITIVE_TYPE;
@@ -80,6 +81,11 @@ void chrus_prim_create_vbuffer(chrus_prim* restrict this, int num_vertices, cons
 void chrus_prim_create_hl(chrus_prim* restrict this);
 
 void chrus_prim_draw(chrus_prim* restrict this, float dx, float dy);
+
+bool chrus_prim_translate(chrus_prim* restrict this, float dx, float dy);
+
+bool chrus_prim_get_filled(chrus_prim* restrict this);
+bool chrus_prim_set_filled(chrus_prim* restrict this, bool new_value);
 
 bool chrus_prim_set_line(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float thickness, ALLEGRO_COLOR color);
 bool chrus_prim_set_triangle(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float x3, float y3, float thickness, ALLEGRO_COLOR color);

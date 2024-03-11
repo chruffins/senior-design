@@ -15,6 +15,7 @@ gameobjects/src/sound.c
 gameobjects/src/sprite.c
 gameobjects/src/chrus.c
 gameobjects/src/text.c
+gameobjects/src/primitive.c
 utils/src/vector.c
 utils/src/rbtree.c
 utils/src/serializer.c

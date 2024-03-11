@@ -106,7 +106,7 @@ void chrus_prim_draw_highlevel(chrus_prim* restrict this, float dx, float dy) {
             this->hl.y2, this->hl.color, this->hl.thickness);
         break;
     case CHRUS_PRIM_HL_SPLINE:
-        al_draw_spline(&this->hl.x1, this->hl.color, this->hl.thickness);
+        al_draw_spline((float*)&this->hl.x1, this->hl.color, this->hl.thickness);
         break;
     default:
         break;
@@ -138,7 +138,143 @@ void chrus_prim_draw(chrus_prim* restrict this, float dx, float dy) {
     }
 }
 
+bool chrus_prim_translate(chrus_prim* restrict this, float dx, float dy) {
+    /* guhhh yeah i don't know what to do for low level yet lmao 
+        TODO: figure out low-level translate
+    */
+    if (this->type != CHRUS_PRIMITIVE_HIGHLEVEL) return false;
 
+    switch (this->hl.hl_type)
+    {
+    /* one point to translate */
+    case CHRUS_PRIM_HL_CIRCLE:
+    case CHRUS_PRIM_HL_FILLED_CIRCLE:
+    case CHRUS_PRIM_HL_ELLIPSE:
+    case CHRUS_PRIM_HL_FILLED_ELLIPSE:
+    case CHRUS_PRIM_HL_ARC:
+    case CHRUS_PRIM_HL_ELLIPTICAL_ARC:
+    case CHRUS_PRIM_HL_PIESLICE:
+    case CHRUS_PRIM_HL_FILLED_PIESLICE:
+        this->hl.x1 += dx;
+        this->hl.y1 += dy;
+        break;
+    /* two points to translate */
+    case CHRUS_PRIM_HL_LINE:
+    case CHRUS_PRIM_HL_RECTANGLE:
+    case CHRUS_PRIM_HL_FILLED_RECTANGLE:
+    case CHRUS_PRIM_HL_ROUNDED_RECTANGLE:
+    case CHRUS_PRIM_HL_FILLED_ROUNDED_RECTANGLE:
+        this->hl.x1 += dx;
+        this->hl.y1 += dy;
+        this->hl.x2 += dx;
+        this->hl.y2 += dy;
+        break;
+    /* three points to translate */
+    case CHRUS_PRIM_HL_TRIANGLE:
+    case CHRUS_PRIM_HL_FILLED_TRIANGLE:
+        this->hl.x1 += dx;
+        this->hl.y1 += dy;
+        this->hl.x2 += dx;
+        this->hl.y2 += dy;
+        this->hl.x3 += dx;
+        this->hl.y3 += dy;
+        break;
+    /* four points to translate */
+    case CHRUS_PRIM_HL_SPLINE:
+        this->hl.x1 += dx;
+        this->hl.y1 += dy;
+        this->hl.x2 += dx;
+        this->hl.y2 += dy;
+        this->hl.x3 += dx;
+        this->hl.y3 += dy;
+        this->hl.rx += dx;
+        this->hl.ry += dy;
+        break;
+    default:
+        printf("translating an invalid primitive type?\n");
+        break;
+    }
+
+    return true;
+}
+
+bool chrus_prim_get_filled(chrus_prim* restrict this) {
+    /* this only applies to highlevel because getting filled doesn't make sense for lowlevel */
+    if (this->type != CHRUS_PRIMITIVE_HIGHLEVEL) return false;
+
+    switch (this->hl.hl_type)
+    {
+    case CHRUS_PRIM_HL_FILLED_CIRCLE:
+    case CHRUS_PRIM_HL_FILLED_ELLIPSE:
+    case CHRUS_PRIM_HL_FILLED_PIESLICE:
+    case CHRUS_PRIM_HL_FILLED_RECTANGLE:
+    case CHRUS_PRIM_HL_FILLED_ROUNDED_RECTANGLE:
+    case CHRUS_PRIM_HL_FILLED_TRIANGLE:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool chrus_prim_set_filled(chrus_prim* restrict this, bool new_value) {
+    /* this only applies to highlevel because setting filled doesn't make sense for lowlevel */
+    if (this->type != CHRUS_PRIMITIVE_HIGHLEVEL) return false;
+
+    if (new_value) {
+        switch (this->hl.hl_type)
+        {
+        case CHRUS_PRIM_HL_CIRCLE:
+            this->hl.hl_type = CHRUS_PRIM_HL_FILLED_CIRCLE;
+            break;
+        case CHRUS_PRIM_HL_ELLIPSE:
+            this->hl.hl_type = CHRUS_PRIM_HL_FILLED_ELLIPSE;
+            break;
+        case CHRUS_PRIM_HL_PIESLICE:
+            this->hl.hl_type = CHRUS_PRIM_HL_FILLED_PIESLICE;
+            break;
+        case CHRUS_PRIM_HL_RECTANGLE:
+            this->hl.hl_type = CHRUS_PRIM_HL_FILLED_RECTANGLE;
+            break;
+        case CHRUS_PRIM_HL_ROUNDED_RECTANGLE:
+            this->hl.hl_type = CHRUS_PRIM_HL_FILLED_ROUNDED_RECTANGLE;
+            break;
+        case CHRUS_PRIM_HL_TRIANGLE:
+            this->hl.hl_type = CHRUS_PRIM_HL_FILLED_TRIANGLE;
+            break;
+        default:
+            /* setting to be filled on filled OR unfillable types does nothing */
+            return false;
+        }
+    } else {
+        switch (this->hl.hl_type)
+        {
+        case CHRUS_PRIM_HL_FILLED_CIRCLE:
+            this->hl.hl_type = CHRUS_PRIM_HL_CIRCLE;
+            break;
+        case CHRUS_PRIM_HL_FILLED_ELLIPSE:
+            this->hl.hl_type = CHRUS_PRIM_HL_ELLIPSE;
+            break;
+        case CHRUS_PRIM_HL_FILLED_PIESLICE:
+            this->hl.hl_type = CHRUS_PRIM_HL_PIESLICE;
+            break;
+        case CHRUS_PRIM_HL_FILLED_RECTANGLE:
+            this->hl.hl_type = CHRUS_PRIM_HL_RECTANGLE;
+            break;
+        case CHRUS_PRIM_HL_FILLED_ROUNDED_RECTANGLE:
+            this->hl.hl_type = CHRUS_PRIM_HL_ROUNDED_RECTANGLE;
+            break;
+        case CHRUS_PRIM_HL_FILLED_TRIANGLE:
+            this->hl.hl_type = CHRUS_PRIM_HL_TRIANGLE;
+            break;
+        default:
+            /* setting to not be filled on non-filled types does nothing */
+            return false;
+        }
+    }
+
+    /* indicates that the function was successful */
+    return true;
+}
 
 /* begins the boilerplate */
 bool chrus_prim_set_line(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float thickness, ALLEGRO_COLOR color) {

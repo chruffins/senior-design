@@ -25,6 +25,7 @@
 #include "script.h"
 #include "sprite.h"
 #include "text.h"
+#include "primitive.h"
 #include "../../utils/include/vector.h"
 #include "../../utils/include/enums.h"
 

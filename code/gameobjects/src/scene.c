@@ -120,6 +120,8 @@ void chrus_scene_draw(chrus_scene* restrict this) {
         case CHRUS_NODE_TEXT:
             chrus_text_draw(node->data, -current_camera->viewport_x, -current_camera->viewport_y);
             break;
+        case CHRUS_NODE_PRIMITIVE:
+            chrus_prim_draw(node->data, -current_camera->viewport_x, -current_camera->viewport_y);
         default:
             break;
         }
