@@ -10,7 +10,31 @@ ffi.cdef(al_ffi.cdef .. [[
 void* malloc(size_t size);
 void free(void *__ptr);
 
-enum CHRUS_NODE_TYPES { CHRUS_NODE_UNINITIALIZED, CHRUS_NODE_CAMERA, CHRUS_NODE_SCRIPT, CHRUS_NODE_SPRITE, CHRUS_NODE_SOUND, CHRUS_NODE_AUDIOSTREAM, CHRUS_NODE_TEXT, };
+enum CHRUS_NODE_TYPES { CHRUS_NODE_UNINITIALIZED, CHRUS_NODE_CAMERA, CHRUS_NODE_SCRIPT, CHRUS_NODE_SPRITE, CHRUS_NODE_SOUND, CHRUS_NODE_AUDIOSTREAM, CHRUS_NODE_TEXT, CHRUS_NODE_PRIMITIVE, };
+enum CHRUS_PRIMITIVE_TYPE {
+    CHRUS_PRIMITIVE_HIGHLEVEL,
+    CHRUS_PRIMITIVE_LOWLEVEL,
+    CHRUS_PRIMITIVE_LOWLEVEL_BACKUP
+};
+
+enum CHRUS_PRIM_HL_TYPE {
+    CHRUS_PRIM_HL_LINE,
+    CHRUS_PRIM_HL_TRIANGLE,
+    CHRUS_PRIM_HL_FILLED_TRIANGLE,
+    CHRUS_PRIM_HL_RECTANGLE,
+    CHRUS_PRIM_HL_FILLED_RECTANGLE,
+    CHRUS_PRIM_HL_ROUNDED_RECTANGLE,
+    CHRUS_PRIM_HL_FILLED_ROUNDED_RECTANGLE,
+    CHRUS_PRIM_HL_PIESLICE,
+    CHRUS_PRIM_HL_FILLED_PIESLICE,
+    CHRUS_PRIM_HL_ELLIPSE,
+    CHRUS_PRIM_HL_FILLED_ELLIPSE,
+    CHRUS_PRIM_HL_CIRCLE,
+    CHRUS_PRIM_HL_FILLED_CIRCLE,
+    CHRUS_PRIM_HL_ARC,
+    CHRUS_PRIM_HL_ELLIPTICAL_ARC,
+    CHRUS_PRIM_HL_SPLINE,
+};
 
 typedef struct chrus_scene_t chrus_scene;
 typedef struct chrus_node_t chrus_node;
@@ -25,6 +49,9 @@ typedef struct chrus_node_t chrus_audiostream_node;
 typedef struct chrus_node_t chrus_sprite_node;
 typedef struct chrus_text_t chrus_text;
 typedef struct chrus_sound_t chrus_sound;
+typedef struct chrus_primitive_t chrus_prim;
+typedef enum CHRUS_PRIMITIVE_TYPE CHRUS_PRIMITIVE_TYPE;
+typedef enum CHRUS_PRIM_HL_TYPE CHRUS_PRIM_HL_TYPE;
 
 struct chrus_node_vector_t { chrus_node** data; size_t size; size_t capacity; };
 struct chrus_vector_t { void **data; size_t size; size_t capacity; };
@@ -50,6 +77,17 @@ struct chrus_sound_t {
     float gain;
     float pan;
     float speed;
+};
+
+struct chrus_primitive_t {
+    CHRUS_PRIMITIVE_TYPE type; /* probably should be erroneous to change this */
+    union { struct hl { CHRUS_PRIM_HL_TYPE hl_type; float x1; float y1; float x2; float y2; float x3; float y3; float rx; /* x4 as necessary */
+            float ry; float thickness; ALLEGRO_COLOR color;
+        } hl;
+        struct ll { ALLEGRO_VERTEX_BUFFER* vertex_buffer; ALLEGRO_VERTEX* vertex_backup; ALLEGRO_BITMAP* texture; int start; int end;
+            int type; int count; int line_style;
+        } ll;
+    };
 };
 
 chrus_node* chrus_scene_add_node(chrus_scene* this, void* parent, chrus_node *child);
@@ -137,6 +175,33 @@ ALLEGRO_PLAYMODE chrus_audiostream_get_playmode(chrus_audiostream* restrict this
 float chrus_audiostream_get_gain(chrus_audiostream* restrict this);
 float chrus_audiostream_get_pan(chrus_audiostream* restrict this);
 float chrus_audiostream_get_speed(chrus_audiostream* restrict this);
+
+chrus_prim* chrus_prim_create();
+void chrus_prim_create_vbuffer(chrus_prim* restrict this, int num_vertices, const void* init_data);
+void chrus_prim_create_hl(chrus_prim* restrict this);
+
+void chrus_prim_draw(chrus_prim* restrict this, float dx, float dy);
+bool chrus_prim_translate(chrus_prim* restrict this, float dx, float dy);
+
+bool chrus_prim_get_filled(chrus_prim* restrict this);
+bool chrus_prim_set_filled(chrus_prim* restrict this, bool new_value);
+
+bool chrus_prim_set_line(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float thickness, ALLEGRO_COLOR color);
+bool chrus_prim_set_triangle(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float x3, float y3, float thickness, ALLEGRO_COLOR color);
+bool chrus_prim_set_filled_triangle(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float x3, float y3, ALLEGRO_COLOR color);
+bool chrus_prim_set_rectangle(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float thickness, ALLEGRO_COLOR color);
+bool chrus_prim_set_filled_rectangle(chrus_prim* restrict this, float x1, float y1, float x2, float y2, ALLEGRO_COLOR color);
+bool chrus_prim_set_rounded_rectangle(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float rx, float ry, float thickness, ALLEGRO_COLOR color);
+bool chrus_prim_set_filled_rounded_rectangle(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float rx, float ry, ALLEGRO_COLOR color);
+bool chrus_prim_set_pieslice(chrus_prim* restrict this, float x1, float y1, float rx, float start_theta, float end_theta, ALLEGRO_COLOR color, float thickness);
+bool chrus_prim_set_filled_pieslice(chrus_prim* restrict this, float x1, float y1, float rx, float start_theta, float end_theta, ALLEGRO_COLOR color);
+bool chrus_prim_set_ellipse(chrus_prim* restrict this, float x1, float y1, float rx, float ry, ALLEGRO_COLOR color, float thickness);
+bool chrus_prim_set_filled_ellipse(chrus_prim* restrict this, float x1, float y1, float rx, float ry, ALLEGRO_COLOR color);
+bool chrus_prim_set_circle(chrus_prim* restrict this, float x1, float y1, float rx, ALLEGRO_COLOR color, float thickness);
+bool chrus_prim_set_filled_circle(chrus_prim* restrict this, float x1, float y1, float rx, ALLEGRO_COLOR color);
+bool chrus_prim_set_arc(chrus_prim* restrict this, float x1, float y1, float rx, float start_theta, float end_theta, ALLEGRO_COLOR color, float thickness);
+bool chrus_prim_set_elliptical_arc(chrus_prim* restrict this, float x1, float y1, float rx, float ry, float start_theta, float end_theta, ALLEGRO_COLOR color, float thickness);
+bool chrus_prim_set_spline(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, ALLEGRO_COLOR color, float thickness);
 
 ]])
 
@@ -396,6 +461,68 @@ local audiostream_newindex_members = {
 local audiostream_index = create_node_indexfunc(audiostream_methods, audiostream_members)
 local audiostream_newindex = create_node_newindexfunc(audiostream_newindex_members)
 
+local primitive_methods = {
+    new = function()
+        local new = custom_node_alloc("chrus_node", finalizer)
+        new.name = "prim"
+        new.type = lchrus.CHRUS_NODE_PRIMITIVE
+        new.parent = nil
+        new.data = lchrus.chrus_prim_create()
+        return new
+    end,
+    reparent = function(node, other)
+        lchrus.chrus_scene_add_node(scene, other, node)
+    end,
+    translate = function(node, dx, dy)
+        lchrus.chrus_prim_translate(node.data, dx, dy)
+    end,
+    line = function(node, x1, y1, x2, y2, thickness, color)
+        return lchrus.chrus_prim_set_line(node.data, x1, y1, x2, y2, thickness, color)
+    end,
+    triangle = function(node, x1, y1, x2, y2, x3, y3, thickness, color)
+        return lchrus.chrus_prim_set_triangle(node.data, x1, y1, x2, y2, x3, y3, thickness, color)
+    end,
+    rectangle = function(node, x1, y1, x2, y2, thickness, color)
+        return lchrus.chrus_prim_set_rectangle(node.data, x1, y1, x2, y2, thickness, color)
+    end,
+    rounded_rectangle = function(node, x1, y1, x2, y2, rx, ry, thickness, color)
+        return lchrus.chrus_prim_set_rounded_rectangle(node.data, x1, y1, x2, y2, rx, ry, thickness, color)
+    end,
+    pieslice = function(node, x1, y1, rx, start_angle, delta_angle, thickness, color)
+        return lchrus.chrus_prim_set_pieslice(node, x1, y1, rx, start_angle, delta_angle, color, thickness)
+    end,
+    ellipse = function(node, x1, y1, rx, ry, thickness, color)
+        return lchrus.chrus_prim_set_ellipse(node, x1, y1, rx, ry, color, thickness)
+    end,
+    circle = function(node, x1, y1, radius, thickness, color)
+        return lchrus.chrus_prim_set_circle(node, x1, y1, radius, color, thickness)
+    end,
+    arc = function(node, x1, y1, radius, start_angle, delta_angle, thickness, color)
+        return lchrus.chrus_prim_set_arc(node, x1, y1, radius, start_angle, delta_angle, color, thickness)
+    end,
+    elliptical_arc = function(node, x1, y1, rx, ry, start_angle, delta_angle, thickness, color)
+        return lchrus.chrus_prim_set_elliptical_arc(node, x1, y1, rx, ry, start_angle, delta_angle, color, thickness)
+    end,
+    spline = function(node, x1, y1, x2, y2, x3, y3, x4, y4, thickness, color)
+        return lchrus.chrus_prim_set_spline(node, x1, y1, x2, y2, x3, y3, x4, y4, color, thickness)
+    end,
+}
+
+local primitive_members = {
+    filled = function(node)
+        lchrus.chrus_prim_get_filled(node.data)
+    end,
+}
+
+local primitive_newindex_members = {
+    filled = function(node, data)
+        lchrus.chrus_prim_set_filled(node.data, data)
+    end,
+}
+
+local primitive_index = create_node_indexfunc(primitive_methods, primitive_members)
+local primitive_newindex = create_node_newindexfunc(primitive_newindex_members)
+
 local script_methods = {
     get_source = function(node)
         return lchrus.chrus_script_get_source(node.data)
@@ -412,18 +539,21 @@ local audiostream_enum = tonumber(lchrus.CHRUS_NODE_AUDIOSTREAM)
 local sprite_enum = tonumber(lchrus.CHRUS_NODE_SPRITE)
 local script_enum = tonumber(lchrus.CHRUS_NODE_SCRIPT)
 local text_enum = tonumber(lchrus.CHRUS_NODE_TEXT)
+local prim_enum = tonumber(lchrus.CHRUS_NODE_PRIMITIVE)
 
 local index_table = {
     [sprite_enum] = sprite_index,
     [audiostream_enum] = audiostream_index,
     [script_enum] = script_index,
     [text_enum] = text_index,
+    [prim_enum] = primitive_index,
 }
 
 local newindex_table = {
     [text_enum] = text_newindex,
     [audiostream_enum] = audiostream_newindex,
     [sprite_enum] = sprite_newindex,
+    [prim_enum] = primitive_newindex,
 }
 
 local test_metatable = {
@@ -439,6 +569,7 @@ local type_table = {
     audiostream = audiostream_methods.new,
     sprite = sprite_methods.new,
     text = text_methods.new,
+    primitive = primitive_methods.new,
 }
 
 --local mouse = {clicked = event:new(), leftclicked = event:new(), rightclicked = event:new() }
