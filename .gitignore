@@ -9,3 +9,7 @@ launch.json
 settings.json
 luajit
 *.so
+*.flac
+*.ogg
+*.json
+*.zip
