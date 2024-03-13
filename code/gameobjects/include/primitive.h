@@ -77,8 +77,9 @@ struct chrus_primitive_t {
 };
 
 chrus_prim* chrus_prim_create();
-void chrus_prim_create_vbuffer(chrus_prim* restrict this, int num_vertices, const void* init_data);
+void chrus_prim_create_vbuffer(chrus_prim* restrict this, int num_vertices, const void* init_data, bool backup);
 void chrus_prim_create_hl(chrus_prim* restrict this);
+void chrus_prim_destroy(chrus_prim* restrict this);
 
 void chrus_prim_draw(chrus_prim* restrict this, float dx, float dy);
 

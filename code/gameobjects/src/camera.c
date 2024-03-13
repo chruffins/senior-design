@@ -40,3 +40,12 @@ void chrus_camera_init(chrus_camera* restrict this) {
 void chrus_camera_calc_transform(chrus_camera* this) {
     al_build_transform(&this->_scaler, 0, 0, this->screen_width / this->viewport_width, this->screen_height / this->viewport_height, 0);
 }
+
+void chrus_camera_destroy(chrus_camera* restrict this) {
+    if (this->_buffer) {
+        al_destroy_bitmap(this->_buffer);
+    }
+
+    free(this);
+    return;
+}

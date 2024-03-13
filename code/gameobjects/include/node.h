@@ -21,6 +21,7 @@
 #include "script.h"
 #include "sound.h"
 #include "sprite.h"
+#include "primitive.h"
 
 typedef struct chrus_node_t chrus_node;
 typedef struct chrus_node_vector_t chrus_node_vec;

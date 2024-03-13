@@ -144,6 +144,8 @@ void run_game_loop() {
     //printf("saving scene to disk\n");
     //chrus_serializer_save_scene(scene_manager.scenes[scene_manager.top], "savedscene.json");
 
+    al_destroy_cond(drawing_loaded);
+
     DEBUG_PRINTF("freeing scene resources now\n");
     chrus_scene_manager_destroy(&scene_manager);
     DEBUG_PRINTF("freeing up cached assets now\n");

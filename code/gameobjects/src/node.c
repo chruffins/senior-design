@@ -55,8 +55,14 @@ void chrus_node_destroy(chrus_node *this) {
     case CHRUS_NODE_SCRIPT:
         //free(this->data);
         break;
+    case CHRUS_NODE_CAMERA:
+        chrus_camera_destroy(this->data);
+        break;
     case CHRUS_NODE_AUDIOSTREAM:
         chrus_audiostream_destroy(this->data);
+        break;
+    case CHRUS_NODE_PRIMITIVE:
+        chrus_prim_destroy(this->data);
         break;
     default:
         free(this->data);

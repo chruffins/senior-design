@@ -4,6 +4,7 @@ al_ffi = require("data/allegro_ffi")
 
 chrus = {}
 al = {}
+Color = {}
 
 ffi.cdef(al_ffi.cdef .. [[
 
@@ -177,7 +178,7 @@ float chrus_audiostream_get_pan(chrus_audiostream* restrict this);
 float chrus_audiostream_get_speed(chrus_audiostream* restrict this);
 
 chrus_prim* chrus_prim_create();
-void chrus_prim_create_vbuffer(chrus_prim* restrict this, int num_vertices, const void* init_data);
+void chrus_prim_create_vbuffer(chrus_prim* restrict this, int num_vertices, const void* init_data, bool backup);
 void chrus_prim_create_hl(chrus_prim* restrict this);
 
 void chrus_prim_draw(chrus_prim* restrict this, float dx, float dy);
@@ -250,6 +251,10 @@ local create_node_newindexfunc = function(newindex_funcs)
     return function (node, key, value)
         return newindex_funcs[key](node, value)
     end
+end
+
+Color.rgb = function(r, g, b)
+    return lallegro.al_map_rgb(r, g, b)
 end
 
 local sprite_methods = {
@@ -489,28 +494,28 @@ local primitive_methods = {
         return lchrus.chrus_prim_set_rounded_rectangle(node.data, x1, y1, x2, y2, rx, ry, thickness, color)
     end,
     pieslice = function(node, x1, y1, rx, start_angle, delta_angle, thickness, color)
-        return lchrus.chrus_prim_set_pieslice(node, x1, y1, rx, start_angle, delta_angle, color, thickness)
+        return lchrus.chrus_prim_set_pieslice(node.data, x1, y1, rx, start_angle, delta_angle, color, thickness)
     end,
     ellipse = function(node, x1, y1, rx, ry, thickness, color)
-        return lchrus.chrus_prim_set_ellipse(node, x1, y1, rx, ry, color, thickness)
+        return lchrus.chrus_prim_set_ellipse(node.data, x1, y1, rx, ry, color, thickness)
     end,
     circle = function(node, x1, y1, radius, thickness, color)
-        return lchrus.chrus_prim_set_circle(node, x1, y1, radius, color, thickness)
+        return lchrus.chrus_prim_set_circle(node.data, x1, y1, radius, color, thickness)
     end,
     arc = function(node, x1, y1, radius, start_angle, delta_angle, thickness, color)
-        return lchrus.chrus_prim_set_arc(node, x1, y1, radius, start_angle, delta_angle, color, thickness)
+        return lchrus.chrus_prim_set_arc(node.data, x1, y1, radius, start_angle, delta_angle, color, thickness)
     end,
     elliptical_arc = function(node, x1, y1, rx, ry, start_angle, delta_angle, thickness, color)
-        return lchrus.chrus_prim_set_elliptical_arc(node, x1, y1, rx, ry, start_angle, delta_angle, color, thickness)
+        return lchrus.chrus_prim_set_elliptical_arc(node.data, x1, y1, rx, ry, start_angle, delta_angle, color, thickness)
     end,
     spline = function(node, x1, y1, x2, y2, x3, y3, x4, y4, thickness, color)
-        return lchrus.chrus_prim_set_spline(node, x1, y1, x2, y2, x3, y3, x4, y4, color, thickness)
+        return lchrus.chrus_prim_set_spline(node.data, x1, y1, x2, y2, x3, y3, x4, y4, color, thickness)
     end,
 }
 
 local primitive_members = {
     filled = function(node)
-        lchrus.chrus_prim_get_filled(node.data)
+        return lchrus.chrus_prim_get_filled(node.data)
     end,
 }
 
@@ -578,11 +583,5 @@ function create_node(type)
     return type_table[type]()
 end
 
---chrus.sound = {}
---chrus.sprite = {}
---setmetatable(chrus.sound, sound_metatable)
---setmetatable(chrus.sprite, sprite_metatable)
 chrus.node = ffi.metatype("chrus_node", test_metatable)
---chrus.sound = ffi.metatype("chrus_node", test_metatable)
---chrus.sprite = ffi.metatype("chrus_node", sprite_metatable)
 print("Lua VM fully loaded.")

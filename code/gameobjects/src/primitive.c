@@ -17,10 +17,10 @@ chrus_prim* chrus_prim_create() {
     return new_prim;
 }
 
-void chrus_prim_create_vbuffer(chrus_prim* restrict this, int num_vertices, const void* init_data) {
+void chrus_prim_create_vbuffer(chrus_prim* restrict this, int num_vertices, const void* init_data, bool backup) {
     this->type = CHRUS_PRIMITIVE_LOWLEVEL;
 
-    this->ll.vertex_buffer = al_create_vertex_buffer(NULL, init_data, num_vertices, 0);
+    if (backup == false) this->ll.vertex_buffer = al_create_vertex_buffer(NULL, init_data, num_vertices, 0);
     if (this->ll.vertex_buffer == NULL) {
         this->type = CHRUS_PRIMITIVE_LOWLEVEL_BACKUP;
         /* need to fallback. TODO: make sure this failure only happens once */
@@ -40,6 +40,21 @@ void chrus_prim_create_hl(chrus_prim* restrict this) {
     this->type = CHRUS_PRIMITIVE_HIGHLEVEL;
     memset(&this->hl, 0, sizeof(this->hl));
     this->hl.hl_type = CHRUS_PRIM_HL_LINE;
+}
+
+void chrus_prim_destroy(chrus_prim* restrict this) {
+    if (this->type == CHRUS_PRIMITIVE_HIGHLEVEL) {
+        free(this);
+        return;
+    }
+
+    if (this->type == CHRUS_PRIMITIVE_LOWLEVEL && this->ll.vertex_buffer) {
+        al_destroy_vertex_buffer(this->ll.vertex_buffer);
+    } else if (this->type == CHRUS_PRIMITIVE_LOWLEVEL_BACKUP && this->ll.vertex_backup) {
+        free(this->ll.vertex_backup);
+    }
+    free(this);
+    return;
 }
 
 void chrus_prim_draw_highlevel(chrus_prim* restrict this, float dx, float dy) {
