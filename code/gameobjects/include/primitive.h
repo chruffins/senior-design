@@ -88,6 +88,10 @@ bool chrus_prim_translate(chrus_prim* restrict this, float dx, float dy);
 bool chrus_prim_get_filled(chrus_prim* restrict this);
 bool chrus_prim_set_filled(chrus_prim* restrict this, bool new_value);
 
+bool chrus_prim_set_hl_type(chrus_prim* restrict this, CHRUS_PRIM_HL_TYPE type);
+bool chrus_prim_set_hl_value(chrus_prim* restrict this, int ptr, float value);
+bool chrus_prim_set_color(chrus_prim* restrict this, ALLEGRO_COLOR color);
+
 bool chrus_prim_set_line(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float thickness, ALLEGRO_COLOR color);
 bool chrus_prim_set_triangle(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float x3, float y3, float thickness, ALLEGRO_COLOR color);
 bool chrus_prim_set_filled_triangle(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float x3, float y3, ALLEGRO_COLOR color);

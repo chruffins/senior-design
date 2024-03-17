@@ -154,6 +154,7 @@ void chrus_text_set_max_width(chrus_text* restrict this, float new);
 void chrus_text_set_line_height(chrus_text* restrict this, float new);
 void chrus_text_set_flags(chrus_text* restrict this, int new);
 void chrus_text_set_text(chrus_text* restrict this, const char* new);
+void chrus_text_set_font(chrus_text* restrict this, const char* font_path, int size);
 
 void chrus_sound_set_playmode(chrus_sound* restrict this, ALLEGRO_PLAYMODE new);
 void chrus_sound_set_gain(chrus_sound* restrict this, float new);
@@ -186,6 +187,10 @@ bool chrus_prim_translate(chrus_prim* restrict this, float dx, float dy);
 
 bool chrus_prim_get_filled(chrus_prim* restrict this);
 bool chrus_prim_set_filled(chrus_prim* restrict this, bool new_value);
+
+bool chrus_prim_set_hl_type(chrus_prim* restrict this, CHRUS_PRIM_HL_TYPE type);
+bool chrus_prim_set_hl_value(chrus_prim* restrict this, int ptr, float value);
+bool chrus_prim_set_color(chrus_prim* restrict this, ALLEGRO_COLOR color);
 
 bool chrus_prim_set_line(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float thickness, ALLEGRO_COLOR color);
 bool chrus_prim_set_triangle(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float x3, float y3, float thickness, ALLEGRO_COLOR color);
@@ -351,6 +356,9 @@ local text_methods = {
     end,
     reparent = function(node, other)
         lchrus.chrus_scene_add_node(scene, other, node)
+    end,
+    font = function(node, font_path, size)
+        lchrus.chrus_text_set_font(node.data, font_path, size)
     end,
 }
 
@@ -522,6 +530,39 @@ local primitive_members = {
 local primitive_newindex_members = {
     filled = function(node, data)
         lchrus.chrus_prim_set_filled(node.data, data)
+    end,
+    x1 = function(node, data)
+        lchrus.chrus_prim_set_hl_value(node.data, 0, data)
+    end,
+    y1 = function(node, data)
+        lchrus.chrus_prim_set_hl_value(node.data, 1, data)
+    end,
+    x2 = function(node, data)
+        lchrus.chrus_prim_set_hl_value(node.data, 2, data)
+    end,
+    y2 = function(node, data)
+        lchrus.chrus_prim_set_hl_value(node.data, 3, data)
+    end,
+    x3 = function(node, data)
+        lchrus.chrus_prim_set_hl_value(node.data, 4, data)
+    end,
+    y3 = function(node, data)
+        lchrus.chrus_prim_set_hl_value(node.data, 5, data)
+    end,
+    x4 = function(node, data)
+        lchrus.chrus_prim_set_hl_value(node.data, 6, data)
+    end,
+    y4 = function(node, data)
+        lchrus.chrus_prim_set_hl_value(node.data, 7, data)
+    end,
+    thickness = function(node, data)
+        lchrus.chrus_prim_set_hl_value(node.data, 8, data)
+    end,
+    color = function(node, data)
+        lchrus.chrus_prim_set_color(node.data, data)
+    end,
+    hl_type = function(node, data)
+        lchrus.chrus_prim_set_hl_type(node.data, data)
     end,
 }
 

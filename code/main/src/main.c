@@ -36,6 +36,7 @@ void must_init(int test, const char *failure) {
 void load_allegro_libraries() {
     must_init(al_init(), "allegro");
     must_init(al_init_font_addon(), "allegro font library");
+    must_init(al_init_ttf_addon(), "allegro ttf library");
     must_init(al_init_primitives_addon(), "allegro primitives library");
     must_init(al_init_image_addon(), "allegro image library");
 

@@ -291,6 +291,59 @@ bool chrus_prim_set_filled(chrus_prim* restrict this, bool new_value) {
     return true;
 }
 
+bool chrus_prim_set_hl_type(chrus_prim* restrict this, CHRUS_PRIM_HL_TYPE type) {
+    if (this->type != CHRUS_PRIMITIVE_HIGHLEVEL) return false;
+
+    this->hl.hl_type = type;
+}
+
+bool chrus_prim_set_hl_value(chrus_prim* restrict this, int ptr, float value) {
+    if (this->type != CHRUS_PRIMITIVE_HIGHLEVEL) return false;
+
+    switch (ptr)
+    {
+    case 0:
+        this->hl.x1 = value;
+        break;
+    case 1:
+        this->hl.y1 = value;
+        break;
+    case 2:
+        this->hl.x2 = value;
+        break;
+    case 3:
+        this->hl.y2 = value;
+        break;
+    case 4:
+        this->hl.x3 = value;
+        break;
+    case 5:
+        this->hl.y3 = value;
+        break;
+    case 6:
+        this->hl.rx = value;
+        break;
+    case 7:
+        this->hl.ry = value;
+        break;
+    case 8:
+        this->hl.thickness = value;
+        break;
+    default:
+        break;
+    }
+
+    return true;
+}
+
+bool chrus_prim_set_color(chrus_prim* restrict this, ALLEGRO_COLOR color) {
+    if (this->type != CHRUS_PRIMITIVE_HIGHLEVEL) return false;
+
+    this->hl.color = color;
+
+    return true;
+}
+
 /* begins the boilerplate */
 bool chrus_prim_set_line(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float thickness, ALLEGRO_COLOR color) {
     if (this->type != CHRUS_PRIMITIVE_HIGHLEVEL) return false;
