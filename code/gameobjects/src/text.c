@@ -93,3 +93,26 @@ void chrus_text_set_flags(chrus_text* restrict this, int new) {
 void chrus_text_set_text(chrus_text* restrict this, const char* new_text) {
     this->text = new_text;
 }
+
+void chrus_text_set_font(chrus_text* restrict this, const char* font_path, int size) {
+    /* use insert to enforce the existence of the font */
+    if (font_path == NULL) {
+        this->font = get_default_font();
+        return;
+    }
+
+    chrus_font* font = chrus_loader_insert(CHRUS_LOADER_FONT, chrus_rbkey_create(font_path));
+    ALLEGRO_FONT* sized_font;
+    if (!font) {
+        printf("font failed to load\n");
+        return;
+    }
+
+    sized_font = chrus_font_append_size(font, size);
+    if (!sized_font) {
+        printf("failed to get font at size %d\n", size);
+    }
+
+    this->font = sized_font;
+    return;
+}

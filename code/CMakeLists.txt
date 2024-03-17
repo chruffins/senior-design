@@ -20,6 +20,7 @@ utils/src/vector.c
 utils/src/rbtree.c
 utils/src/serializer.c
 utils/src/deserializer.c
+utils/src/font.c
 utils/src/allocator.c
 utils/src/globals.c
 utils/src/drawing_thread.c
@@ -41,12 +42,13 @@ target_compile_options(chrus_engine PRIVATE)
 
 find_library(AL allegro)
 find_library(AL_FONT allegro_font)
+find_library(AL_TTF allegro_ttf)
 find_library(AL_AUDIO allegro_audio)
 find_library(AL_ACODEC allegro_acodec)
 find_library(AL_PRIMITIVES allegro_primitives)
 find_library(AL_IMAGE allegro_image)
 find_library(LUAJIT luajit-5.1)
 
-target_link_libraries(chrus_lib ${AL} ${AL_FONT} ${AL_AUDIO} ${AL_ACODEC} ${AL_PRIMITIVES} ${AL_IMAGE} ${LUAJIT})
+target_link_libraries(chrus_lib ${AL} ${AL_FONT} ${AL_AUDIO} ${AL_ACODEC} ${AL_PRIMITIVES} ${AL_IMAGE} ${AL_TTF} ${LUAJIT})
 
-target_link_libraries(${PROJECT_NAME} ${AL} ${AL_FONT} ${AL_PRIMITIVES} ${AL_IMAGE} ${AL_AUDIO} ${AL_ACODEC} ${LUAJIT} chrus_lib)
+target_link_libraries(${PROJECT_NAME} ${AL} ${AL_FONT} ${AL_PRIMITIVES} ${AL_IMAGE} ${AL_AUDIO} ${AL_ACODEC} ${AL_TTF} ${LUAJIT} chrus_lib)

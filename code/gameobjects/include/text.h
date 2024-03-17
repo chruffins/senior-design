@@ -16,9 +16,14 @@
 #include<allegro5/allegro_ttf.h>
 
 #include<stdbool.h>
+#include<stdio.h>
+
+#include "../../utils/include/allocator.h"
+#include "../../utils/include/font.h"
 
 typedef struct chrus_text_t chrus_text;
 
+/* TODO: refactor to use chrus_font */
 struct chrus_text_t {
     ALLEGRO_FONT* font;
     ALLEGRO_COLOR color;
@@ -50,4 +55,5 @@ void chrus_text_set_y(chrus_text* restrict this, float new);
 void chrus_text_set_max_width(chrus_text* restrict this, float new);
 void chrus_text_set_line_height(chrus_text* restrict this, float new);
 void chrus_text_set_flags(chrus_text* restrict this, int new);
-void chrus_text_set_text(chrus_text* restrict this, const char* new);
+void chrus_text_set_text(chrus_text* restrict this, const char* new_text);
+void chrus_text_set_font(chrus_text* restrict this, const char* font_path, int size);
