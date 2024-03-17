@@ -21,6 +21,7 @@
 
 #include "rbtree.h"
 #include "bitmap_converter.h"
+#include "font.h"
 
 typedef enum CHRUS_LOADER CHRUS_LOADER;
 
@@ -28,6 +29,7 @@ enum CHRUS_LOADER {
     CHRUS_LOADER_BITMAP=0,
     CHRUS_LOADER_SAMPLE,
     CHRUS_LOADER_SCRIPT,
+    CHRUS_LOADER_FONT,
     CHRUS_LOADER_END
 };
 

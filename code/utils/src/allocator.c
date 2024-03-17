@@ -28,10 +28,15 @@ static inline void* load_sample(chrus_rbkey key) {
     return al_load_sample(key.keyptr);
 }
 
+static inline void* load_font(chrus_rbkey key) {
+    return chrus_font_create(key.keyptr);
+}
+
 void chrus_loader_init() {
     loader_trees[CHRUS_LOADER_BITMAP] = chrus_rbtree_create(chrus_loader_comparator, (chrus_rbtree_destructor)al_destroy_bitmap, load_bitmap);
     //loader_trees[CHRUS_LOADER_SCRIPT] = chrus_rbtree_create(strcmp, );
     loader_trees[CHRUS_LOADER_SAMPLE] = chrus_rbtree_create(chrus_loader_comparator, (chrus_rbtree_destructor)al_destroy_sample, load_sample);
+    loader_trees[CHRUS_LOADER_FONT] = chrus_rbtree_create(chrus_loader_comparator, (chrus_rbtree_destructor)chrus_font_destroy, load_font);
 }
 
 void *chrus_loader_insert(CHRUS_LOADER index, chrus_rbkey key) {
