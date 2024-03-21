@@ -3,7 +3,7 @@
 chrus_scene *chrus_scene_create(const char *name) {
     printf("creating scene %s\n", name);
 
-    chrus_scene *new_scene = malloc(sizeof(chrus_scene));
+    chrus_scene *new_scene = calloc(1, sizeof(chrus_scene));
     
     al_init_user_event_source(&new_scene->event_source);
     new_scene->name = name;
@@ -106,6 +106,12 @@ void chrus_scene_draw(chrus_scene* restrict this) {
     //al_use_transform(&current_camera->_scaler);
     if (!current_camera->_buffer) return;
     al_set_target_bitmap(current_camera->_buffer);
+    for (int i = 0; i < sizeof(this->scene_shaders) / sizeof(chrus_node*); i++) {
+        if (this->scene_shaders[i] != NULL) {
+            al_use_shader(this->scene_shaders[i]->data);
+        }
+    }
+
     al_clear_to_color(al_map_rgb(0, 0, 0));
 
     //al_hold_bitmap_drawing(true);
@@ -137,6 +143,8 @@ void chrus_scene_draw(chrus_scene* restrict this) {
     */
 
     //al_hold_bitmap_drawing(false);
+
+    al_use_shader(NULL);
 
     al_set_target_backbuffer(current_display);
     al_use_transform(&current_camera->_scaler);
@@ -204,4 +212,11 @@ void chrus_scene_queue_script(chrus_scene* this, chrus_node* script) {
     new_event.user.data1 = (intptr_t)script;
 
     al_emit_user_event((ALLEGRO_EVENT_SOURCE*)this, &new_event, NULL);
+}
+
+void chrus_scene_set_shader(chrus_scene* restrict this, chrus_node* restrict shader_node, int pos) {
+    assert(shader_node->type == CHRUS_NODE_SHADER);
+
+    this->scene_shaders[pos] = shader_node;
+    /* TODO: shaders being deleted should implicitly remove themselves from here */
 }

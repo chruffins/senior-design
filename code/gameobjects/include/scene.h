@@ -42,6 +42,7 @@ struct chrus_scene_t {
     lua_State* lua_vm;
     ALLEGRO_EVENT_QUEUE* event_queue;
     ALLEGRO_TIMER* tick_timer;
+    chrus_node* scene_shaders[4]; /* TODO: ummm idk */
 };
 
 chrus_scene *chrus_scene_create(const char *name);
@@ -58,3 +59,4 @@ chrus_node* chrus_scene_replace_rbnode(chrus_scene* this, void* parent, void** v
 
 void chrus_scene_add_spritecache(chrus_scene* restrict this, chrus_sprite *sprite);
 void chrus_scene_queue_script(chrus_scene* restrict this, chrus_node *script);
+void chrus_scene_set_shader(chrus_scene* restrict this, chrus_node* restrict shader_node, int pos);

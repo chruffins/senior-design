@@ -64,6 +64,9 @@ void chrus_node_destroy(chrus_node *this) {
     case CHRUS_NODE_PRIMITIVE:
         chrus_prim_destroy(this->data);
         break;
+    case CHRUS_NODE_SHADER:
+        al_destroy_shader(this->data);
+        break;
     default:
         free(this->data);
         break;

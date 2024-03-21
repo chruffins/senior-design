@@ -7,6 +7,7 @@ void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
     ALLEGRO_EVENT_QUEUE *queue = al_create_event_queue(); // separate queue that only takes in drawing events
 
     al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
+    //al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE);
     chrus_display = al_create_display(1080, 810);
 
     /* need to setup the drawing queue and the ability to send over bitmaps to create */
@@ -50,6 +51,19 @@ void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
         case CHRUS_EVENT_CONVERT_BITMAP:
             al_convert_memory_bitmaps();
             //al_convert_bitmap((ALLEGRO_BITMAP*)event.user.data1);
+            break;
+        case CHRUS_EVENT_CREATE_SHADER:
+            *(void**)event.user.data1 = al_create_shader(ALLEGRO_SHADER_GLSL);
+            al_broadcast_cond((ALLEGRO_COND*)event.user.data2);
+            break;
+        case CHRUS_EVENT_ATTACH_SOURCEFILE_SHADER:
+            al_attach_shader_source_file((ALLEGRO_SHADER*)event.user.data1, (ALLEGRO_SHADER_TYPE)event.user.data2, (const char*)event.user.data3);
+            break;
+        case CHRUS_EVENT_ATTACH_SOURCE_SHADER:
+            al_attach_shader_source((ALLEGRO_SHADER*)event.user.data1, (ALLEGRO_SHADER_TYPE)event.user.data2, (const char*)event.user.data3);
+            break;
+        case CHRUS_EVENT_BUILD_SHADER:
+            al_build_shader((ALLEGRO_SHADER*)event.user.data1);
             break;
         case ALLEGRO_EVENT_TIMER:
             redraw = true;
