@@ -115,7 +115,7 @@ void run_game_loop() {
             //redraw = true;
             break;
         case ALLEGRO_EVENT_KEY_DOWN:
-            ((chrus_camera*)(chrus_scene_manager_top(&scene_manager)->current_camera->data))->viewport_x += 5;
+            //((chrus_camera*)(chrus_scene_manager_top(&scene_manager)->current_camera->data))->viewport_x += 5;
             break;
         case ALLEGRO_EVENT_DISPLAY_CLOSE:
             finished = true;

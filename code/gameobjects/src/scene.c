@@ -215,7 +215,7 @@ void chrus_scene_queue_script(chrus_scene* this, chrus_node* script) {
 }
 
 void chrus_scene_set_shader(chrus_scene* restrict this, chrus_node* restrict shader_node, int pos) {
-    assert(shader_node->type == CHRUS_NODE_SHADER);
+    assert(shader_node == NULL || shader_node->type == CHRUS_NODE_SHADER);
 
     this->scene_shaders[pos] = shader_node;
     /* TODO: shaders being deleted should implicitly remove themselves from here */

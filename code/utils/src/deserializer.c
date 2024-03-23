@@ -338,7 +338,7 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
     FILE* fp = fopen(filename, "r");
     if (!fp) return NULL;
 
-    printf("successfully opened scene file\n");
+    //printf("successfully opened scene file\n");
 
     json_stream first_pass_stream;
     enum json_type current_type;
@@ -380,7 +380,7 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
     if (current_type != JSON_STRING) goto failure;
     str_buffer = json_get_string_copy(&first_pass_stream);
     final_scene = chrus_scene_create(str_buffer);
-    printf("got past name: %s\n", final_scene->name);
+    //printf("got past name: %s\n", final_scene->name);
 
     /* we put ALL pointers in the first pass with the exception of id */
     result = is_correct_fieldname(&first_pass_stream, "current_camera");
@@ -398,8 +398,8 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
     result = chrus_vector_reserve(&nodes, scene_children); 
     printf("scene children: %d\n", scene_children);
 
-    printf("red-black tree black height: %d\n", chrus_rbtree_black_height(pointer_dictionary, pointer_dictionary->root));
-    printf("red-black tree valid: %d\n", chrus_rbtree_valid(pointer_dictionary, pointer_dictionary->root));
+    //printf("red-black tree black height: %d\n", chrus_rbtree_black_height(pointer_dictionary, pointer_dictionary->root));
+    //printf("red-black tree valid: %d\n", chrus_rbtree_valid(pointer_dictionary, pointer_dictionary->root));
 
     current_type = json_next(&first_pass_stream);
     if (current_type != JSON_OBJECT_END) goto failure;

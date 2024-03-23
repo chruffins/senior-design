@@ -11,7 +11,8 @@ ffi.cdef(al_ffi.cdef .. [[
 void* malloc(size_t size);
 void free(void *__ptr);
 
-enum CHRUS_NODE_TYPES { CHRUS_NODE_UNINITIALIZED, CHRUS_NODE_CAMERA, CHRUS_NODE_SCRIPT, CHRUS_NODE_SPRITE, CHRUS_NODE_SOUND, CHRUS_NODE_AUDIOSTREAM, CHRUS_NODE_TEXT, CHRUS_NODE_PRIMITIVE, };
+enum CHRUS_NODE_TYPES { CHRUS_NODE_UNINITIALIZED, CHRUS_NODE_CAMERA, CHRUS_NODE_SCRIPT, CHRUS_NODE_SPRITE, CHRUS_NODE_SOUND, 
+CHRUS_NODE_AUDIOSTREAM, CHRUS_NODE_TEXT, CHRUS_NODE_PRIMITIVE, CHRUS_NODE_SHADER, };
 enum CHRUS_PRIMITIVE_TYPE {
     CHRUS_PRIMITIVE_HIGHLEVEL,
     CHRUS_PRIMITIVE_LOWLEVEL,
@@ -209,6 +210,12 @@ bool chrus_prim_set_arc(chrus_prim* restrict this, float x1, float y1, float rx,
 bool chrus_prim_set_elliptical_arc(chrus_prim* restrict this, float x1, float y1, float rx, float ry, float start_theta, float end_theta, ALLEGRO_COLOR color, float thickness);
 bool chrus_prim_set_spline(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, ALLEGRO_COLOR color, float thickness);
 
+ALLEGRO_SHADER* chrus_shader_create();
+void chrus_scene_set_shader(chrus_scene* restrict this, chrus_node* restrict shader_node, int pos);
+
+void chrus_shader_attach_source_file(ALLEGRO_SHADER* restrict shader, int type, const char* filename);
+void chrus_shader_attach_source(ALLEGRO_SHADER* restrict shader, int type, const char* source);
+void chrus_shader_build(ALLEGRO_SHADER* shader);
 ]])
 
 --ffi.load("allegro")
@@ -569,6 +576,58 @@ local primitive_newindex_members = {
 local primitive_index = create_node_indexfunc(primitive_methods, primitive_members)
 local primitive_newindex = create_node_newindexfunc(primitive_newindex_members)
 
+local shader_methods = {
+    new = function()
+        local new = custom_node_alloc("chrus_node", finalizer)
+        new.name = "shader"
+        new.type = lchrus.CHRUS_NODE_SHADER
+        new.parent = nil
+        new.data = lchrus.chrus_shader_create()
+        return new
+    end,
+    load_file = function(node, shader_type, filename)
+        if shader_type == "pixel" then
+            print("huh")
+            lchrus.chrus_shader_attach_source_file(node.data, al_ffi.ALLEGRO_PIXEL_SHADER, filename)
+            --lchrus.chrus_shader_build(node.data)
+        elseif shader_type == "vertex" then
+            lchrus.chrus_shader_attach_source_file(node.data, al_ffi.ALLEGRO_VERTEX_SHADER, filename)
+            --lchrus.chrus_shader_build(node.data)
+        end
+    end,
+    load = function(node, shader_type, source_code)
+        if shader_type == "pixel" then
+            lchrus.chrus_shader_attach_source(node.data, al_ffi.ALLEGRO_PIXEL_SHADER, source_code)
+            --lchrus.chrus_shader_build(node.data)
+        elseif shader_type == "vertex" then
+            lchrus.chrus_shader_attach_source(node.data, al_ffi.ALLEGRO_VERTEX_SHADER, source_code)
+            --lchrus.chrus_shader_build(node.data)
+        end
+    end,
+    build = function(node)
+        lchrus.chrus_shader_build(node.data)
+    end,
+    use = function(node)
+        -- TODO: tell the scene to be using this shader from now on
+        --lchrus.chrus_shader_build(node.data)
+        lchrus.chrus_scene_set_shader(scene, node, 0)
+    end,
+    stop_using = function(node)
+        lchrus.chrus_scene_set_shader(scene, nil, 0)
+    end,
+}
+
+local shader_members = {
+
+}
+
+local shader_newindex_members = {
+
+}
+
+local shader_index = create_node_indexfunc(shader_methods, shader_members)
+local shader_newindex = create_node_newindexfunc(shader_newindex_members)
+
 local script_methods = {
     get_source = function(node)
         return lchrus.chrus_script_get_source(node.data)
@@ -586,6 +645,7 @@ local sprite_enum = tonumber(lchrus.CHRUS_NODE_SPRITE)
 local script_enum = tonumber(lchrus.CHRUS_NODE_SCRIPT)
 local text_enum = tonumber(lchrus.CHRUS_NODE_TEXT)
 local prim_enum = tonumber(lchrus.CHRUS_NODE_PRIMITIVE)
+local shader_enum = tonumber(lchrus.CHRUS_NODE_SHADER)
 
 local index_table = {
     [sprite_enum] = sprite_index,
@@ -593,6 +653,7 @@ local index_table = {
     [script_enum] = script_index,
     [text_enum] = text_index,
     [prim_enum] = primitive_index,
+    [shader_enum] = shader_index,
 }
 
 local newindex_table = {
@@ -600,6 +661,7 @@ local newindex_table = {
     [audiostream_enum] = audiostream_newindex,
     [sprite_enum] = sprite_newindex,
     [prim_enum] = primitive_newindex,
+    [shader_enum] = shader_newindex,
 }
 
 local test_metatable = {
@@ -616,6 +678,7 @@ local type_table = {
     sprite = sprite_methods.new,
     text = text_methods.new,
     primitive = primitive_methods.new,
+    shader = shader_methods.new,
 }
 
 --local mouse = {clicked = event:new(), leftclicked = event:new(), rightclicked = event:new() }
