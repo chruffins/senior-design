@@ -11,15 +11,28 @@ varying vec2 varying_texcoord;
 
 bool alpha_test_func(float x, int op, float compare);
 
+float random (vec2 st) {
+    return fract(sin(dot(st.xy,
+                         vec2(12.9898,78.233)))*
+        43758.5453123);
+}
+
+vec4 pink() {
+  return vec4(0.7, 0.0, 0.7, 1.0);
+}
+
 void main()
 {
+  float rnd = random(gl_FragCoord.xy);
+  vec4 noise = vec4(vec3(rnd), 1.0);
+
   vec4 c;
   if (al_use_tex)
     c = varying_color * texture2D(al_tex, varying_texcoord);
   else
     c = varying_color;
   if (!al_alpha_test || alpha_test_func(c.a, al_alpha_func, al_alpha_test_val))
-    gl_FragColor = c; //vec4(1.0,0.0,1.0,1.0);
+    gl_FragColor = c + (noise * 0.5);
   else
     discard;
 }
