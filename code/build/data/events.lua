@@ -79,9 +79,9 @@ mouse.rightclicked:connect(function(x, y)
     print(string.format("I RIGHT clicked at (%d, %d)!", x, y))
 end)
 
-keyboard.keydown:connect(function(keycode)
-    print(string.format("Cheesed to meet you, %d!", keycode))
-end)
+--keyboard.keydown:connect(function(keycode)
+--    print(string.format("Cheesed to meet you, %d!", keycode))
+--end)
 
 -- TODO: fill out event params n stuff
 -- TODO: need something to do in response to loading a script
@@ -102,18 +102,23 @@ local event_responses = {
         end
     end,
     [al_ffi.ALLEGRO_EVENT_TIMER] = function ()
-        tick.tick:fire()
+        tick.tick:fire(lallegro.al_get_time())
     end,
     [1667591283] = function ()
-        print("script loading now!!")
         local script = ffi.cast("chrus_node*", e.user.data1)
         local src = ffi.string(script:get_source())
+        local err
         if src == nil then
             warn("loading an empty script...?")
             return
+        else
+            print(("loading %s"):format(src))
         end
-
-        loaded_scripts[src] = loadfile(src)
+        
+        loaded_scripts[src], err = loadfile(src)
+        if (err) then
+            print(err)
+        end
 
         local result, err = pcall(loaded_scripts[src])
         if result == nil then

@@ -6,6 +6,7 @@ uniform bool al_use_tex;
 uniform bool al_alpha_test;
 uniform int al_alpha_func;
 uniform float al_alpha_test_val;
+uniform float u_time;
 varying vec4 varying_color;
 varying vec2 varying_texcoord;
 
@@ -23,7 +24,7 @@ vec4 pink() {
 
 void main()
 {
-  float rnd = random(gl_FragCoord.xy);
+  float rnd = random(gl_FragCoord.xy + vec2(u_time, 0.0));
   vec4 noise = vec4(vec3(rnd), 1.0);
 
   vec4 c;
@@ -32,7 +33,7 @@ void main()
   else
     c = varying_color;
   if (!al_alpha_test || alpha_test_func(c.a, al_alpha_func, al_alpha_test_val))
-    gl_FragColor = c + (noise * 0.5);
+    gl_FragColor = c + (noise * 0.6);
   else
     discard;
 }

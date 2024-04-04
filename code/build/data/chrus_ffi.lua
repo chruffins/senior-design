@@ -58,7 +58,7 @@ typedef enum CHRUS_PRIM_HL_TYPE CHRUS_PRIM_HL_TYPE;
 struct chrus_node_vector_t { chrus_node** data; size_t size; size_t capacity; };
 struct chrus_vector_t { void **data; size_t size; size_t capacity; };
 struct chrus_camera_t { float screen_x, screen_y; float screen_width, screen_height; float viewport_width, viewport_height; float viewport_x, viewport_y; ALLEGRO_TRANSFORM _scaler; };
-struct chrus_scene_t { ALLEGRO_EVENT_SOURCE event_source; const char* name; chrus_node* current_camera; chrus_node_vec children; chrus_vector sprites_cache; void* lua_vm; ALLEGRO_EVENT_QUEUE* event_queue; ALLEGRO_TIMER* tick_timer; };
+struct chrus_scene_t { ALLEGRO_EVENT_SOURCE event_source; const char* name; chrus_node* current_camera; chrus_node_vec children; chrus_vector drawable_layers[8]; void* lua_vm; ALLEGRO_EVENT_QUEUE* event_queue; ALLEGRO_TIMER* tick_timer; };
 struct chrus_node_t { const char *name; chrus_node* parent; chrus_node_vec children; enum CHRUS_NODE_TYPES type; void *data; };
 struct chrus_sprite_t { const char* source; float x; float y; int width; int height; int flipping; float sx; float sy; float rotation; bool visible; ALLEGRO_BITMAP* image_data; };
 struct chrus_text_t {
@@ -115,6 +115,7 @@ float chrus_sprite_get_sy(chrus_sprite* restrict this);
 int chrus_sprite_get_flipping(chrus_sprite* restrict this);
 float chrus_sprite_get_rotation(chrus_sprite* restrict this);
 bool chrus_sprite_get_visible(chrus_sprite* restrict this);
+ALLEGRO_BITMAP* chrus_sprite_get_bitmap(chrus_sprite* restrict this);
 
 void chrus_sprite_set_x(chrus_sprite* restrict this, float new);
 void chrus_sprite_set_y(chrus_sprite* restrict this, float new);
@@ -123,6 +124,7 @@ void chrus_sprite_set_sy(chrus_sprite* restrict this, float new);
 void chrus_sprite_set_flipping(chrus_sprite* restrict this, int new);
 void chrus_sprite_set_rotation(chrus_sprite* restrict this, float new);
 void chrus_sprite_set_visible(chrus_sprite* restrict this, bool new);
+void chrus_sprite_set_bitmap(chrus_sprite* restrict this, ALLEGRO_BITMAP* restrict new);
 
 const char* chrus_script_get_source(chrus_script* restrict this);
 
@@ -255,6 +257,8 @@ local create_node_indexfunc = function(methods, members)
             return methods[key]
         elseif members[key] then
             return members[key](node.data)
+        else
+            warn(("%s is not a callable function from this node!").format(key))
         end
     end
 end
@@ -269,6 +273,10 @@ Color.rgb = function(r, g, b)
     return lallegro.al_map_rgb(r, g, b)
 end
 
+load_bitmap = function(path)
+    return lchrus.chrus_load_bitmap(path)
+end
+
 local sprite_methods = {
     new = function()
         local new = custom_node_alloc("chrus_node", finalizer)
@@ -278,7 +286,7 @@ local sprite_methods = {
         new.data = lchrus.chrus_sprite_create(nil)
         return new
     end,
-    load = function(node, source)
+    load_file = function(node, source)
         lchrus.chrus_sprite_load(node.data, source)
     end,
     move = function(node, x, y)
@@ -316,6 +324,9 @@ local sprite_members = {
     end,
     visible = function(node)
         return lchrus.chrus_sprite_get_visible(node)
+    end,
+    bitmap = function(node)
+        return lchrus.chrus_sprite_get_bitmap(node)
     end,
 }
 
@@ -410,6 +421,15 @@ local text_newindex_members = {
     end,
     text = function(node, value)
         lchrus.chrus_text_set_text(node.data, value)
+    end,
+    justify = function(node, value)
+        if value == "left" then
+            lchrus.chrus_text_set_flags(node.data, al_ffi.ALLEGRO_ALIGN_LEFT)
+        elseif value == "center" then
+            lchrus.chrus_text_set_flags(node.data, al_ffi.ALLEGRO_ALIGN_CENTER)
+        elseif value == "right" then
+            lchrus.chrus_text_set_flags(node.data, al_ffi.ALLEGRO_ALIGN_RIGHT)
+        end
     end,
 }
 
@@ -587,7 +607,6 @@ local shader_methods = {
     end,
     load_file = function(node, shader_type, filename)
         if shader_type == "pixel" then
-            print("huh")
             lchrus.chrus_shader_attach_source_file(node.data, al_ffi.ALLEGRO_PIXEL_SHADER, filename)
             --lchrus.chrus_shader_build(node.data)
         elseif shader_type == "vertex" then
@@ -614,6 +633,9 @@ local shader_methods = {
     end,
     stop_using = function(node)
         lchrus.chrus_scene_set_shader(scene, nil, 0)
+    end,
+    set_float = function(node, fieldname, value)
+        lallegro.al_set_shader_float(fieldname, value)
     end,
 }
 

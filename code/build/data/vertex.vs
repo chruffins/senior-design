@@ -4,6 +4,7 @@ attribute vec2 al_texcoord;
 uniform mat4 al_projview_matrix;
 uniform bool al_use_tex_matrix;
 uniform mat4 al_tex_matrix;
+uniform float u_time;
 varying vec4 varying_color;
 varying vec2 varying_texcoord;
 void main()
