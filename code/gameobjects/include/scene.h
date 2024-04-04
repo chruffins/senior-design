@@ -31,6 +31,7 @@
 
 typedef struct chrus_scene_t chrus_scene;
 
+
 // basically a top level node lol
 struct chrus_scene_t {
     ALLEGRO_EVENT_SOURCE event_source;
@@ -38,11 +39,15 @@ struct chrus_scene_t {
     const char* name;
     chrus_node* current_camera;
     chrus_node_vec children;
-    chrus_vector sprites_cache;
+    chrus_vector drawable_layers[8];
     lua_State* lua_vm;
     ALLEGRO_EVENT_QUEUE* event_queue;
     ALLEGRO_TIMER* tick_timer;
     chrus_node* scene_shaders[4]; /* TODO: ummm idk */
+};
+
+struct chrus_sprite_layer_t {
+
 };
 
 chrus_scene *chrus_scene_create(const char *name);
@@ -60,3 +65,4 @@ chrus_node* chrus_scene_replace_rbnode(chrus_scene* this, void* parent, void** v
 void chrus_scene_add_spritecache(chrus_scene* restrict this, chrus_sprite *sprite);
 void chrus_scene_queue_script(chrus_scene* restrict this, chrus_node *script);
 void chrus_scene_set_shader(chrus_scene* restrict this, chrus_node* restrict shader_node, int pos);
+bool chrus_scene_node_set_layer(chrus_scene* restrict this, chrus_node* restrict drawable, int layer);

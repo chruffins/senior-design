@@ -49,6 +49,7 @@ enum CHRUS_PRIM_HL_TYPE {
 
 struct chrus_primitive_t {
     CHRUS_PRIMITIVE_TYPE type; /* probably should be erroneous to change this */
+    int _layer;
     union {
         struct hl {
             CHRUS_PRIM_HL_TYPE hl_type; 
@@ -86,6 +87,7 @@ void chrus_prim_draw(chrus_prim* restrict this, float dx, float dy);
 bool chrus_prim_translate(chrus_prim* restrict this, float dx, float dy);
 
 bool chrus_prim_get_filled(chrus_prim* restrict this);
+int  chrus_prim_get_layer(chrus_prim* restrict this);
 bool chrus_prim_set_filled(chrus_prim* restrict this, bool new_value);
 
 bool chrus_prim_set_hl_type(chrus_prim* restrict this, CHRUS_PRIM_HL_TYPE type);

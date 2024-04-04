@@ -25,6 +25,7 @@ static chrus_sprite* chrus_sprite_create_default() {
     new_sprite->sx = 1;
     new_sprite->sy = 1;
     new_sprite->visible = true;
+    new_sprite->_layer = 0;
     new_sprite->image_data = default_square;
 
     return new_sprite;
@@ -47,7 +48,7 @@ void chrus_sprite_load(chrus_sprite* this, const char *source) {
 }
 
 chrus_sprite* chrus_sprite_create_uninit() {
-    chrus_sprite *new_sprite = malloc(sizeof(chrus_sprite));
+    chrus_sprite *new_sprite = calloc(1, sizeof(chrus_sprite));
 
     return new_sprite;
 }
@@ -70,6 +71,7 @@ chrus_sprite* chrus_sprite_create(const char *source) {
     new_sprite->flipping = 0;
     new_sprite->visible = true;
     new_sprite->image_data = loader;
+    new_sprite->_layer = 0;
 
     return new_sprite;
 }
@@ -120,6 +122,14 @@ bool chrus_sprite_get_visible(chrus_sprite* restrict this) {
     return this->visible;
 }
 
+int chrus_sprite_get_layer(chrus_sprite* restrict this) {
+    return this->_layer;
+}
+
+ALLEGRO_BITMAP* chrus_sprite_get_bitmap(chrus_sprite* restrict this) {
+    return this->image_data;
+}
+
 void chrus_sprite_set_x(chrus_sprite* restrict this, float new) {
     this->x = new;
 }
@@ -146,4 +156,8 @@ void chrus_sprite_set_rotation(chrus_sprite* restrict this, float new) {
 
 void chrus_sprite_set_visible(chrus_sprite* restrict this, bool new) {
     this->visible = new;
+}
+
+void chrus_sprite_set_bitmap(chrus_sprite* restrict this, ALLEGRO_BITMAP* restrict new) {
+    this->image_data = new;
 }

@@ -26,6 +26,7 @@ chrus_text* chrus_text_create() {
     new_text->line_height = 0;
     new_text->flags = ALLEGRO_ALIGN_LEFT;
     new_text->text = "Hello world!";
+    new_text->_layer = 0;
 
     return new_text;
 }
@@ -64,6 +65,10 @@ int chrus_text_get_flags(chrus_text* restrict this) {
 
 const char* chrus_text_get_text(chrus_text* restrict this) {
     return this->text;
+}
+
+int chrus_text_get_layer(chrus_text* restrict this) {
+    return this->_layer;
 }
 
 void chrus_text_set_color(chrus_text* restrict this, ALLEGRO_COLOR new) {

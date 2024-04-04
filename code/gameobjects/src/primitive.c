@@ -57,6 +57,10 @@ void chrus_prim_destroy(chrus_prim* restrict this) {
     return;
 }
 
+int  chrus_prim_get_layer(chrus_prim* restrict this) {
+    return this->_layer;
+}
+
 void chrus_prim_draw_highlevel(chrus_prim* restrict this, float dx, float dy) {
     switch (this->hl.hl_type)
     {

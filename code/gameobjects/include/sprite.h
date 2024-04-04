@@ -26,8 +26,6 @@ typedef struct chrus_animation_t chrus_animation;
 typedef struct chrus_animation_frame_t chrus_animation_frame;
 
 struct chrus_sprite_t {
-    const char* source; // path
-
     float x;
     float y;
     int width;
@@ -36,8 +34,10 @@ struct chrus_sprite_t {
     float sx;
     float sy;
     float rotation;
+    int _layer;
     bool visible;
     
+    const char* source; // path
     ALLEGRO_BITMAP* image_data;
 };
 
@@ -73,6 +73,8 @@ float chrus_sprite_get_sy(chrus_sprite* restrict this);
 int chrus_sprite_get_flipping(chrus_sprite* restrict this);
 float chrus_sprite_get_rotation(chrus_sprite* restrict this);
 bool chrus_sprite_get_visible(chrus_sprite* restrict this);
+int chrus_sprite_get_layer(chrus_sprite* restrict this);
+ALLEGRO_BITMAP* chrus_sprite_get_bitmap(chrus_sprite* restrict this);
 
 void chrus_sprite_set_x(chrus_sprite* restrict this, float new);
 void chrus_sprite_set_y(chrus_sprite* restrict this, float new);
@@ -81,3 +83,4 @@ void chrus_sprite_set_sy(chrus_sprite* restrict this, float new);
 void chrus_sprite_set_flipping(chrus_sprite* restrict this, int new);
 void chrus_sprite_set_rotation(chrus_sprite* restrict this, float new);
 void chrus_sprite_set_visible(chrus_sprite* restrict this, bool new);
+void chrus_sprite_set_bitmap(chrus_sprite* restrict this, ALLEGRO_BITMAP* restrict new);

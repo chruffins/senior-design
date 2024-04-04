@@ -32,6 +32,7 @@ struct chrus_text_t {
     float max_width;
     float line_height;
     int flags;
+    int _layer;
     const char* text;
 };
 
@@ -48,6 +49,7 @@ float chrus_text_get_max_width(chrus_text* restrict this);
 float chrus_text_get_line_height(chrus_text* restrict this);
 int chrus_text_get_flags(chrus_text* restrict this);
 const char* chrus_text_get_text(chrus_text* restrict this);
+int chrus_text_get_layer(chrus_text* restrict this);
 
 void chrus_text_set_color(chrus_text* restrict this, ALLEGRO_COLOR new);
 void chrus_text_set_x(chrus_text* restrict this, float new);

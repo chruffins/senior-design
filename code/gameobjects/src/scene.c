@@ -1,5 +1,8 @@
 #include "../include/scene.h"
 
+static bool chrus_scene_node_place_layer(chrus_scene* restrict this, chrus_node* restrict drawable, int layer);
+static int chrus_scene_node_get_layer(chrus_node* restrict drawable);
+
 chrus_scene *chrus_scene_create(const char *name) {
     printf("creating scene %s\n", name);
 
@@ -19,7 +22,10 @@ chrus_scene *chrus_scene_create(const char *name) {
 
     //chrus_scene_init_lua_vm(new_scene);
 
-    new_scene->sprites_cache = chrus_vector_create();
+    for (int i = 0; i < 8; i++) {
+        new_scene->drawable_layers[i] = chrus_vector_create();
+    }
+    
     return new_scene;
 }
 
@@ -106,16 +112,18 @@ void chrus_scene_draw(chrus_scene* restrict this) {
     //al_use_transform(&current_camera->_scaler);
     if (!current_camera->_buffer) return;
     al_set_target_bitmap(current_camera->_buffer);
-    for (int i = 0; i < sizeof(this->scene_shaders) / sizeof(chrus_node*); i++) {
+    for (size_t i = 0; i < sizeof(this->scene_shaders) / sizeof(chrus_node*); i++) {
         if (this->scene_shaders[i] != NULL) {
             al_use_shader(this->scene_shaders[i]->data);
+            al_set_shader_float("u_time", al_get_time());
+            //if (result == false) printf("failed to set time\n");
         }
     }
 
     al_clear_to_color(al_map_rgb(0, 0, 0));
 
     //al_hold_bitmap_drawing(true);
-
+    /*
     for (size_t i = 0; i < this->children.size; i++) {
         chrus_node* node = this->children.data[i];
         switch (node->type)
@@ -132,15 +140,26 @@ void chrus_scene_draw(chrus_scene* restrict this) {
             break;
         }
     }
-    /*
-    for (int i = 0; i < this->sprites_cache.size; i++) {
-        chrus_sprite* restrict s = (chrus_sprite*)this->sprites_cache.data[i];
-        if ((s->x + s->width > current_camera->viewport_x && s->x < current_camera->viewport_x + current_camera->viewport_width) && 
-                (s->y + s->height > current_camera->viewport_y && s->y < current_camera->viewport_y + current_camera->viewport_height)) {
-            chrus_sprite_draw(s, -current_camera->viewport_x, -current_camera->viewport_y);
+    */
+    for (size_t i = 0; i < 8; i++) {
+        for (size_t j = 0; j < this->drawable_layers[i].size; j++) {
+            chrus_node* node = this->drawable_layers[i].data[j];
+            switch (node->type)
+            {
+            case CHRUS_NODE_SPRITE:
+                chrus_sprite_draw(node->data, -current_camera->viewport_x, -current_camera->viewport_y);
+                break;
+            case CHRUS_NODE_TEXT:
+                chrus_text_draw(node->data, -current_camera->viewport_x, -current_camera->viewport_y);
+                break;
+            case CHRUS_NODE_PRIMITIVE:
+                chrus_prim_draw(node->data, -current_camera->viewport_x, -current_camera->viewport_y);
+                break;
+            default:
+                break;
+            }
         }
     }
-    */
 
     //al_hold_bitmap_drawing(false);
 
@@ -168,7 +187,9 @@ chrus_node* chrus_scene_add_node(chrus_scene* this, void* parent, chrus_node *ch
         chrus_scene_queue_script(this, child);
         break;
     case CHRUS_NODE_SPRITE:
-        chrus_vector_append(&this->sprites_cache, child->data);
+    case CHRUS_NODE_PRIMITIVE:
+    case CHRUS_NODE_TEXT:
+        chrus_scene_node_place_layer(this, child, chrus_scene_node_get_layer(child));
         break;
     default:
         break;
@@ -191,16 +212,46 @@ chrus_node* chrus_scene_replace_rbnode(chrus_scene* this, void* parent, void** v
         chrus_scene_queue_script(this, child);
         break;
     case CHRUS_NODE_SPRITE:
-        chrus_vector_append(&this->sprites_cache, child->data);
-        break;
+    case CHRUS_NODE_PRIMITIVE:
     case CHRUS_NODE_TEXT:
-        //((chrus_text*)child->data)->font = chrus_text
+        chrus_scene_node_place_layer(this, child, chrus_scene_node_get_layer(child));
         break;
     default:
         break;
     }
 
     return child;
+}
+
+static int chrus_scene_node_get_layer(chrus_node* restrict drawable) {
+    int current_layer = -1;
+
+    switch (drawable->type)
+    {
+    case CHRUS_NODE_SPRITE:
+        current_layer = chrus_sprite_get_layer(drawable->data);
+        break;
+    case CHRUS_NODE_TEXT:
+        current_layer = chrus_text_get_layer(drawable->data);
+        break;
+    case CHRUS_NODE_PRIMITIVE:
+        current_layer = chrus_prim_get_layer(drawable->data);
+        break;
+    default:
+        break;
+    }
+
+    return current_layer;
+}
+
+static bool chrus_scene_node_place_layer(chrus_scene* restrict this, chrus_node* restrict drawable, int layer) {
+    bool result;
+    result = chrus_vector_append(&this->drawable_layers[layer], drawable);
+    if (result == false) {
+        printf("chrus_scene_node_set_layer failed to append to drawable_layer %d\n", layer);
+        return false;
+    }
+    return true;
 }
 
 void chrus_scene_queue_script(chrus_scene* this, chrus_node* script) {
@@ -219,4 +270,26 @@ void chrus_scene_set_shader(chrus_scene* restrict this, chrus_node* restrict sha
 
     this->scene_shaders[pos] = shader_node;
     /* TODO: shaders being deleted should implicitly remove themselves from here */
+}
+
+bool chrus_scene_node_set_layer(chrus_scene* restrict this, chrus_node* restrict drawable, int layer) {
+    /* strictly assume that this function is called when node is parented to scene */
+    if (layer < 0 || layer >= 8) return false;
+
+    int current_layer = -1;
+    bool removed = false;
+
+    current_layer = chrus_scene_node_get_layer(drawable);
+
+    if (current_layer < 0 || current_layer >= 8) return false;
+    removed = chrus_vector_remove(&this->drawable_layers[current_layer], drawable);
+    if (removed == false) {
+        printf("chrus_scene_node_set_layer seems to have been called incorrectly for %s\n", drawable->name);
+    }
+    removed = chrus_vector_append(&this->drawable_layers[layer], drawable);
+    if (removed == false) {
+        printf("chrus_scene_node_set_layer failed to append to drawable_layer %d\n", layer);
+        return false;
+    }
+    return true;
 }
