@@ -51,6 +51,7 @@ ALLEGRO_SHADER* chrus_shader_create() {
 }
 
 void chrus_shader_attach_source_file(ALLEGRO_SHADER* restrict shader, ALLEGRO_SHADER_TYPE type, const char* filename) {
+    printf("loading shader file\n");
     ALLEGRO_EVENT e;
     e.user.type = CHRUS_EVENT_ATTACH_SOURCEFILE_SHADER;
     e.user.data1 = (intptr_t)shader;
@@ -61,6 +62,7 @@ void chrus_shader_attach_source_file(ALLEGRO_SHADER* restrict shader, ALLEGRO_SH
 }
 
 void chrus_shader_attach_source(ALLEGRO_SHADER* restrict shader, ALLEGRO_SHADER_TYPE type, const char* source) {
+    printf("hello BROTHER\n");
     ALLEGRO_EVENT e;
     e.user.type = CHRUS_EVENT_ATTACH_SOURCE_SHADER;
     e.user.data1 = (intptr_t)shader;
@@ -74,6 +76,22 @@ void chrus_shader_build(ALLEGRO_SHADER* shader) {
     ALLEGRO_EVENT e;
     e.user.type = CHRUS_EVENT_BUILD_SHADER;
     e.user.data1 = (intptr_t)shader;
+
+    al_emit_user_event(&chrus_drawing_event_source, &e, NULL);
+}
+
+void chrus_set_window_title(const char* new_title) {
+    ALLEGRO_EVENT e;
+    e.user.type = CHRUS_EVENT_SET_WINDOW_TITLE;
+    e.user.data1 = (intptr_t)new_title;
+
+    al_emit_user_event(&chrus_drawing_event_source, &e, NULL);
+}
+
+void chrus_set_window_icon(ALLEGRO_BITMAP* icon) {
+    ALLEGRO_EVENT e;
+    e.user.type = CHRUS_EVENT_SET_WINDOW_ICON;
+    e.user.data1 = (intptr_t)icon;
 
     al_emit_user_event(&chrus_drawing_event_source, &e, NULL);
 }

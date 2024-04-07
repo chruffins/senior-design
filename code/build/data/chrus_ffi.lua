@@ -3,8 +3,31 @@ ffi = require("ffi")
 al_ffi = require("data/allegro_ffi")
 
 chrus = {}
+
 al = {}
 Color = {}
+UIDim = {
+    abs_x = 0,
+    off_x = 0,
+    abs_y = 0,
+    off_y = 0
+}
+
+function UIDim:new(o, ax, ox, ay, oy)
+    o = o or {}   -- create object if user does not provide one
+    setmetatable(o, self)
+    self.__index = self
+    o.abs_x = ax
+    o.off_x = ox
+    o.abs_y = ay
+    o.off_y = oy
+    return o
+end
+
+warn = function(...)
+    io.stderr:write("warning: ", ...)
+    io.stderr:flush()
+end
 
 ffi.cdef(al_ffi.cdef .. [[
 
@@ -149,6 +172,9 @@ float chrus_text_get_max_width(chrus_text* restrict this);
 float chrus_text_get_line_height(chrus_text* restrict this);
 int chrus_text_get_flags(chrus_text* restrict this);
 const char* chrus_text_get_text(chrus_text* restrict this);
+int chrus_text_get_width(chrus_text* restrict this);
+int chrus_text_get_height(chrus_text* restrict this);
+bool chrus_text_get_visible(chrus_text* restrict this);
 
 void chrus_text_set_color(chrus_text* restrict this, ALLEGRO_COLOR new);
 void chrus_text_set_x(chrus_text* restrict this, float new);
@@ -158,6 +184,7 @@ void chrus_text_set_line_height(chrus_text* restrict this, float new);
 void chrus_text_set_flags(chrus_text* restrict this, int new);
 void chrus_text_set_text(chrus_text* restrict this, const char* new);
 void chrus_text_set_font(chrus_text* restrict this, const char* font_path, int size);
+void chrus_text_set_visible(chrus_text* restrict this, bool new);
 
 void chrus_sound_set_playmode(chrus_sound* restrict this, ALLEGRO_PLAYMODE new);
 void chrus_sound_set_gain(chrus_sound* restrict this, float new);
@@ -218,12 +245,30 @@ void chrus_scene_set_shader(chrus_scene* restrict this, chrus_node* restrict sha
 void chrus_shader_attach_source_file(ALLEGRO_SHADER* restrict shader, int type, const char* filename);
 void chrus_shader_attach_source(ALLEGRO_SHADER* restrict shader, int type, const char* source);
 void chrus_shader_build(ALLEGRO_SHADER* shader);
+
+ALLEGRO_BITMAP* chrus_load_bitmap(const char* filename);
+void chrus_set_window_title(const char* new_title);
+void chrus_set_window_icon(ALLEGRO_BITMAP* icon);
 ]])
 
 --ffi.load("allegro")
 local lchrus = ffi.load("chrus_lib")
+local lallegro_color = ffi.load("allegro_color")
 lallegro = ffi.load("allegro")
 --chrus.sound = ffi.typeof("chrus_node")
+
+chrus.set_window_title = function(new_title)
+    lchrus.chrus_set_window_title(new_title)
+end
+chrus.set_window_icon = function(new_icon)
+    lchrus.chrus_set_window_icon(new_icon)
+end
+chrus.get_screen_width = function()
+    return 1920
+end
+chrus.get_screen_height = function()
+    return 1080
+end
 
 local function custom_node_alloc(typestr, finalizer)
     -- use free as the default finalizer
@@ -256,7 +301,7 @@ local create_node_indexfunc = function(methods, members)
         if methods[key] then
             return methods[key]
         elseif members[key] then
-            return members[key](node.data)
+            return members[key](node)
         else
             warn(("%s is not a callable function from this node!").format(key))
         end
@@ -271,6 +316,14 @@ end
 
 Color.rgb = function(r, g, b)
     return lallegro.al_map_rgb(r, g, b)
+end
+
+Color.rgba = function(r, g, b, a)
+    return lallegro.al_map_rgba(r, g, b, a)
+end
+
+Color.hsv = function(h, s, v)
+    return lallegro_color.al_color_hsv(h, s, v)
 end
 
 load_bitmap = function(path)
@@ -331,6 +384,9 @@ local sprite_members = {
 }
 
 local sprite_newindex_members = {
+    bitmap = function(node, data)
+        return lchrus.chrus_sprite_set_bitmap(node.data, data)
+    end,
     x = function(node, data)
         return lchrus.chrus_sprite_set_x(node.data, data)
     end,
@@ -381,23 +437,32 @@ local text_methods = {
 }
 
 local text_members = {
-    color = function(node, value)
-        lchrus.chrus_text_get_color(node.data, value)
+    color = function(node)
+        return lchrus.chrus_text_get_color(node.data)
     end,
-    x = function(node, value)
-        lchrus.chrus_text_get_x(node.data, value)
+    x = function(node)
+        return lchrus.chrus_text_get_x(node.data)
     end,
-    y = function(node, value)
-        lchrus.chrus_text_get_y(node.data, value)
+    y = function(node)
+        return lchrus.chrus_text_get_y(node.data)
     end,
-    max_width = function(node, value)
-        lchrus.chrus_text_get_max_width(node.data, value)
+    max_width = function(node)
+        return lchrus.chrus_text_get_max_width(node.data)
     end,
-    line_height = function(node, value)
-        lchrus.chrus_text_get_line_height(node.data, value)
+    width = function(node)
+        return lchrus.chrus_text_get_width(node.data)
     end,
-    text = function(node, value)
-        lchrus.chrus_text_get_text(node.data, value)
+    height = function(node)
+        return lchrus.chrus_text_get_height(node.data)
+    end,
+    line_height = function(node)
+        return lchrus.chrus_text_get_line_height(node.data)
+    end,
+    text = function(node)
+        return lchrus.chrus_text_get_text(node.data)
+    end,
+    visible = function(node)
+        return lchrus.chrus_text_get_visible(node.data)
     end,
 }
 
@@ -412,6 +477,10 @@ local text_newindex_members = {
     end,
     y = function(node, value)
         lchrus.chrus_text_set_y(node.data, value)
+    end,
+    position = function(node, value)
+        lchrus.chrus_text_set_x(node.data, (value.abs_x * chrus.get_screen_width()) + value.off_x)
+        lchrus.chrus_text_set_y(node.data, (value.abs_y * chrus.get_screen_height()) + value.off_y)
     end,
     max_width = function(node, value)
         lchrus.chrus_text_set_max_width(node.data, value)
@@ -430,6 +499,9 @@ local text_newindex_members = {
         elseif value == "right" then
             lchrus.chrus_text_set_flags(node.data, al_ffi.ALLEGRO_ALIGN_RIGHT)
         end
+    end,
+    visible = function(node, value)
+        lchrus.chrus_text_set_visible(node.data, value)
     end,
 }
 
@@ -463,9 +535,6 @@ local audiostream_methods = {
 }
 
 local audiostream_members = {
-    volume = function(node)
-        return lchrus.chrus_audiostream_get_volume(node.data)
-    end,
     playmode = function(node)
         return lchrus.chrus_audiostream_get_playmode(node.data)
     end,
@@ -481,9 +550,6 @@ local audiostream_members = {
 }
 
 local audiostream_newindex_members = {
-    volume = function(node, value)
-        lchrus.chrus_audiostream_set_volume(node.data, value)
-    end,
     playmode = function(node, value)
         lchrus.chrus_audiostream_set_playmode(node.data, value)
     end,

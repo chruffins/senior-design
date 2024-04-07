@@ -11,6 +11,8 @@
 */
 #pragma once
 
+#include<allegro5/allegro.h>
+
 typedef struct chrus_vec2 chrus_vec2;
 typedef struct chrus_vec3 chrus_vec3;
 typedef struct chrus_vec4 chrus_vec4;
@@ -33,9 +35,17 @@ struct chrus_vec4 {
     float a;
 };
 
-chrus_vec2 chrus_vec2_create(float, float);
-chrus_vec3 chrus_vec3_create(float, float, float);
-chrus_vec4 chrus_vec4_create(float, float, float, float);
+inline chrus_vec2 chrus_vec2_create(float x, float y) {
+    return (chrus_vec2){ .x = x, .y = y };
+}
+
+inline chrus_vec3 chrus_vec3_create(float x, float y, float z) {
+    return (chrus_vec3){ .x = x, .y = y, .z = z };
+}
+
+inline chrus_vec4 chrus_vec4_create(float x, float y, float z, float a) {
+    return (chrus_vec4){ .x = x, .y = y, .z = z, .a = a };
+}
 
 inline bool chrus_rectangles_collide(chrus_vec2 r1p, chrus_vec2 r1s, chrus_vec2 r2p, chrus_vec2 r2s) {
     if (r1p.x + r1s.x >= r2p.x && r1p.x <= r2p.x + r2s.x
@@ -45,3 +55,5 @@ inline bool chrus_rectangles_collide(chrus_vec2 r1p, chrus_vec2 r1s, chrus_vec2 
 
     return false;
 }
+
+void* physics_handler(ALLEGRO_THREAD*, void*);

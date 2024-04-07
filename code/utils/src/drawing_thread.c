@@ -8,7 +8,7 @@ void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
 
     al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
     al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE);
-    chrus_display = al_create_display(1080, 810);
+    chrus_display = al_create_display(1920, 1080);
 
     /* need to setup the drawing queue and the ability to send over bitmaps to create */
     chrus_drawing_queue = al_create_event_queue();
@@ -76,6 +76,12 @@ void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
             } else {
                 printf("shader built successfully!\n");
             }
+            break;
+        case CHRUS_EVENT_SET_WINDOW_TITLE:
+            al_set_window_title(chrus_display, (const char*)event.user.data1);
+            break;
+        case CHRUS_EVENT_SET_WINDOW_ICON:
+            al_set_display_icon(chrus_display, (const char*)event.user.data1);
             break;
         case ALLEGRO_EVENT_TIMER:
             redraw = true;

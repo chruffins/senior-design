@@ -41,7 +41,7 @@ lallegro.al_register_event_source(event_queue, lallegro.al_get_mouse_event_sourc
 
 --setmetatable(event, event_metatable)
 
-local mouse = {clicked = event:new(), leftclicked = event:new(), rightclicked = event:new() }
+local mouse = {clicked = event:new(), leftclicked = event:new(), rightclicked = event:new(), moved = event:new() }
 local keyboard = {keydown = event:new()}
 local tick = {tick = event:new()}
 
@@ -69,7 +69,6 @@ end
 mouse.clicked:connect(function(x, y)
     print(string.format("I clicked at (%d, %d)!", x, y))
 end)
-]]--
 
 mouse.leftclicked:connect(function(x, y)
     print(string.format("I LEFT clicked at (%d, %d)!", x, y))
@@ -78,6 +77,7 @@ end)
 mouse.rightclicked:connect(function(x, y)
     print(string.format("I RIGHT clicked at (%d, %d)!", x, y))
 end)
+]]--
 
 --keyboard.keydown:connect(function(keycode)
 --    print(string.format("Cheesed to meet you, %d!", keycode))
@@ -101,6 +101,9 @@ local event_responses = {
             mouse.rightclicked:fire(e.mouse.x, e.mouse.y)
         end
     end,
+    [al_ffi.ALLEGRO_EVENT_MOUSE_AXES] = function ()
+        mouse.moved:fire(e.mouse.x, e.mouse.y)
+    end,
     [al_ffi.ALLEGRO_EVENT_TIMER] = function ()
         tick.tick:fire(lallegro.al_get_time())
     end,
@@ -121,7 +124,7 @@ local event_responses = {
         end
 
         local result, err = pcall(loaded_scripts[src])
-        if result == nil then
+        if result == false then
             print(err)
         end
     end

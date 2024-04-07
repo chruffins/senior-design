@@ -160,4 +160,6 @@ void chrus_sprite_set_visible(chrus_sprite* restrict this, bool new) {
 
 void chrus_sprite_set_bitmap(chrus_sprite* restrict this, ALLEGRO_BITMAP* restrict new) {
     this->image_data = new;
+    this->width = al_get_bitmap_width(new);
+    this->height = al_get_bitmap_height(new);
 }

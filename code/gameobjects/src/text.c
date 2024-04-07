@@ -27,11 +27,14 @@ chrus_text* chrus_text_create() {
     new_text->flags = ALLEGRO_ALIGN_LEFT;
     new_text->text = "Hello world!";
     new_text->_layer = 0;
+    new_text->visible = true;
 
     return new_text;
 }
 
 void chrus_text_draw(chrus_text* restrict this, float dx, float dy) {
+    if (!this->visible) return;
+
     al_draw_multiline_text(this->font, this->color, this->x + dx, this->y + dy, this->max_width, this->line_height, this->flags, this->text);
 }
 
@@ -71,6 +74,21 @@ int chrus_text_get_layer(chrus_text* restrict this) {
     return this->_layer;
 }
 
+int chrus_text_get_width(chrus_text* restrict this) {
+    return this->_width;
+}
+
+int chrus_text_get_height(chrus_text* restrict this) {
+    int _, h;
+
+    al_get_text_dimensions(this->font, this->text, &_, &_, &_, &h);
+    return h;
+}
+
+bool chrus_text_get_visible(chrus_text* restrict this) {
+    return this->visible;
+}
+
 void chrus_text_set_color(chrus_text* restrict this, ALLEGRO_COLOR new) {
     this->color = new;
 }
@@ -97,12 +115,14 @@ void chrus_text_set_flags(chrus_text* restrict this, int new) {
 
 void chrus_text_set_text(chrus_text* restrict this, const char* new_text) {
     this->text = new_text;
+    this->_width = al_get_text_width(this->font, this->text);
 }
 
 void chrus_text_set_font(chrus_text* restrict this, const char* font_path, int size) {
     /* use insert to enforce the existence of the font */
     if (font_path == NULL) {
         this->font = get_default_font();
+        this->_width = al_get_text_width(this->font, this->text);
         return;
     }
 
@@ -119,5 +139,10 @@ void chrus_text_set_font(chrus_text* restrict this, const char* font_path, int s
     }
 
     this->font = sized_font;
+    this->_width = al_get_text_width(this->font, this->text);
     return;
+}
+
+void chrus_text_set_visible(chrus_text* restrict this, bool new) {
+    this->visible = new;
 }

@@ -28,3 +28,7 @@ ALLEGRO_SHADER* chrus_shader_create();
 void chrus_shader_attach_source_file(ALLEGRO_SHADER* restrict shader, ALLEGRO_SHADER_TYPE type, const char* filename);
 void chrus_shader_attach_source(ALLEGRO_SHADER* restrict shader, ALLEGRO_SHADER_TYPE type, const char* source);
 void chrus_shader_build(ALLEGRO_SHADER* shader);
+
+/* some misc functions */
+void chrus_set_window_title(const char* new_title);
+void chrus_set_window_icon(ALLEGRO_BITMAP* icon);

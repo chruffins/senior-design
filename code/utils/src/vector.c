@@ -41,7 +41,20 @@ void* chrus_vector_pop(chrus_vector *this) {
     return ret;
 }
 
-bool chrus_vector_remove(chrus_vector *this, void *match);
+bool chrus_vector_remove(chrus_vector *this, void *match) {
+    size_t at = -1;
+    for (size_t i = 0; i < this->size; i++) {
+        if (this->data[i] == match) {
+            at = i;
+            break;
+        }
+    }
+
+    if (at == -1) return false;
+
+    memmove(this->data + at, this->data + at + 1, (--this->size - at) * sizeof(void*));
+}
+
 bool chrus_vector_insert(chrus_vector *this, void *data, size_t position);
 
 bool chrus_vector_reserve(chrus_vector* restrict this, size_t new_capacity) {
