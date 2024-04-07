@@ -47,8 +47,9 @@ find_library(AL_AUDIO allegro_audio)
 find_library(AL_ACODEC allegro_acodec)
 find_library(AL_PRIMITIVES allegro_primitives)
 find_library(AL_IMAGE allegro_image)
+find_library(AL_COLOR allegro_color)
 find_library(LUAJIT luajit-5.1)
 
-target_link_libraries(chrus_lib ${AL} ${AL_FONT} ${AL_AUDIO} ${AL_ACODEC} ${AL_PRIMITIVES} ${AL_IMAGE} ${AL_TTF} ${LUAJIT})
+target_link_libraries(chrus_lib ${AL} ${AL_FONT} ${AL_AUDIO} ${AL_ACODEC} ${AL_PRIMITIVES} ${AL_IMAGE} ${AL_TTF} ${AL_COLOR} ${LUAJIT})
 
-target_link_libraries(${PROJECT_NAME} ${AL} ${AL_FONT} ${AL_PRIMITIVES} ${AL_IMAGE} ${AL_AUDIO} ${AL_ACODEC} ${AL_TTF} ${LUAJIT} chrus_lib)
+target_link_libraries(${PROJECT_NAME} ${AL} ${AL_FONT} ${AL_PRIMITIVES} ${AL_IMAGE} ${AL_AUDIO} ${AL_ACODEC} ${AL_TTF} ${AL_COLOR} ${LUAJIT} chrus_lib)

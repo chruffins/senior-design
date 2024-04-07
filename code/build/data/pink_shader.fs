@@ -33,7 +33,7 @@ void main()
   else
     c = varying_color;
   if (!al_alpha_test || alpha_test_func(c.a, al_alpha_func, al_alpha_test_val))
-    gl_FragColor = c + (noise * 0.6);
+    gl_FragColor = c + vec4(0.4, 0.0, 0.4, 0.0);//(noise * 0.6);
   else
     discard;
 }
