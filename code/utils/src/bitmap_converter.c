@@ -24,6 +24,38 @@ ALLEGRO_BITMAP* chrus_load_bitmap(const char* filename) {
     return new_bitmap;
 }
 
+ALLEGRO_FONT*   chrus_load_ttf_font(const char *filename, int size, int flags) {
+    /* synchronous font loading. great */
+    struct chrus_font_loader_args args = (struct chrus_font_loader_args){ .filename = filename, .size = size, .flags = flags };
+
+    ALLEGRO_FONT** ptr_to_font = malloc(sizeof(void*));
+    ALLEGRO_FONT* created_font;
+    ALLEGRO_MUTEX* font_mutex = al_create_mutex();
+    ALLEGRO_COND* font_created = al_create_cond();
+    ALLEGRO_EVENT creater_event;
+    creater_event.user.type = CHRUS_EVENT_CREATE_FONT;
+    creater_event.user.data1 = (intptr_t)ptr_to_font;
+    creater_event.user.data2 = (intptr_t)font_created;
+    creater_event.user.data3 = (intptr_t)&args;
+
+    al_lock_mutex(font_mutex);
+    al_emit_user_event(&chrus_drawing_event_source, &creater_event, NULL);
+    al_wait_cond(font_created, font_mutex);
+    al_unlock_mutex(font_mutex);
+
+    created_font = *ptr_to_font;
+
+    free(ptr_to_font);
+    al_destroy_mutex(font_mutex);
+    al_destroy_cond(font_created);
+
+    return created_font;
+}
+
+void chrus_convert_font() {
+    chrus_emit_conversion_event(NULL);
+}
+
 ALLEGRO_SHADER* chrus_shader_create() {
     /* writing synchronous code l_l */
     ALLEGRO_SHADER** ptr_to_shader = malloc(sizeof(void*));

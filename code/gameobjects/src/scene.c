@@ -15,7 +15,7 @@ chrus_scene *chrus_scene_create(const char *name) {
     /* we need to defer creating the camera to the thread handle*/
     new_scene->current_camera = NULL;
     new_scene->event_queue = al_create_event_queue();
-    new_scene->tick_timer = al_create_timer(1.0 / 30.0);
+    new_scene->tick_timer = al_create_timer(1.0 / 60.0);
 
     al_register_event_source(new_scene->event_queue, (ALLEGRO_EVENT_SOURCE*)new_scene);
     al_register_event_source(new_scene->event_queue, al_get_timer_event_source(new_scene->tick_timer));
@@ -41,6 +41,10 @@ void chrus_scene_destroy(chrus_scene *scene) {
     for (size_t i = 0; i < scene->children.size; i++) {
         /* printf("destroying node %s now\n", scene->children.data[i]->name); */
         chrus_node_destroy(scene->children.data[i]);
+    }
+
+    for (size_t i = 0; i < 8; i++) {
+        chrus_vector_destroy(&scene->drawable_layers[i]);
     }
 
     free(scene);
@@ -122,7 +126,7 @@ void chrus_scene_draw(chrus_scene* restrict this) {
 
     al_clear_to_color(al_map_rgb(0, 0, 0));
 
-    //al_hold_bitmap_drawing(true);
+    al_hold_bitmap_drawing(true);
     /*
     for (size_t i = 0; i < this->children.size; i++) {
         chrus_node* node = this->children.data[i];
@@ -161,13 +165,15 @@ void chrus_scene_draw(chrus_scene* restrict this) {
         }
     }
 
-    //al_hold_bitmap_drawing(false);
+    al_hold_bitmap_drawing(false);
 
     al_use_shader(NULL);
 
     al_set_target_backbuffer(current_display);
-    al_use_transform(&current_camera->_scaler);
-    al_draw_bitmap(current_camera->_buffer, current_camera->screen_x, current_camera->screen_y, 0);
+    //al_use_transform(&current_camera->_scaler);
+    //al_draw_bitmap(current_camera->_buffer, current_camera->screen_x, current_camera->screen_y, 0);
+    al_draw_scaled_bitmap(current_camera->_buffer, current_camera->screen_x, current_camera->screen_y, current_camera->screen_width, current_camera->screen_height,
+        current_camera->viewport_x, current_camera->viewport_y, current_camera->viewport_width, current_camera->viewport_height, 0);
 
     // set target backbuffer is called by scenemanager
 }

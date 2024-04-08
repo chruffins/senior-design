@@ -17,7 +17,7 @@ local event = {
 
 function event:fire(...)
     for _, v in pairs(self.connections) do
-        v(...)
+        if v(...) then break end
     end
 end
 

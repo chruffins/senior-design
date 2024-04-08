@@ -13,22 +13,27 @@ chrus_prim* chrus_prim_create() {
     /* initializes to a line... just because. */
     new_prim->type = CHRUS_PRIMITIVE_HIGHLEVEL;
     new_prim->hl.hl_type = CHRUS_PRIM_HL_LINE;
+    new_prim->visible = true;
 
     return new_prim;
 }
 
 void chrus_prim_create_vbuffer(chrus_prim* restrict this, int num_vertices, const void* init_data, bool backup) {
+    this->ll.vertex_buffer = NULL;
     this->type = CHRUS_PRIMITIVE_LOWLEVEL;
-
+    this->ll.count = num_vertices;
+    this->ll.texture = NULL;
+    this->ll.start = 0;
+    this->ll.end = num_vertices;
+    
     if (backup == false) this->ll.vertex_buffer = al_create_vertex_buffer(NULL, init_data, num_vertices, 0);
     if (this->ll.vertex_buffer == NULL) {
         this->type = CHRUS_PRIMITIVE_LOWLEVEL_BACKUP;
         /* need to fallback. TODO: make sure this failure only happens once */
-        this->ll.vertex_backup = malloc(sizeof(ALLEGRO_VERTEX)*num_vertices);
+        this->ll.vertex_backup = calloc(num_vertices, sizeof(ALLEGRO_VERTEX));
         if (this->ll.vertex_backup == NULL) return; /* TODO: we should just crash the program at this point */
+        //printf("created a backup\n");
     }
-
-    this->ll.count = num_vertices;
 }
 
 void chrus_prim_create_hl(chrus_prim* restrict this) {
@@ -55,6 +60,10 @@ void chrus_prim_destroy(chrus_prim* restrict this) {
     }
     free(this);
     return;
+}
+
+bool chrus_prim_get_visible(chrus_prim* restrict this) {
+    return this->visible;
 }
 
 int  chrus_prim_get_layer(chrus_prim* restrict this) {
@@ -133,14 +142,20 @@ void chrus_prim_draw_highlevel(chrus_prim* restrict this, float dx, float dy) {
 }
 
 void chrus_prim_draw_lowlevel(chrus_prim* restrict this, float dx, float dy) {
+    if (this->ll.vertex_buffer == NULL) return;
+
     al_draw_vertex_buffer(this->ll.vertex_buffer, this->ll.texture, this->ll.start, this->ll.end, this->ll.type);
 }
 
 void chrus_prim_draw_lowlevel_backup(chrus_prim* restrict this, float dx, float dy) {
+    if (this->ll.vertex_backup == NULL) return;
+    
     al_draw_prim(this->ll.vertex_backup, NULL, this->ll.texture, this->ll.start, this->ll.end, this->ll.type);
 }
 
 void chrus_prim_draw(chrus_prim* restrict this, float dx, float dy) {
+    if (!this->visible) return;
+
     switch (this->type)
     {
     case CHRUS_PRIMITIVE_HIGHLEVEL:
@@ -235,6 +250,12 @@ bool chrus_prim_get_filled(chrus_prim* restrict this) {
     }
 }
 
+bool chrus_prim_set_visible(chrus_prim* restrict this, bool new) {
+    this->visible = new;
+
+    return true;
+}
+
 bool chrus_prim_set_filled(chrus_prim* restrict this, bool new_value) {
     /* this only applies to highlevel because setting filled doesn't make sense for lowlevel */
     if (this->type != CHRUS_PRIMITIVE_HIGHLEVEL) return false;
@@ -299,6 +320,7 @@ bool chrus_prim_set_hl_type(chrus_prim* restrict this, CHRUS_PRIM_HL_TYPE type) 
     if (this->type != CHRUS_PRIMITIVE_HIGHLEVEL) return false;
 
     this->hl.hl_type = type;
+    return true;
 }
 
 bool chrus_prim_set_hl_value(chrus_prim* restrict this, int ptr, float value) {
@@ -595,4 +617,17 @@ bool chrus_prim_set_spline(chrus_prim* restrict this, float x1, float y1, float 
     this->hl.thickness = thickness;
 
     return true;
+}
+
+bool chrus_prim_set_type(chrus_prim* restrict this, int new) {
+    if (this->type == CHRUS_PRIMITIVE_HIGHLEVEL) return false;
+
+    this->ll.type = new;
+    return true;
+}
+
+ALLEGRO_VERTEX* chrus_prim_get_vertices(chrus_prim* restrict this) {
+    if (this->type != CHRUS_PRIMITIVE_LOWLEVEL_BACKUP) return NULL;
+
+    return this->ll.vertex_backup;
 }

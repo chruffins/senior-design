@@ -57,6 +57,7 @@ void load_allegro_libraries() {
 void set_some_flags() {
     al_set_new_display_flags(ALLEGRO_WINDOWED);
     al_set_new_bitmap_flags(ALLEGRO_CONVERT_BITMAP);
+    al_inhibit_screensaver(true);
     al_set_new_window_title("chrus game");
 }
 
@@ -90,7 +91,9 @@ void run_game_loop() {
     al_register_event_source(queue, al_get_display_event_source(chrus_display));
     al_register_event_source(queue, al_get_timer_event_source(timer));
 
-    chrus_scene_manager_load_scene(&scene_manager, "savedscene.json");
+    al_set_mixer_postprocess_callback(al_get_default_mixer(), chrus_demo_postprocess_callback, NULL);
+
+    chrus_scene_manager_load_scene(&scene_manager, "testscene.json");
 
     //chrus_scene_manager_add_scene(&scene_manager, chrus_scene_create("base test"));
     //chrus_node* test_node_script = malloc(sizeof(chrus_node));

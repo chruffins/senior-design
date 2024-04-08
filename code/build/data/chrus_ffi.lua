@@ -186,12 +186,12 @@ void chrus_text_set_text(chrus_text* restrict this, const char* new);
 void chrus_text_set_font(chrus_text* restrict this, const char* font_path, int size);
 void chrus_text_set_visible(chrus_text* restrict this, bool new);
 
-void chrus_sound_set_playmode(chrus_sound* restrict this, ALLEGRO_PLAYMODE new);
+void chrus_sound_set_playmode(chrus_sound* restrict this, int new);
 void chrus_sound_set_gain(chrus_sound* restrict this, float new);
 void chrus_sound_set_pan(chrus_sound* restrict this, float new);
 void chrus_sound_set_speed(chrus_sound* restrict this, float new);
 
-void chrus_audiostream_set_playmode(chrus_audiostream* restrict this, ALLEGRO_PLAYMODE new);
+void chrus_audiostream_set_playmode(chrus_audiostream* restrict this, int new);
 void chrus_audiostream_set_gain(chrus_audiostream* restrict this, float new);
 void chrus_audiostream_set_pan(chrus_audiostream* restrict this, float new);
 void chrus_audiostream_set_speed(chrus_audiostream* restrict this, float new);
@@ -215,9 +215,10 @@ void chrus_prim_create_hl(chrus_prim* restrict this);
 void chrus_prim_draw(chrus_prim* restrict this, float dx, float dy);
 bool chrus_prim_translate(chrus_prim* restrict this, float dx, float dy);
 
+bool chrus_prim_get_visible(chrus_prim* restrict this);
 bool chrus_prim_get_filled(chrus_prim* restrict this);
 bool chrus_prim_set_filled(chrus_prim* restrict this, bool new_value);
-
+bool chrus_prim_set_visible(chrus_prim* restrict this, bool new);
 bool chrus_prim_set_hl_type(chrus_prim* restrict this, CHRUS_PRIM_HL_TYPE type);
 bool chrus_prim_set_hl_value(chrus_prim* restrict this, int ptr, float value);
 bool chrus_prim_set_color(chrus_prim* restrict this, ALLEGRO_COLOR color);
@@ -239,6 +240,10 @@ bool chrus_prim_set_arc(chrus_prim* restrict this, float x1, float y1, float rx,
 bool chrus_prim_set_elliptical_arc(chrus_prim* restrict this, float x1, float y1, float rx, float ry, float start_theta, float end_theta, ALLEGRO_COLOR color, float thickness);
 bool chrus_prim_set_spline(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, ALLEGRO_COLOR color, float thickness);
 
+bool chrus_prim_set_type(chrus_prim* restrict this, int new);
+
+ALLEGRO_VERTEX* chrus_prim_get_vertices(chrus_prim* restrict this);
+
 ALLEGRO_SHADER* chrus_shader_create();
 void chrus_scene_set_shader(chrus_scene* restrict this, chrus_node* restrict shader_node, int pos);
 
@@ -249,6 +254,8 @@ void chrus_shader_build(ALLEGRO_SHADER* shader);
 ALLEGRO_BITMAP* chrus_load_bitmap(const char* filename);
 void chrus_set_window_title(const char* new_title);
 void chrus_set_window_icon(ALLEGRO_BITMAP* icon);
+
+float* chrus_demo_get_audio_buffer();
 ]])
 
 --ffi.load("allegro")
@@ -330,6 +337,14 @@ load_bitmap = function(path)
     return lchrus.chrus_load_bitmap(path)
 end
 
+get_bitmap_flags = function(bmp)
+    return lallegro.al_get_bitmap_flags(bmp)
+end
+
+get_mixer_buffer = function()
+    return lchrus.chrus_demo_get_audio_buffer()
+end
+
 local sprite_methods = {
     new = function()
         local new = custom_node_alloc("chrus_node", finalizer)
@@ -352,31 +367,31 @@ local sprite_methods = {
 
 local sprite_members = {
     x = function(node)
-        return lchrus.chrus_sprite_get_x(node)
+        return lchrus.chrus_sprite_get_x(node.data)
     end,
     y = function(node)
-        return lchrus.chrus_sprite_get_y(node)
+        return lchrus.chrus_sprite_get_y(node.data)
     end,
     width = function(node)
-        return lchrus.chrus_sprite_get_width(node)
+        return lchrus.chrus_sprite_get_width(node.data)
     end,
     height = function(node)
-        return lchrus.chrus_sprite_get_height(node)
+        return lchrus.chrus_sprite_get_height(node.data)
     end,
     flipping = function(node)
-        return lchrus.chrus_sprite_get_flipping(node)
+        return lchrus.chrus_sprite_get_flipping(node.data)
     end,
     sx = function(node)
-        return lchrus.chrus_sprite_get_sx(node)
+        return lchrus.chrus_sprite_get_sx(node.data)
     end,
     sy = function(node)
-        return lchrus.chrus_sprite_get_sy(node)
+        return lchrus.chrus_sprite_get_sy(node.data)
     end,
     rotation = function(node)
-        return lchrus.chrus_sprite_get_rotation(node)
+        return lchrus.chrus_sprite_get_rotation(node.data)
     end,
     visible = function(node)
-        return lchrus.chrus_sprite_get_visible(node)
+        return lchrus.chrus_sprite_get_visible(node.data)
     end,
     bitmap = function(node)
         return lchrus.chrus_sprite_get_bitmap(node)
@@ -582,6 +597,10 @@ local primitive_methods = {
     translate = function(node, dx, dy)
         lchrus.chrus_prim_translate(node.data, dx, dy)
     end,
+    create_vertex_buffer = function(node, num_vertices)
+        -- can't store this stuff in the GPU because lmao never finished it
+        lchrus.chrus_prim_create_vbuffer(node.data, num_vertices, nil, true)
+    end,
     line = function(node, x1, y1, x2, y2, thickness, color)
         return lchrus.chrus_prim_set_line(node.data, x1, y1, x2, y2, thickness, color)
     end,
@@ -617,6 +636,12 @@ local primitive_methods = {
 local primitive_members = {
     filled = function(node)
         return lchrus.chrus_prim_get_filled(node.data)
+    end,
+    vertices = function(node)
+        return lchrus.chrus_prim_get_vertices(node.data)
+    end,
+    visible = function(node)
+        return lchrus.chrus_prim_get_visible(node.data)
     end,
 }
 
@@ -656,6 +681,12 @@ local primitive_newindex_members = {
     end,
     hl_type = function(node, data)
         lchrus.chrus_prim_set_hl_type(node.data, data)
+    end,
+    ll_type = function(node, data)
+        lchrus.chrus_prim_set_type(node.data, data)
+    end,
+    visible = function(node, data)
+        lchrus.chrus_prim_set_visible(node.data, data)
     end,
 }
 

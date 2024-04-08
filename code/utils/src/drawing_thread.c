@@ -49,8 +49,16 @@ void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
             finished = true;
             break;
         case CHRUS_EVENT_CONVERT_BITMAP:
+            /*
+            if (event.user.data1) { 
+                al_convert_bitmap((ALLEGRO_BITMAP*)event.user.data1);
+                printf("converted bitmap %p new flags: %d\n", (void*)event.user.data1, al_get_bitmap_flags(event.user.data1));
+            } else {
+                al_convert_memory_bitmaps();
+                printf("converting all memory bitmaps now\n");
+            }
+            */
             al_convert_memory_bitmaps();
-            //al_convert_bitmap((ALLEGRO_BITMAP*)event.user.data1);
             break;
         case CHRUS_EVENT_CREATE_SHADER:
             *(void**)event.user.data1 = al_create_shader(ALLEGRO_SHADER_GLSL);
@@ -81,7 +89,13 @@ void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
             al_set_window_title(chrus_display, (const char*)event.user.data1);
             break;
         case CHRUS_EVENT_SET_WINDOW_ICON:
-            al_set_display_icon(chrus_display, (const char*)event.user.data1);
+            al_set_display_icon(chrus_display, (ALLEGRO_BITMAP*)event.user.data1);
+            break;
+        case CHRUS_EVENT_CREATE_FONT:
+            /* what a person will do to avoid declaring a stack variable just for this */
+            *(void**)event.user.data1 = al_load_ttf_font(((struct chrus_font_loader_args*)(void*)event.user.data3)->filename, 
+                ((struct chrus_font_loader_args*)(void*)event.user.data3)->size, ((struct chrus_font_loader_args*)(void*)event.user.data3)->flags);
+            al_broadcast_cond((ALLEGRO_COND*)event.user.data2);
             break;
         case ALLEGRO_EVENT_TIMER:
             redraw = true;
@@ -100,7 +114,7 @@ void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
         al_flip_display();
 
         double game_time = al_get_time();
-        if (game_time - old_time >= 1.0) {
+        if (game_time - old_time >= 0.2) {
             fps = frames_done / (game_time - old_time);
 
             frames_done = 0;

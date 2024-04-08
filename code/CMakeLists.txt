@@ -4,7 +4,7 @@ project(chrus_engine C)
 # set C standard
 set(CMAKE_C_STANDARD 11)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -g")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -g -O3")
 
 add_library(chrus_lib SHARED gameobjects/src/camera.c
 gameobjects/src/node.c

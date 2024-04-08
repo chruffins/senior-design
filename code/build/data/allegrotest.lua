@@ -1,3 +1,4 @@
+--[[
 local ffi = require("ffi")
 
 local al_ffi = require("allegro_ffi")
@@ -29,3 +30,4 @@ end
 
 -- Destroy the display and clean up Allegro
 allegro.al_destroy_display(display)
+]]

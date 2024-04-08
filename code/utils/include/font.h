@@ -19,6 +19,8 @@
 #include<string.h>
 #include<stdio.h>
 
+#include "bitmap_converter.h"
+
 typedef struct chrus_font_t chrus_font;
 
 /* i sure wish types could be file scope only */

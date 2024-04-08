@@ -50,6 +50,7 @@ enum CHRUS_PRIM_HL_TYPE {
 struct chrus_primitive_t {
     CHRUS_PRIMITIVE_TYPE type; /* probably should be erroneous to change this */
     int _layer;
+    bool visible;
     union {
         struct hl {
             CHRUS_PRIM_HL_TYPE hl_type; 
@@ -86,6 +87,7 @@ void chrus_prim_draw(chrus_prim* restrict this, float dx, float dy);
 
 bool chrus_prim_translate(chrus_prim* restrict this, float dx, float dy);
 
+bool chrus_prim_get_visible(chrus_prim* restrict this);
 bool chrus_prim_get_filled(chrus_prim* restrict this);
 int  chrus_prim_get_layer(chrus_prim* restrict this);
 bool chrus_prim_set_filled(chrus_prim* restrict this, bool new_value);
@@ -93,6 +95,8 @@ bool chrus_prim_set_filled(chrus_prim* restrict this, bool new_value);
 bool chrus_prim_set_hl_type(chrus_prim* restrict this, CHRUS_PRIM_HL_TYPE type);
 bool chrus_prim_set_hl_value(chrus_prim* restrict this, int ptr, float value);
 bool chrus_prim_set_color(chrus_prim* restrict this, ALLEGRO_COLOR color);
+
+bool chrus_prim_set_visible(chrus_prim* restrict this, bool new);
 
 bool chrus_prim_set_line(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float thickness, ALLEGRO_COLOR color);
 bool chrus_prim_set_triangle(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float x3, float y3, float thickness, ALLEGRO_COLOR color);
@@ -110,3 +114,9 @@ bool chrus_prim_set_filled_circle(chrus_prim* restrict this, float x1, float y1,
 bool chrus_prim_set_arc(chrus_prim* restrict this, float x1, float y1, float rx, float start_theta, float end_theta, ALLEGRO_COLOR color, float thickness);
 bool chrus_prim_set_elliptical_arc(chrus_prim* restrict this, float x1, float y1, float rx, float ry, float start_theta, float end_theta, ALLEGRO_COLOR color, float thickness);
 bool chrus_prim_set_spline(chrus_prim* restrict this, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, ALLEGRO_COLOR color, float thickness);
+
+/* low level sets */
+bool chrus_prim_set_type(chrus_prim* restrict this, int new);
+
+ALLEGRO_VERTEX* chrus_prim_get_vertices(chrus_prim* restrict this);
+//bool chrus_prim_

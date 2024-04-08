@@ -15,16 +15,26 @@
 */
 #pragma once
 #include<allegro5/allegro.h>
+#include<allegro5/allegro_font.h>
+#include<allegro5/allegro_ttf.h>
 
 #include "globals.h"
 #include "enums.h"
+
+struct chrus_font_loader_args {
+    const char *filename;
+    int size;
+    int flags;
+};
 
 /* these functions tell the drawing thread to do stuff */
 ALLEGRO_BITMAP* chrus_create_bitmap(int w, int h);
 ALLEGRO_BITMAP* chrus_load_bitmap(const char* filename);
 ALLEGRO_SHADER* chrus_shader_create();
+ALLEGRO_FONT*   chrus_load_ttf_font(const char *filename, int size, int flags);
+void chrus_convert_font();
 
-/* asynchronously tells the drawing thread to do stuff and is guaranteed to be done in order */
+/* asynchronously tells the drawing thread to do stuff and is at least guaranteed to be done in order */
 void chrus_shader_attach_source_file(ALLEGRO_SHADER* restrict shader, ALLEGRO_SHADER_TYPE type, const char* filename);
 void chrus_shader_attach_source(ALLEGRO_SHADER* restrict shader, ALLEGRO_SHADER_TYPE type, const char* source);
 void chrus_shader_build(ALLEGRO_SHADER* shader);

@@ -129,6 +129,7 @@ void chrus_sound_set_speed(chrus_sound* restrict this, float new) {
 
 void chrus_audiostream_set_playmode(chrus_audiostream* restrict this, ALLEGRO_PLAYMODE new) {
     this->playmode = new;
+    al_set_audio_stream_playmode(this->stream, new);
 }
 
 void chrus_audiostream_set_gain(chrus_audiostream* restrict this, float new) {

@@ -132,7 +132,7 @@ void chrus_text_set_font(chrus_text* restrict this, const char* font_path, int s
         printf("font failed to load\n");
         return;
     }
-
+   
     sized_font = chrus_font_append_size(font, size);
     if (!sized_font) {
         printf("failed to get font at size %d\n", size);

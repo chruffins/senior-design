@@ -13,6 +13,7 @@ ALLEGRO_FONT* chrus_font_append_size(chrus_font* restrict this, int size) {
         this->capacity = 1;
         this->size = 1;
         this->sizes[0] = chrus_create_fontsize_elem(this, size);
+        chrus_convert_font();
         return this->sizes[0].font;
     }
 
@@ -28,12 +29,14 @@ ALLEGRO_FONT* chrus_font_append_size(chrus_font* restrict this, int size) {
     this->sizes[this->size] = chrus_create_fontsize_elem(this, size);
     this->size++;
 
+    chrus_convert_font();
+
     font = this->sizes[this->size - 1].font;
     return font;
 }
 
 static struct chrus_fontsize_elem_t chrus_create_fontsize_elem(chrus_font* restrict this, int size) {
-    return (struct chrus_fontsize_elem_t){ .size = size, .font = al_load_ttf_font(this->source, size, 0)};
+    return (struct chrus_fontsize_elem_t){ .size = size, .font = chrus_load_ttf_font(this->source, size, 0)};
 }
 
 chrus_font* chrus_font_create(const char* source) {
