@@ -1,0 +1,34 @@
+[{
+  "type": -1,
+  "id": "0x55ab608e6190",
+  "name": "base test",
+  "current_camera": "0x55ab608ffa90",
+  "children": [
+    "0x55ab608ff9d0",
+    "0x55ab608ffa90"
+  ]
+},
+{
+  "type": 2,
+  "id": "0x55ab608ff9d0",
+  "name": "script",
+  "source": "data/helloworld.lua",
+  "children": [
+  ]
+},
+{
+  "type": 1,
+  "id": "0x55ab608ffa90",
+  "name": "camera",
+  "sx": 0.000000,
+  "sy": 0.000000,
+  "sw": 1920.000000,
+  "sh": 1080.000000,
+  "vx": 0.000000,
+  "vy": 0.000000,
+  "vw": 1920.000000,
+  "vh": 1080.000000,
+  "children": [
+  ]
+}
+]
