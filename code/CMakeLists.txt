@@ -40,6 +40,7 @@ target_compile_options(chrus_engine PRIVATE)
 #target_compile_options(example PUBLIC -std=c++1y -Wall -Wfloat-conversion)
 #target_compile_options(${PROJECT_NAME} -O2)
 
+# sudo apt install liballegro5-dev
 find_library(AL allegro)
 find_library(AL_FONT allegro_font)
 find_library(AL_TTF allegro_ttf)
@@ -48,6 +49,9 @@ find_library(AL_ACODEC allegro_acodec)
 find_library(AL_PRIMITIVES allegro_primitives)
 find_library(AL_IMAGE allegro_image)
 find_library(AL_COLOR allegro_color)
+
+# sudo apt install libluajit-dev
+# i forget the name so just do 'sudo apt search luajit'
 find_library(LUAJIT luajit-5.1)
 
 target_link_libraries(chrus_lib ${AL} ${AL_FONT} ${AL_AUDIO} ${AL_ACODEC} ${AL_PRIMITIVES} ${AL_IMAGE} ${AL_TTF} ${AL_COLOR} ${LUAJIT})

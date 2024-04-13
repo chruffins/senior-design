@@ -16,7 +16,7 @@ end
 
 local stupid_icon = load_bitmap("data/fudge.webp")
 
-sound:load("data/insideout.flac")
+sound:load("data/hummingbird.ogg")
 sound.playmode = al_ffi.ALLEGRO_PLAYMODE_LOOP
 sound:play()
 sound:reparent(scene)
@@ -212,16 +212,24 @@ puff_demo_helpertext.justify = "center"
 puff_demo_helpertext.visible = false
 puff_demo_helpertext:reparent(scene)
 
+local puff_demo_helpertext2 = create_node("text")
+puff_demo_helpertext2.position = UIDim:new(nil, 0.5, 0, 0.20, 0)
+puff_demo_helpertext2:font(sansfont_path, 16)
+puff_demo_helpertext2.text = "click to stretch puff"
+puff_demo_helpertext2.justify = "center"
+puff_demo_helpertext2.visible = false
+puff_demo_helpertext2:reparent(scene)
+
 local menu_objects = {welcome_menu_about, welcome_menu_demos, about_menu_text, 
     about_menu_back, about_menu_puff, demo_menu_back, demo_menu_osc, demo_menu_stress, demo_menu_puff}
-local demo_objects = {osc_demo_prim, osc_demo_explainer, osc_demo_left_line, osc_demo_right_line, puff_demo_sprite, puff_background, puff_demo_helpertext}
+local demo_objects = {osc_demo_prim, osc_demo_explainer, osc_demo_left_line, osc_demo_right_line, puff_demo_sprite, puff_background, puff_demo_helpertext, puff_demo_helpertext2}
 local welcome_background = {background_rect, welcome_text, welcome_menu_frame}
 local welcome_menu = {welcome_menu_about, welcome_menu_demos}
 local about_menu = {about_menu_text, about_menu_back, about_menu_puff}
 local demo_menu = {demo_menu_back, demo_menu_osc, demo_menu_stress, demo_menu_puff}
 
 local osc_demo_objects = {osc_demo_prim, osc_demo_explainer, osc_demo_left_line, osc_demo_right_line}
-local puff_demo_objects = {puff_demo_sprite, puff_background, puff_demo_helpertext}
+local puff_demo_objects = {puff_demo_sprite, puff_background, puff_demo_helpertext, puff_demo_helpertext2}
 
 local function hide_objects(tbl)
     for _, obj in pairs(tbl) do
@@ -323,8 +331,13 @@ local states = {
         chrus.set_window_title("Chrus Engine Demo -- Puff")
         state = "puff"
         show_objects(puff_demo_objects)
+        puff_demo_sprite.sx = 1
     end,
 }
+
+local function stretch_puff()
+    puff_demo_sprite.sx = puff_demo_sprite.sx + 0.05
+end
 
 get_mouse().moved:connect(create_onhover_func(welcome_menu_about))
 get_mouse().moved:connect(create_onhover_func(about_menu_back))
@@ -341,6 +354,7 @@ get_mouse().clicked:connect(create_onclick_func(demo_menu_back, states["menu"]))
 get_mouse().clicked:connect(create_onclick_func(demo_menu_osc, states["oscilloscope"]))
 get_mouse().clicked:connect(create_onclick_func(demo_menu_stress, states["stress"]))
 get_mouse().clicked:connect(create_onclick_func(demo_menu_puff, states["puff"]))
+get_mouse().clicked:connect(create_onclick_func(puff_demo_sprite, stretch_puff))
 
 get_tick().tick:connect(function ()
     about_menu_puff.rotation = about_menu_puff.rotation + 0.04
