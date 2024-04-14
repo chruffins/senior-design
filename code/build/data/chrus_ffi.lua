@@ -81,7 +81,7 @@ typedef enum CHRUS_PRIM_HL_TYPE CHRUS_PRIM_HL_TYPE;
 struct chrus_node_vector_t { chrus_node** data; size_t size; size_t capacity; };
 struct chrus_vector_t { void **data; size_t size; size_t capacity; };
 struct chrus_camera_t { float screen_x, screen_y; float screen_width, screen_height; float viewport_width, viewport_height; float viewport_x, viewport_y; ALLEGRO_TRANSFORM _scaler; };
-struct chrus_scene_t { ALLEGRO_EVENT_SOURCE event_source; const char* name; chrus_node* current_camera; chrus_node_vec children; chrus_vector drawable_layers[8]; void* lua_vm; ALLEGRO_EVENT_QUEUE* event_queue; ALLEGRO_TIMER* tick_timer; };
+struct chrus_scene_t { ALLEGRO_EVENT_SOURCE event_source; const char* _name; chrus_node* current_camera; chrus_node_vec children; chrus_vector drawable_layers[8]; void* lua_vm; ALLEGRO_EVENT_QUEUE* event_queue; ALLEGRO_TIMER* tick_timer; };
 struct chrus_node_t { const char *_name; chrus_node* parent; chrus_node_vec children; enum CHRUS_NODE_TYPES type; void *data; };
 struct chrus_sprite_t { const char* source; float x; float y; int width; int height; int flipping; float sx; float sy; float rotation; bool visible; ALLEGRO_BITMAP* image_data; };
 struct chrus_text_t {
@@ -786,18 +786,29 @@ local newindex_table = {
     [shader_enum] = shader_newindex,
 }
 
+local node_index = {
+    name = function(node)
+        return ffi.string(node._name)
+    end,
+}
+
+local node_newindex = {
+    name = function(node, value)
+        lchrus.chrus_node_set_name(node, value)
+    end,
+}
+
 local node_metatable = {
     __index = function (node, key)
-        if key == "name" then
-            return node._name
+        if node_index[key] then
+            return node_index[key](node)
         end
 
         return index_table[tonumber(node.type)](node, key)
     end,
     __newindex = function (node, key, value)
-        if key == "name" then
-            lchrus.chrus_node_set_name(node, value)
-            return
+        if node_newindex[key] then
+            return node_newindex[key](node, value)
         end
 
         return newindex_table[tonumber(node.type)](node, key, value)
@@ -812,17 +823,35 @@ local type_table = {
     shader = shader_methods.new,
 }
 
-local scene_metatable = {
-    __index = {
-        get_child = function(scene, name)
-            for i = 0, tonumber(scene.children.size) - 1 do
-                if scene.children.data[i].name == name then
-                    return scene.children.data[i]
-                end
+local scene_index_methods = {
+    get_child = function(scene, name)
+        for i = 0, tonumber(scene.children.size) - 1 do
+            if scene.children.data[i].name == name then
+                return scene.children.data[i]
             end
-            return nil
-        end,
-    },
+        end
+        return nil
+    end,
+}
+
+local scene_index_members = {
+    name = function(scene)
+        return ffi.string(scene._name)
+    end
+}
+
+local scene_newindex_members = {
+    name = function(scene, new_name)
+        -- do stuff lmao
+    end
+}
+
+local scene_index = create_node_indexfunc(scene_index_methods, scene_index_members)
+local scene_newindex = create_node_newindexfunc(scene_newindex_members)
+
+local scene_metatable = {
+    __index = scene_index,
+    __newindex = scene_newindex,
 }
 
 --local mouse = {clicked = event:new(), leftclicked = event:new(), rightclicked = event:new() }

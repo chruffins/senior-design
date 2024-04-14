@@ -49,7 +49,7 @@ void chrus_scene_destroy(chrus_scene *scene) {
         chrus_vector_destroy(&scene->drawable_layers[i]);
     }
 
-    free(scene->name);
+    free((void*)scene->name);
     free(scene);
 }
 

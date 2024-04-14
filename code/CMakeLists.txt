@@ -4,6 +4,7 @@ project(chrus_engine C)
 # set C standard
 set(CMAKE_C_STANDARD 11)
 
+# -fsanitize=address
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -g -O3")
 
 add_library(chrus_lib SHARED gameobjects/src/camera.c
@@ -25,7 +26,8 @@ utils/src/allocator.c
 utils/src/globals.c
 utils/src/drawing_thread.c
 utils/src/bitmap_converter.c
-utils/src/pdjson.c)
+utils/src/pdjson.c
+utils/src/utils.c)
 
 # find the files
 #file(GLOB_RECURSE SOURCES main/*.c main/*.h gameobjects/*.c gameobjects/*.h utils/*.h utils/*.c)

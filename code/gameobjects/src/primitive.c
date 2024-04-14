@@ -5,10 +5,9 @@ static void chrus_prim_draw_lowlevel(chrus_prim* restrict this, float dx, float 
 static void chrus_prim_draw_lowlevel_backup(chrus_prim* restrict this, float dx, float dy);
 
 chrus_prim* chrus_prim_create() {
-    chrus_prim* new_prim = malloc(sizeof(chrus_prim));
+    chrus_prim* new_prim = calloc(1, sizeof(chrus_prim));
 
     if (new_prim == NULL) return NULL;
-    memset(new_prim, 0, sizeof(new_prim));
 
     /* initializes to a line... just because. */
     new_prim->type = CHRUS_PRIMITIVE_HIGHLEVEL;

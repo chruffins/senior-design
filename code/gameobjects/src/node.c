@@ -75,7 +75,7 @@ void chrus_node_destroy(chrus_node *this) {
         break;
     }
 
-    printf("%s", this->name);
+    //printf("%s", this->name);
     free((void*)this->name);
     //printf("%s\n", this->name);
     free(this);
