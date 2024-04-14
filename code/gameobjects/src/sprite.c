@@ -88,6 +88,10 @@ void chrus_sprite_translate(chrus_sprite *this, float dx, float dy) {
     this->y += dy;
 }
 
+void chrus_sprite_destroy(chrus_sprite* restrict this) {
+    free(this);
+}
+
 float chrus_sprite_get_x(chrus_sprite* restrict this) {
     return this->x;
 }

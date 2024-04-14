@@ -12,7 +12,7 @@ struct chrus_node_t {
 
 chrus_node *chrus_node_create_uninit() {
     chrus_node *new_node = malloc(sizeof(chrus_node));
-    *new_node = (chrus_node){ "unused", NULL, chrus_node_vec_create(), CHRUS_NODE_UNINITIALIZED, NULL };
+    *new_node = (chrus_node){ convert_static_string_to_dynamic("unused"), NULL, chrus_node_vec_create(), CHRUS_NODE_UNINITIALIZED, NULL };
     return new_node;
 }
 
@@ -20,7 +20,7 @@ chrus_node *chrus_node_create_camera() {
     printf("creating camera node\n");
 
     chrus_node *new_node = malloc(sizeof(chrus_node));
-    *new_node = (chrus_node){ "camera", NULL, chrus_node_vec_create(), CHRUS_NODE_CAMERA, chrus_camera_create() };
+    *new_node = (chrus_node){ convert_static_string_to_dynamic("camera"), NULL, chrus_node_vec_create(), CHRUS_NODE_CAMERA, chrus_camera_create() };
     return new_node;
 }
 
@@ -28,7 +28,7 @@ chrus_node* chrus_node_create_sprite() {
     printf("creating sprite node\n");
 
     chrus_node *new_node = malloc(sizeof(chrus_node));
-    *new_node = (chrus_node){ "sprite", NULL, chrus_node_vec_create(), CHRUS_NODE_SPRITE, chrus_sprite_create(NULL) };
+    *new_node = (chrus_node){ convert_static_string_to_dynamic("sprite"), NULL, chrus_node_vec_create(), CHRUS_NODE_SPRITE, chrus_sprite_create(NULL) };
     return new_node;
 }
 
@@ -36,7 +36,7 @@ chrus_node* chrus_node_create_audiostream() {
     printf("creating stream node\n");
 
     chrus_node *new_node = malloc(sizeof(chrus_node));
-    *new_node = (chrus_node){ "audiostream", NULL, chrus_node_vec_create(), CHRUS_NODE_AUDIOSTREAM, chrus_audiostream_create(NULL) };
+    *new_node = (chrus_node){ convert_static_string_to_dynamic("audiostream"), NULL, chrus_node_vec_create(), CHRUS_NODE_AUDIOSTREAM, chrus_audiostream_create(NULL) };
     return new_node;
 }
 
@@ -53,7 +53,7 @@ void chrus_node_destroy(chrus_node *this) {
     switch (this->type)
     {
     case CHRUS_NODE_SCRIPT:
-        //free(this->data);
+        chrus_script_destroy(this->data);
         break;
     case CHRUS_NODE_CAMERA:
         chrus_camera_destroy(this->data);
@@ -64,6 +64,9 @@ void chrus_node_destroy(chrus_node *this) {
     case CHRUS_NODE_PRIMITIVE:
         chrus_prim_destroy(this->data);
         break;
+    case CHRUS_NODE_SPRITE:
+        chrus_sprite_destroy(this->data);
+        break;
     case CHRUS_NODE_SHADER:
         al_destroy_shader(this->data);
         break;
@@ -72,9 +75,23 @@ void chrus_node_destroy(chrus_node *this) {
         break;
     }
 
+    printf("%s", this->name);
+    free((void*)this->name);
+    //printf("%s\n", this->name);
     free(this);
 }
 
+bool chrus_node_set_name(chrus_node* restrict this, const char* new) {
+    // node owns the name so we can do this
+    const char* copied_str = convert_static_string_to_dynamic(new);
+
+    if (!copied_str) return false;
+
+    free((void*)this->name);
+    this->name = copied_str;
+
+    return true;
+}
 /*
 void chrus_node_reparent(chrus_node *parent, chrus_node *new_child) {
     // we should probably propagate child added up the chain...

@@ -82,7 +82,7 @@ struct chrus_node_vector_t { chrus_node** data; size_t size; size_t capacity; };
 struct chrus_vector_t { void **data; size_t size; size_t capacity; };
 struct chrus_camera_t { float screen_x, screen_y; float screen_width, screen_height; float viewport_width, viewport_height; float viewport_x, viewport_y; ALLEGRO_TRANSFORM _scaler; };
 struct chrus_scene_t { ALLEGRO_EVENT_SOURCE event_source; const char* name; chrus_node* current_camera; chrus_node_vec children; chrus_vector drawable_layers[8]; void* lua_vm; ALLEGRO_EVENT_QUEUE* event_queue; ALLEGRO_TIMER* tick_timer; };
-struct chrus_node_t { const char *name; chrus_node* parent; chrus_node_vec children; enum CHRUS_NODE_TYPES type; void *data; };
+struct chrus_node_t { const char *_name; chrus_node* parent; chrus_node_vec children; enum CHRUS_NODE_TYPES type; void *data; };
 struct chrus_sprite_t { const char* source; float x; float y; int width; int height; int flipping; float sx; float sy; float rotation; bool visible; ALLEGRO_BITMAP* image_data; };
 struct chrus_text_t {
     ALLEGRO_FONT* font;
@@ -124,6 +124,7 @@ chrus_node* chrus_node_create_sprite();
 chrus_audiostream *chrus_audiostream_create(const char *source);
 
 void chrus_node_destroy(chrus_node *this);
+bool chrus_node_set_name(chrus_node* restrict this, const char* new);
 
 chrus_sprite* chrus_sprite_create(const char *source);
 void chrus_sprite_load(chrus_sprite* this, const char *source);
@@ -256,6 +257,8 @@ void chrus_set_window_title(const char* new_title);
 void chrus_set_window_icon(ALLEGRO_BITMAP* icon);
 
 float* chrus_demo_get_audio_buffer();
+
+const char* convert_static_string_to_dynamic(const char*);
 ]])
 
 --ffi.load("allegro")
@@ -783,11 +786,20 @@ local newindex_table = {
     [shader_enum] = shader_newindex,
 }
 
-local test_metatable = {
+local node_metatable = {
     __index = function (node, key)
+        if key == "name" then
+            return node._name
+        end
+
         return index_table[tonumber(node.type)](node, key)
     end,
     __newindex = function (node, key, value)
+        if key == "name" then
+            lchrus.chrus_node_set_name(node, value)
+            return
+        end
+
         return newindex_table[tonumber(node.type)](node, key, value)
     end
 }
@@ -800,11 +812,27 @@ local type_table = {
     shader = shader_methods.new,
 }
 
+local scene_metatable = {
+    __index = {
+        get_child = function(scene, name)
+            for i = 0, tonumber(scene.children.size) - 1 do
+                if scene.children.data[i].name == name then
+                    return scene.children.data[i]
+                end
+            end
+            return nil
+        end,
+    },
+}
+
 --local mouse = {clicked = event:new(), leftclicked = event:new(), rightclicked = event:new() }
 
 function create_node(type)
     return type_table[type]()
 end
 
-chrus.node = ffi.metatype("chrus_node", test_metatable)
+chrus.node = ffi.metatype("chrus_node", node_metatable)
+chrus.scene = ffi.metatype("chrus_scene", scene_metatable)
+
+scene = ffi.cast("chrus_scene*", scene)
 print("Lua VM fully loaded.")

@@ -114,6 +114,7 @@ void chrus_text_set_flags(chrus_text* restrict this, int new) {
 }
 
 void chrus_text_set_text(chrus_text* restrict this, const char* new_text) {
+    //if (this->text != NULL) free(this->text);
     this->text = new_text;
     this->_width = al_get_text_width(this->font, this->text);
 }

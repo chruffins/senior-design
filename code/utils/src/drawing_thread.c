@@ -14,7 +14,10 @@ void* drawing_handler(ALLEGRO_THREAD *this, void *args) {
     chrus_drawing_queue = al_create_event_queue();
     al_init_user_event_source(&chrus_drawing_event_source);
 
-    chrus_sprite_create(NULL); /* you did this to initialize the default sprite */
+    {
+        chrus_sprite* temp_sprite =chrus_sprite_create(NULL); /* you did this to initialize the default sprite */
+        free(temp_sprite);
+    }
     if (!chrus_load_default_font()) {
         printf("default font FAILED to load in! you will crash now lol\n");
     } else {

@@ -68,6 +68,7 @@ int chrus_scene_manager_pop_scene(chrus_scene_manager *this) {
 
     al_join_thread(this->threads[this->top], NULL);
     chrus_scene_destroy(this->scenes[this->top]);
+    al_destroy_thread(this->threads[this->top]);
     this->threads[this->top] = NULL;
     this->scenes[this->top] = NULL;
     this->top--;

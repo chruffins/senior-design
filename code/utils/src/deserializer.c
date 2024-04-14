@@ -266,9 +266,10 @@ static inline chrus_node* deserialize_object(chrus_rbtree* restrict tree, json_s
 
     result = is_correct_fieldname(stream, "children");
     //if (result != 0) return NULL; 
-    int children = store_children_in_rbtree((chrus_vector*)&final_node->children, tree, stream);
+    store_children_in_rbtree((chrus_vector*)&final_node->children, tree, stream);
 
     final_node->type = node_type; /* set the node type now */
+    free(final_node->name);
     final_node->name = node_name;
 
     /* building our treemap now */
@@ -445,11 +446,13 @@ chrus_scene* chrus_deserialize_scene(const char* filename) {
     json_close(&first_pass_stream);
     fclose(fp);
     chrus_rbtree_destroy(pointer_dictionary);
+    chrus_vector_destroy(&nodes);
     if (final_scene) chrus_scene_destroy(final_scene);
     return NULL;
     success:
     json_close(&first_pass_stream);
     fclose(fp);
     chrus_rbtree_destroy(pointer_dictionary);
+    chrus_vector_destroy(&nodes);
     return final_scene;
 }

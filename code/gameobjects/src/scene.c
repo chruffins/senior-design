@@ -43,10 +43,13 @@ void chrus_scene_destroy(chrus_scene *scene) {
         chrus_node_destroy(scene->children.data[i]);
     }
 
+    chrus_node_vec_destroy(&scene->children);
+
     for (size_t i = 0; i < 8; i++) {
         chrus_vector_destroy(&scene->drawable_layers[i]);
     }
 
+    free(scene->name);
     free(scene);
 }
 
@@ -68,11 +71,11 @@ void* chrus_scene_thread_handler(ALLEGRO_THREAD* restrict this, void* args) {
 
     luaL_openlibs(scene->lua_vm);
 
-    int result = luaL_dofile(scene->lua_vm, "data/chrus_ffi.lua");
-    if (result) printf("%s\n", lua_tostring(scene->lua_vm, -1));
-
     lua_pushlightuserdata(scene->lua_vm, scene);
     lua_setglobal(scene->lua_vm, "scene");
+
+    int result = luaL_dofile(scene->lua_vm, "data/chrus_ffi.lua");
+    if (result) printf("%s\n", lua_tostring(scene->lua_vm, -1));
 
     lua_pushlightuserdata(scene->lua_vm, this);
     lua_setglobal(scene->lua_vm, "thread");

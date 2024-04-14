@@ -47,5 +47,6 @@ void chrus_camera_destroy(chrus_camera* restrict this) {
     }
 
     free(this);
+    
     return;
 }

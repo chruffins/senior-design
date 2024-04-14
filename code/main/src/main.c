@@ -143,12 +143,14 @@ void run_game_loop() {
     DEBUG_PRINTF("joined the drawing thread now\n");
     chrus_join_drawing_thread();
     al_join_thread(drawing_thread, NULL);
+    al_destroy_thread(drawing_thread);
     // need to wait for drawing thread to die before we can close up the scene manager
 
     //printf("saving scene to disk\n");
     //chrus_serializer_save_scene(scene_manager.scenes[scene_manager.top], "savedscene.json");
 
     al_destroy_cond(drawing_loaded);
+    al_destroy_mutex(drawing_mutex);
 
     DEBUG_PRINTF("freeing scene resources now\n");
     chrus_scene_manager_destroy(&scene_manager);

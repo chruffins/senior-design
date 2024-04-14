@@ -53,6 +53,7 @@ void chrus_sound_destroy(chrus_sound* restrict this) {
 chrus_audiostream *chrus_audiostream_create(const char *source) {
     chrus_audiostream *new_sound = malloc(sizeof(chrus_audiostream));
     new_sound->stream = NULL;
+    new_sound->source = NULL;
 
     chrus_audiostream_load(new_sound, source);
     // well... even if you mess up loading the song, there should be some default properties
@@ -65,6 +66,7 @@ chrus_audiostream *chrus_audiostream_create(const char *source) {
 }
 
 void chrus_audiostream_load(chrus_audiostream* restrict this, const char *source) {
+    //if (this->source != NULL) free(this->source);
     this->source = source;
     if (this->stream != NULL) {
         al_destroy_audio_stream(this->stream);

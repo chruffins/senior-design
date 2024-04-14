@@ -12,3 +12,8 @@ chrus_script *chrus_script_create(const char *source) {
 const char* chrus_script_get_source(chrus_script* restrict this) {
     return this->source_name;
 }
+
+void chrus_script_destroy(chrus_script* restrict this) {
+    free(this->source_name);
+    free(this);
+}

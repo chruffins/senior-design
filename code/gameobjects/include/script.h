@@ -31,5 +31,7 @@ struct chrus_script_t {
 
 chrus_script* chrus_script_create(const char* source);
 const char* chrus_script_get_source(chrus_script* restrict this);
+
+void chrus_script_destroy(chrus_script* restrict this);
 //void chrus_script_run(chrus_script *this);
 //void chrus_script_set_luavm(chrus_script *this, lua_State *vm);

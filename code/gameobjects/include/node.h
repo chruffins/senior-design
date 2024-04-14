@@ -16,6 +16,7 @@
 #include<memory.h>
 #include<stdbool.h>
 
+#include "../../utils/include/utils.h"
 #include "node_types.h"
 #include "camera.h"
 #include "script.h"
@@ -50,6 +51,7 @@ chrus_node* chrus_node_create_audiostream();
 chrus_node_vec chrus_node_vec_create();
 
 void chrus_node_destroy(chrus_node *this);
+bool chrus_node_set_name(chrus_node* restrict this, const char* new);
 //void chrus_node_reparent(chrus_node *parent, chrus_node *new_child);
 
 void chrus_node_vec_destroy(chrus_node_vec* this);
